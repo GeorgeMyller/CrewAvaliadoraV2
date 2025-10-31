@@ -43,6 +43,20 @@ cp .env.example .env
 2. Create a free API key
 3. Add to `.env` file
 
+### Verify System Health
+
+```bash
+# Run health check to verify everything is configured correctly
+uv run python utils/health_check.py
+
+# This will check:
+# - Python version
+# - Required packages
+# - Environment variables
+# - Project structure
+# - Gemini API connection
+```
+
 ### Run Analysis
 
 ```bash
