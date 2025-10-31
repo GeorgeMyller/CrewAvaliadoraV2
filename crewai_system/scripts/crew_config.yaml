@@ -1,0 +1,292 @@
+---
+# 🚀 CrewAI - Configuração Completa para Avaliação de Codebase
+# ============================================================
+# Sistema plug-and-play com Gemini 2.5 Flash para análise profissional
+
+crew_config:
+  name: "AvaliacaoCodebaseStartupProfissional"
+  description: >
+    Equipe multidisciplinar de elite para avaliar codebase de automação 
+    WhatsApp→Instagram, gerando relatórios ultra-profissionais para diferentes 
+    públicos técnicos e estratégicos.
+  
+  llm_config:
+    provider: "google"
+    model: "gemini-2.5-flash"
+    api_key_env: "GEMINI_API_KEY"
+    temperature: 0.3
+    max_tokens: 8192
+    
+  memory_config:
+    enabled: true
+    provider: "google"
+    embedding_model: "models/text-embedding-004"
+
+# 🎭 DEFINIÇÃO DOS AGENTES ESPECIALIZADOS
+agents:
+  
+  arquiteto_software:
+    name: "ArquitetoSoftwareSenior"
+    emoji: "🏗️"
+    role: "Arquiteto de Software Sênior"
+    goal: >
+      Analisar profundamente a arquitetura, identificando padrões, integrações,
+      escalabilidade e propondo refatorações estruturais concretas.
+    backstory: >
+      Arquiteto com 10+ anos em sistemas distribuídos e APIs de redes sociais.
+      Expert em Instagram Graph API v23, WhatsApp Business API e arquiteturas SaaS.
+      Especialista em padrões como Repository, Factory, Observer e estratégias 
+      de rate limiting.
+    max_iterations: 3
+    delegation: false
+    
+  engenheiro_qualidade:
+    name: "EngenheiroQualidadeTestes"
+    emoji: "🔬"
+    role: "Engenheiro de Qualidade e Testes"
+    goal: >
+      Avaliar rigorosamente qualidade de código, cobertura de testes,
+      CI/CD, vulnerabilidades e estratégias de monitoramento.
+    backstory: >
+      QA Engineer expert em automação de testes, análise estática e pipelines CI/CD.
+      Experiência com pytest, bandit, ruff e ferramentas de segurança.
+      Especialista em testes de APIs e mock de serviços externos.
+    max_iterations: 3
+    delegation: false
+    
+  documentador_tecnico:
+    name: "DocumentadorTecnicoSenior"
+    emoji: "📚"
+    role: "Documentador Técnico Sênior"  
+    goal: >
+      Garantir documentação de classe mundial para onboarding,
+      APIs, arquitetura e diferentes públicos técnicos.
+    backstory: >
+      Documentador especializado em projetos open-source e SaaS.
+      Expert em criar docs para diferentes níveis técnicos.
+      Conhece Sphinx, MkDocs e padrões de documentação REST APIs.
+    max_iterations: 3
+    delegation: false
+    
+  product_manager:
+    name: "ProductManagerEstrategico"
+    emoji: "🎯"
+    role: "Product Manager Estratégico"
+    goal: >
+      Avaliar viabilidade comercial, prontidão SaaS, estratégia de monetização
+      e roadmap de lançamento no mercado.
+    backstory: >
+      PM com 8+ anos em produtos de automação e marketing digital.
+      Experiência em lançar SaaS para redes sociais, conhece o mercado
+      de automação Instagram/WhatsApp. Expert em MVP e pricing strategy.
+    max_iterations: 3
+    delegation: false
+    
+  especialista_legal:
+    name: "ConsultorJuridicoTecnologia"
+    emoji: "⚖️"
+    role: "Consultor Jurídico de Tecnologia"
+    goal: >
+      Assegurar conformidade legal com APIs, LGPD/GDPR e riscos
+      de automação em redes sociais.
+    backstory: >
+      Advogado especializado em direito digital e APIs de redes sociais.
+      Expert em LGPD, GDPR e regulamentações de automação.
+      Experiência em compliance para startups de tecnologia.
+    max_iterations: 3
+    delegation: false
+    
+  engenheiro_ia:
+    name: "EngenheiroIAEspecialista"
+    emoji: "🧠"
+    role: "Engenheiro de IA Especialista"
+    goal: >
+      Otimizar pipeline de IA, prompts, personalização por usuário
+      e estratégias de custos para LLMs.
+    backstory: >
+      Engenheiro de IA especializado em NLP, visão computacional e LLMs.
+      Experiência com Gemini, GPT e modelos de visão.
+      Expert em prompt engineering, RAG e personalização de conteúdo.
+    max_iterations: 3
+    delegation: false
+
+# 📋 DEFINIÇÃO DAS TASKS ESPECIALIZADAS
+tasks:
+  
+  analise_arquitetural:
+    agent: "arquiteto_software"
+    name: "Análise Arquitetural Completa"
+    description: >
+      Conduza uma análise arquitetural profunda do projeto:
+      
+      1. **Arquitetura Atual**: Identifique padrões arquiteturais
+      2. **Integrações**: Analise APIs externas (Instagram, WhatsApp, Gemini)
+      3. **Fluxo de Dados**: Mapeie fluxo end-to-end
+      4. **Escalabilidade**: Identifique gargalos e pontos de falha
+      5. **Padrões de Design**: Liste padrões usados/ausentes
+      6. **Refatorações**: Proponha melhorias concretas priorizadas
+    
+    expected_output: >
+      Análise estruturada com:
+      - Resumo da arquitetura atual
+      - Qualidade das integrações  
+      - Pontos críticos identificados
+      - Recomendações priorizadas (Alta/Média/Baixa)
+      - Diagrama conceitual em texto
+    
+  avaliacao_qualidade:
+    agent: "engenheiro_qualidade"
+    name: "Avaliação de Qualidade e Testes"
+    description: >
+      Análise rigorosa de qualidade e estratégias de teste:
+      
+      1. **Cobertura de Testes**: Avalie unitários, integração, E2E
+      2. **Qualidade Código**: Analise complexity, duplicação, smells
+      3. **Segurança**: Identifique vulnerabilidades e riscos
+      4. **CI/CD Pipeline**: Avalie práticas de deployment
+      5. **Monitoramento**: Analise logging e observabilidade
+      6. **Plano Testes**: Sugira estratégia completa
+    
+    expected_output: >
+      Relatório de qualidade com:
+      - Score de qualidade (0-100)
+      - Gaps críticos em testes
+      - Vulnerabilidades identificadas
+      - Estratégia de testes recomendada
+      - Ferramentas e métricas sugeridas
+      - Roadmap de melhorias
+      
+  auditoria_documentacao:
+    agent: "documentador_tecnico"
+    name: "Auditoria de Documentação"
+    description: >
+      Avaliação completa da documentação existente:
+      
+      1. **Doc Usuário**: Clareza para usuários finais
+      2. **Doc Técnica**: Análise para desenvolvedores
+      3. **API Docs**: Documentação de endpoints
+      4. **Onboarding**: Facilidade de setup para novos devs
+      5. **Exemplos**: Qualidade dos exemplos práticos
+      6. **Manutenção**: Processo de atualização
+    
+    expected_output: >
+      Auditoria estruturada com:
+      - Score de completude (0-100)
+      - Gaps críticos identificados
+      - Sugestões de reorganização
+      - Templates recomendados
+      - Estratégia de manutenção
+      - Roadmap documental
+      
+  analise_viabilidade_comercial:
+    agent: "product_manager"
+    name: "Análise de Viabilidade Comercial"
+    description: >
+      Avaliação estratégica de prontidão para mercado:
+      
+      1. **Market Readiness**: Maturidade para lançamento SaaS
+      2. **Análise Competitiva**: Compare com soluções existentes
+      3. **Value Proposition**: Identifique diferenciadores únicos
+      4. **User Journey**: Mapeie jornada do usuário ideal
+      5. **Monetização**: Sugira modelos de precificação
+      6. **Go-to-Market**: Proponha estratégia de lançamento
+    
+    expected_output: >
+      Análise comercial com:
+      - Score prontidão mercado (0-100)
+      - Análise competitiva resumida
+      - Proposta de valor única
+      - Roadmap lançamento em fases
+      - Modelo monetização sugerido
+      - Riscos comerciais e mitigações
+      
+  conformidade_legal:
+    agent: "especialista_legal"
+    name: "Análise de Conformidade Legal"
+    description: >
+      Auditoria legal completa do projeto:
+      
+      1. **API Terms**: Conformidade com termos das APIs
+      2. **Data Privacy**: Conformidade LGPD/GDPR
+      3. **Automation Risks**: Riscos legais de automação
+      4. **Terms of Service**: Política de uso adequada
+      5. **Liability**: Responsabilidades e riscos
+      6. **Compliance Strategy**: Plano de conformidade
+    
+    expected_output: >
+      Relatório legal com:
+      - Score compliance (0-100)
+      - Riscos legais críticos
+      - Não conformidades identificadas
+      - Plano adequação legal
+      - Políticas necessárias
+      - Roadmap compliance
+      
+  otimizacao_ia:
+    agent: "engenheiro_ia"
+    name: "Otimização do Pipeline de IA"
+    description: >
+      Análise e otimização dos componentes de IA:
+      
+      1. **LLM Integration**: Avalie uso do Gemini e outros LLMs
+      2. **Prompt Engineering**: Analise qualidade dos prompts
+      3. **Performance**: Avalie latência e custos APIs IA
+      4. **Personalização**: Estratégias de personalização
+      5. **Model Selection**: Adequação dos modelos escolhidos
+      6. **AI Strategy**: Roadmap de melhorias em IA
+    
+    expected_output: >
+      Análise IA com:
+      - Score otimização IA (0-100)
+      - Bottlenecks identificados
+      - Oportunidades de melhoria
+      - Estratégia personalização
+      - Otimizações custo sugeridas
+      - Roadmap evolução IA
+
+# 📑 CONFIGURAÇÃO DO RELATÓRIO FINAL
+final_report:
+  consolidator_agent: "arquiteto_software"
+  template_sections:
+    - executive_summary
+    - dev_junior_section
+    - dev_senior_section
+    - strategic_roadmap
+    - quick_wins
+    - critical_risks
+    
+  output_format: "markdown"
+  include_metadata: true
+  generate_json_summary: true
+
+# 🔧 CONFIGURAÇÕES OPERACIONAIS  
+operational_settings:
+  process_type: "sequential"
+  verbose_mode: true
+  memory_enabled: true
+  max_retries: 2
+  timeout_minutes: 30
+  
+  input_files:
+    - "relatorio_codebase_turbinado.md"
+    
+  output_files:
+    report: "relatorio_final_startup_{timestamp}.md"
+    metadata: "metadata_analise_{timestamp}.json"
+    summary: "summary_analise_{timestamp}.json"
+
+# 🎯 MÉTRICAS E KPIS
+metrics:
+  quality_thresholds:
+    architecture_score: 70
+    quality_score: 75
+    documentation_score: 70
+    market_readiness: 65
+    legal_compliance: 85
+    ai_optimization: 60
+    
+  priority_levels:
+    critical: "Score < 50"
+    high: "Score 50-69"
+    medium: "Score 70-84" 
+    low: "Score >= 85"
