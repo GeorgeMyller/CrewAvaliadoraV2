@@ -163,14 +163,58 @@ class CodebaseAnalysisCrewV2:
             raise
     
     def _save_report(self, result: str, output_file: str):
-        """💾 Salva relatório final"""
+        """💾 Salva relatório final com template profissional"""
         try:
+            from utils.template_engine import TemplateEngine
+            
             os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
             
-            with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(result)
+            # Tenta usar template engine se disponível
+            try:
+                template_path = "templates/template_relatorio_final.md"
+                if os.path.exists(template_path):
+                    logger.info("📝 Aplicando template profissional...")
+                    engine = TemplateEngine(template_path)
+                    
+                    # Extrai scores do resultado
+                    scores = engine.extract_scores(result)
+                    
+                    # Cria contexto básico
+                    context = {
+                        'project_name': 'Projeto Analisado',
+                        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        'analysis_output': result,
+                        **scores  # Adiciona scores extraídos
+                    }
+                    
+                    # Renderiza com template
+                    final_content = engine.render(context)
+                    logger.info(f"✅ Template aplicado ({len(final_content)} chars)")
+                else:
+                    logger.warning("⚠️ Template não encontrado, salvando resultado direto")
+                    final_content = result
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Erro ao aplicar template: {e}, salvando resultado direto")
+                final_content = result
             
-            logger.info(f"📄 Relatório salvo em: {output_file}")
+            # Valida que há conteúdo
+            if not final_content or len(final_content.strip()) < 100:
+                raise ValueError(f"Relatório vazio ou muito curto ({len(final_content)} chars)")
+            
+            # Salva arquivo
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(final_content)
+            
+            # Valida que arquivo foi escrito
+            if not os.path.exists(output_file):
+                raise IOError(f"Arquivo {output_file} não foi criado")
+                
+            file_size = os.path.getsize(output_file)
+            if file_size == 0:
+                raise IOError(f"Arquivo {output_file} está vazio")
+            
+            logger.info(f"📄 Relatório salvo em: {output_file} ({file_size} bytes)")
             
         except Exception as e:
             logger.error(f"❌ Erro ao salvar relatório: {e}")
@@ -216,7 +260,7 @@ def main():
     
     # Executa análise
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = f"outputs/reports/relatorio_final_{timestamp}.md"
+    output_file = f"relatorio_final_startup_{timestamp}.md"  # Salva na raiz para consistência
     
     print("🔍 Iniciando análise completa (isso pode levar alguns minutos)...")
     print()
@@ -224,12 +268,32 @@ def main():
     try:
         result = crew.analyze_codebase(codebase_report, output_file)
         
-        print()
-        print("="*60)
-        print("✅ ANÁLISE COMPLETA!")
-        print("="*60)
-        print(f"📄 Relatório salvo em: {output_file}")
-        print()
+        # Valida que o relatório foi gerado corretamente
+        if os.path.exists(output_file):
+            file_size = os.path.getsize(output_file)
+            with open(output_file, 'r', encoding='utf-8') as f:
+                num_lines = len(f.readlines())
+            
+            print()
+            print("="*60)
+            print("✅ ANÁLISE COMPLETA!")
+            print("="*60)
+            print(f"📄 Relatório salvo em: {output_file}")
+            print(f"📊 Tamanho: {file_size:,} bytes / {num_lines} linhas")
+            
+            if file_size < 1000:
+                print("⚠️ ATENÇÃO: Relatório muito pequeno, pode estar incompleto!")
+            elif num_lines < 50:
+                print("⚠️ ATENÇÃO: Relatório com poucas linhas, pode estar incompleto!")
+            else:
+                print("✅ Relatório parece completo e bem formatado!")
+            print()
+        else:
+            print()
+            print("="*60)
+            print("❌ ERRO: Arquivo não foi criado!")
+            print("="*60)
+            sys.exit(1)
         
     except Exception as e:
         print()
@@ -237,6 +301,8 @@ def main():
         print("❌ ERRO NA ANÁLISE")
         print("="*60)
         print(f"Erro: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 
