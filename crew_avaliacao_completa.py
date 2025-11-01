@@ -59,8 +59,18 @@ def clone_github_repo(url: str, target_dir: Optional[str] = None) -> str:
     Raises:
         RuntimeError: Se o clone falhar
     """
+    # Sempre cria um novo diretório temporário para evitar conflitos
     if target_dir is None:
         target_dir = tempfile.mkdtemp(prefix="crew_analysis_")
+    else:
+        # Se target_dir foi especificado, garante que ele não existe ou está vazio
+        if os.path.exists(target_dir):
+            if os.listdir(target_dir):  # Directory exists and is not empty
+                # Create a unique subdirectory within target_dir
+                import uuid
+                unique_subdir = f"clone_{uuid.uuid4().hex[:8]}"
+                target_dir = os.path.join(target_dir, unique_subdir)
+                os.makedirs(target_dir, exist_ok=True)
     
     logger.info(f"🔄 Clonando repositório: {url}")
     logger.info(f"📁 Destino: {target_dir}")
