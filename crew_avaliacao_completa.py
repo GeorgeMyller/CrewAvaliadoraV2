@@ -27,6 +27,7 @@ from urllib.parse import urlparse
 import subprocess
 import tempfile
 import shutil
+import uuid
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -34,6 +35,9 @@ logger = logging.getLogger(__name__)
 
 # Carrega variáveis de ambiente
 load_dotenv()
+
+# Constantes de configuração
+GIT_CLONE_TIMEOUT_SECONDS = 300  # 5 minutos timeout para clone de repositório
 
 
 def is_github_url(path: str) -> bool:
@@ -45,13 +49,14 @@ def is_github_url(path: str) -> bool:
         return False
 
 
-def clone_github_repo(url: str, target_dir: Optional[str] = None) -> str:
+def clone_github_repo(url: str, target_dir: Optional[str] = None, timeout: int = GIT_CLONE_TIMEOUT_SECONDS) -> str:
     """
     Clona um repositório do GitHub.
     
     Args:
         url: URL do GitHub
         target_dir: Diretório de destino (opcional, cria um temporário se None)
+        timeout: Timeout em segundos para o comando git clone (padrão: GIT_CLONE_TIMEOUT_SECONDS)
     
     Returns:
         Caminho do diretório clonado
@@ -67,7 +72,6 @@ def clone_github_repo(url: str, target_dir: Optional[str] = None) -> str:
         if os.path.exists(target_dir):
             if os.listdir(target_dir):  # Directory exists and is not empty
                 # Create a unique subdirectory within target_dir
-                import uuid
                 unique_subdir = f"clone_{uuid.uuid4().hex[:8]}"
                 target_dir = os.path.join(target_dir, unique_subdir)
                 os.makedirs(target_dir, exist_ok=True)
@@ -81,7 +85,7 @@ def clone_github_repo(url: str, target_dir: Optional[str] = None) -> str:
             ["git", "clone", "--depth", "1", url, target_dir],
             capture_output=True,
             text=True,
-            timeout=300,  # 5 minutos timeout
+            timeout=timeout,
             check=True
         )
         
@@ -89,7 +93,7 @@ def clone_github_repo(url: str, target_dir: Optional[str] = None) -> str:
         return target_dir
         
     except subprocess.TimeoutExpired:
-        error_msg = f"❌ Timeout ao clonar repositório (>5 minutos): {url}"
+        error_msg = f"❌ Timeout ao clonar repositório (>{timeout} segundos): {url}"
         logger.error(error_msg)
         # Cleanup em caso de erro
         if os.path.exists(target_dir):
