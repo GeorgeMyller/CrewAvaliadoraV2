@@ -22,6 +22,8 @@ import json
 from datetime import datetime
 from typing import Dict, List, Optional
 import logging
+import re
+from urllib.parse import urlparse
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -43,7 +45,7 @@ class CodebaseAnalysisCrew:
     🤖 Engenheiro de IA
     """
     
-    def __init__(self, gemini_api_key: Optional[str] = None):
+    def __init__(self, gemini_api_key: Optional[str] = None, project_name: Optional[str] = None):
         """Inicializa a crew com configuração Gemini 2.5 Flash"""
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         if not self.gemini_api_key:
@@ -64,6 +66,10 @@ class CodebaseAnalysisCrew:
         # No need for manual LLM() instantiation
         self.llm = None
         
+        # Setup output directory structure
+        self.project_name = project_name or "unknown_project"
+        self.output_base_dir = self._setup_output_directory()
+        
         # Tools para leitura de arquivos (só instanciaremos ferramentas reais se disponíveis)
         if HAVE_CREWAI_TOOLS and crewai_tools is not None:
             try:
@@ -80,6 +86,41 @@ class CodebaseAnalysisCrew:
         # Cria agentes especializados
         self.agents = self._create_agents()
         self.tasks = self._create_tasks()
+    
+    def _setup_output_directory(self) -> str:
+        """Cria estrutura de diretórios para outputs organizados por projeto"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Sanitiza o nome do projeto
+        safe_project_name = re.sub(r'[^\w\-]', '_', self.project_name.lower())
+        safe_project_name = re.sub(r'_+', '_', safe_project_name).strip('_')
+        
+        # Estrutura: outputs/{project_name}_{timestamp}/
+        project_dir = f"{safe_project_name}_{timestamp}"
+        output_dir = os.path.join(os.getcwd(), "outputs", project_dir)
+        
+        # Cria subdiretórios
+        os.makedirs(os.path.join(output_dir, "reports"), exist_ok=True)
+        os.makedirs(os.path.join(output_dir, "metadata"), exist_ok=True)
+        os.makedirs(os.path.join(output_dir, "per_file_reports"), exist_ok=True)
+        
+        logger.info(f"📁 Diretório de saída criado: {output_dir}")
+        return output_dir
+    
+    @staticmethod
+    def extract_project_name_from_path(path: str) -> str:
+        """Extrai nome do projeto a partir de URL do GitHub ou caminho local"""
+        # Tenta extrair de URL do GitHub
+        github_match = re.search(r'github\.com/[^/]+/([^/\.]+)', path)
+        if github_match:
+            return github_match.group(1)
+        
+        # Tenta extrair do caminho local
+        if os.path.isdir(path):
+            return os.path.basename(os.path.abspath(path))
+        
+        # Fallback: usa o próprio path sanitizado
+        return os.path.basename(path) or "unknown_project"
         
     def _create_agents(self) -> Dict[str, Agent]:
         """🎭 Cria todos os agentes especializados"""
@@ -448,7 +489,7 @@ class CodebaseAnalysisCrew:
                 result = crew.kickoff()
 
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_file = f"relatorio_final_startup_{timestamp}.md"
+                output_file = os.path.join(self.output_base_dir, "reports", f"relatorio_final_{timestamp}.md")
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(str(result))
 
@@ -460,7 +501,7 @@ class CodebaseAnalysisCrew:
                     "total_tasks": len(all_tasks),
                     "llm_model": "gemini-2.5-flash"
                 }
-                metadata_file = f"metadata_analise_{timestamp}.json"
+                metadata_file = os.path.join(self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json")
                 with open(metadata_file, "w", encoding="utf-8") as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
@@ -487,8 +528,7 @@ class CodebaseAnalysisCrew:
         allowed_exts = {".py", ".md", ".txt", ".json", ".yaml", ".yml", ".ini", ".cfg", ".sh", ".tsx", ".ts", ".js"}
 
         per_file_reports = []
-        reports_dir = os.path.join(os.getcwd(), "reports_by_file")
-        os.makedirs(reports_dir, exist_ok=True)
+        reports_dir = os.path.join(self.output_base_dir, "per_file_reports")
 
         files_analyzed = 0
 
@@ -620,13 +660,14 @@ Conteúdo do arquivo (até {max_chars} chars):
 
             # Salva resultado final consolidado
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = f"relatorio_final_startup_{timestamp}.md"
+            output_file = os.path.join(self.output_base_dir, "reports", f"relatorio_final_{timestamp}.md")
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(str(final_result))
 
             # Salva metadados
             metadata = {
                 "timestamp": timestamp,
+                "project_name": self.project_name,
                 "root_dir": root_dir,
                 "per_file_reports": per_file_reports,
                 "output_file": output_file,
@@ -634,7 +675,7 @@ Conteúdo do arquivo (até {max_chars} chars):
                 "total_files_analyzed": len(per_file_reports),
                 "llm_model": "gemini-2.5-flash",
             }
-            metadata_file = f"metadata_analise_{timestamp}.json"
+            metadata_file = os.path.join(self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json")
             with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
 
@@ -651,7 +692,7 @@ Conteúdo do arquivo (até {max_chars} chars):
             logger.error(f"❌ Erro durante consolidação com Crew (usando fallback): {e}")
             try:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                fallback_output = f"relatorio_final_fallback_{timestamp}.md"
+                fallback_output = os.path.join(self.output_base_dir, "reports", f"relatorio_final_fallback_{timestamp}.md")
                 with open(fallback_output, "w", encoding="utf-8") as out_f:
                     out_f.write("# Relatório Consolidado (fallback)\n\n")
                     out_f.write("_A consolidação automática com a Crew falhou; este é um fallback que concatena os relatórios por arquivo gerados previamente._\n\n")
@@ -667,6 +708,7 @@ Conteúdo do arquivo (até {max_chars} chars):
 
                 metadata = {
                     "timestamp": timestamp,
+                    "project_name": self.project_name,
                     "root_dir": root_dir,
                     "per_file_reports": per_file_reports,
                     "output_file": fallback_output,
@@ -676,7 +718,7 @@ Conteúdo do arquivo (até {max_chars} chars):
                     "fallback": True,
                     "error": str(e),
                 }
-                metadata_file = f"metadata_analise_{timestamp}.json"
+                metadata_file = os.path.join(self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json")
                 with open(metadata_file, "w", encoding="utf-8") as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
@@ -699,13 +741,21 @@ def main():
     print("=" * 50)
     
     try:
-        # Inicializa a crew
-        crew_analyzer = CodebaseAnalysisCrew()
+        # Pede caminho ou URL do projeto
+        project_path = input("📂 Digite o caminho/URL do repositório (ou Enter para usar diretório atual): ").strip()
+        if not project_path:
+            project_path = os.getcwd()
+        
+        # Extrai nome do projeto
+        project_name = CodebaseAnalysisCrew.extract_project_name_from_path(project_path)
+        print(f"📦 Projeto identificado: {project_name}")
+        
+        # Inicializa a crew com o nome do projeto
+        crew_analyzer = CodebaseAnalysisCrew(project_name=project_name)
 
         # Executa análise (se o relatório não existir, run_analysis fará a varredura da codebase)
-        report_path = "relatorio_codebase_turbinado.md"
         # Use max_files=3 for quick testing with a valid API key
-        output_file = crew_analyzer.run_analysis(report_path, max_files=3)
+        output_file = crew_analyzer.run_analysis(project_path, max_files=3)
 
         print("\n🎉 Análise concluída com sucesso!")
         print(f"📄 Relatório final: {output_file}")
