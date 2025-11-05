@@ -22,7 +22,7 @@ class TemplateEngine:
             template_path: Caminho para o template markdown
         """
         if template_path is None:
-            template_path = "templates/template_relatorio_final.md"
+            template_path = "templates/template_relatorio_final_v2.md"
         
         self.template_path = template_path
         self.template_content = self._load_template()

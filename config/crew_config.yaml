@@ -6,9 +6,9 @@
 crew_config:
   name: "AvaliacaoCodebaseStartupProfissional"
   description: >
-    Equipe multidisciplinar de elite para avaliar codebase de automação 
-    WhatsApp→Instagram, gerando relatórios ultra-profissionais para diferentes 
-    públicos técnicos e estratégicos.
+    Equipe multidisciplinar de elite para avaliar qualquer codebase, gerando relatórios 
+    ultra-profissionais para diferentes públicos técnicos e estratégicos com base no 
+    conteúdo real do projeto fornecido.
   
   llm_config:
     provider: "google"
@@ -18,9 +18,7 @@ crew_config:
     max_tokens: 8192
     
   memory_config:
-    enabled: true
-    provider: "google"
-    embedding_model: "models/text-embedding-004"
+    enabled: false
 
 # 🎭 DEFINIÇÃO DOS AGENTES ESPECIALIZADOS
 agents:
@@ -30,13 +28,13 @@ agents:
     emoji: "🏗️"
     role: "Arquiteto de Software Sênior"
     goal: >
-      Analisar profundamente a arquitetura, identificando padrões, integrações,
-      escalabilidade e propondo refatorações estruturais concretas.
+      Analisar profundamente a arquitetura do projeto fornecido, identificando padrões, 
+      integrações, escalabilidade e propondo refatorações estruturais concretas baseadas 
+      no código real apresentado.
     backstory: >
-      Arquiteto com 10+ anos em sistemas distribuídos e APIs de redes sociais.
-      Expert em Instagram Graph API v23, WhatsApp Business API e arquiteturas SaaS.
-      Especialista em padrões como Repository, Factory, Observer e estratégias 
-      de rate limiting.
+      Arquiteto com 10+ anos em sistemas distribuídos, APIs e arquiteturas modernas.
+      Expert em padrões como Repository, Factory, Observer, MVC e estratégias de 
+      escalabilidade. Analisa o código real do projeto para fornecer insights precisos.
     max_iterations: 3
     delegation: false
     
@@ -73,12 +71,12 @@ agents:
     emoji: "🎯"
     role: "Product Manager Estratégico"
     goal: >
-      Avaliar viabilidade comercial, prontidão SaaS, estratégia de monetização
-      e roadmap de lançamento no mercado.
+      Avaliar viabilidade comercial do projeto analisado, identificar oportunidades 
+      de mercado e propor roadmap baseado no código e documentação fornecidos.
     backstory: >
-      PM com 8+ anos em produtos de automação e marketing digital.
-      Experiência em lançar SaaS para redes sociais, conhece o mercado
-      de automação Instagram/WhatsApp. Expert em MVP e pricing strategy.
+      PM com 10+ anos em produtos de tecnologia diversos, desde ferramentas desktop 
+      até SaaS empresarial. Expert em análise de produto, market fit e estratégia de 
+      crescimento. Avalia projetos baseando-se exclusivamente no que está implementado.
     max_iterations: 3
     delegation: false
     
@@ -87,26 +85,26 @@ agents:
     emoji: "⚖️"
     role: "Consultor Jurídico de Tecnologia"
     goal: >
-      Assegurar conformidade legal com APIs, LGPD/GDPR e riscos
-      de automação em redes sociais.
+      Identificar riscos legais e conformidade com base nas funcionalidades 
+      e integrações presentes no código do projeto analisado.
     backstory: >
-      Advogado especializado em direito digital e APIs de redes sociais.
-      Expert em LGPD, GDPR e regulamentações de automação.
-      Experiência em compliance para startups de tecnologia.
+      Advogado especializado em direito digital, propriedade intelectual e compliance.
+      Expert em LGPD, GDPR e análise de riscos legais em software. Analisa o código 
+      real para identificar uso de APIs, dados pessoais e possíveis riscos regulatórios.
     max_iterations: 3
     delegation: false
     
-  engenheiro_ia:
-    name: "EngenheiroIAEspecialista"
-    emoji: "🧠"
-    role: "Engenheiro de IA Especialista"
+  analista_tecnologia:
+    name: "AnalistaTecnologiaModerna"
+    emoji: "🔬"
+    role: "Analista de Tecnologias Modernas"
     goal: >
-      Otimizar pipeline de IA, prompts, personalização por usuário
-      e estratégias de custos para LLMs.
+      Identificar tecnologias, frameworks e padrões utilizados no projeto, 
+      avaliar sua adequação e propor melhorias técnicas concretas.
     backstory: >
-      Engenheiro de IA especializado em NLP, visão computacional e LLMs.
-      Experiência com Gemini, GPT e modelos de visão.
-      Expert em prompt engineering, RAG e personalização de conteúdo.
+      Analista tecnológico com vasta experiência em múltiplas linguagens e frameworks.
+      Expert em avaliar stack tecnológico, dependências, segurança e performance.
+      Analisa o código real para identificar oportunidades de otimização e modernização.
     max_iterations: 3
     delegation: false
 
@@ -117,22 +115,29 @@ tasks:
     agent: "arquiteto_software"
     name: "Análise Arquitetural Completa"
     description: >
-      Conduza uma análise arquitetural profunda do projeto:
+      Analise profundamente a arquitetura do projeto fornecido no relatório da codebase.
       
-      1. **Arquitetura Atual**: Identifique padrões arquiteturais
-      2. **Integrações**: Analise APIs externas (Instagram, WhatsApp, Gemini)
-      3. **Fluxo de Dados**: Mapeie fluxo end-to-end
-      4. **Escalabilidade**: Identifique gargalos e pontos de falha
-      5. **Padrões de Design**: Liste padrões usados/ausentes
-      6. **Refatorações**: Proponha melhorias concretas priorizadas
+      RELATÓRIO DA CODEBASE:
+      {codebase_report}
+      
+      Com base EXCLUSIVAMENTE no relatório acima, execute:
+      
+      1. **Arquitetura Atual**: Identifique padrões arquiteturais baseados no código real
+      2. **Integrações**: Analise APIs e dependências externas encontradas no projeto
+      3. **Fluxo de Dados**: Mapeie fluxo baseado na estrutura de código identificada
+      4. **Escalabilidade**: Identifique gargalos e pontos de falha específicos do projeto
+      5. **Padrões de Design**: Liste padrões usados/ausentes encontrados no código
+      6. **Refatorações**: Proponha melhorias concretas priorizadas BASEADAS NO PROJETO REAL
+      
+      IMPORTANTE: Use APENAS informações presentes no relatório acima. NÃO invente tecnologias.
     
     expected_output: >
       Análise estruturada com:
-      - Resumo da arquitetura atual
-      - Qualidade das integrações  
-      - Pontos críticos identificados
-      - Recomendações priorizadas (Alta/Média/Baixa)
-      - Diagrama conceitual em texto
+      - Resumo da arquitetura atual baseado no código real
+      - Qualidade das integrações encontradas no projeto
+      - Pontos críticos identificados no código fornecido
+      - Recomendações priorizadas (Alta/Média/Baixa) específicas do projeto
+      - Diagrama conceitual em texto da arquitetura real
     
   avaliacao_qualidade:
     agent: "engenheiro_qualidade"
@@ -182,19 +187,25 @@ tasks:
     agent: "product_manager"
     name: "Análise de Viabilidade Comercial"
     description: >
-      Avaliação estratégica de prontidão para mercado:
+      Avalie o potencial comercial do projeto baseado no código e documentação:
       
-      1. **Market Readiness**: Maturidade para lançamento SaaS
-      2. **Análise Competitiva**: Compare com soluções existentes
-      3. **Value Proposition**: Identifique diferenciadores únicos
-      4. **User Journey**: Mapeie jornada do usuário ideal
-      5. **Monetização**: Sugira modelos de precificação
-      6. **Go-to-Market**: Proponha estratégia de lançamento
+      1. **Tipo de Produto**: Identifique se é ferramenta, biblioteca, aplicação, etc
+      2. **Público-Alvo**: Determine quem se beneficiaria deste projeto
+      3. **Value Proposition**: Identifique o valor único oferecido
+      4. **Maturidade**: Avalie o estágio de desenvolvimento (MVP, beta, produção)
+      5. **Oportunidades**: Sugira possíveis caminhos de monetização/crescimento
+      6. **Roadmap**: Proponha próximos passos baseados no estado atual
+      
+      IMPORTANTE: Baseie-se SOMENTE no que está implementado no código fornecido.
     
     expected_output: >
       Análise comercial com:
-      - Score prontidão mercado (0-100)
-      - Análise competitiva resumida
+      - Tipo e propósito do projeto identificado
+      - Público-alvo potencial
+      - Estágio de maturidade atual
+      - Forças e oportunidades comerciais
+      - Recomendações de próximos passos
+      - Roadmap sugerido baseado no código real
       - Proposta de valor única
       - Roadmap lançamento em fases
       - Modelo monetização sugerido
@@ -204,41 +215,49 @@ tasks:
     agent: "especialista_legal"
     name: "Análise de Conformidade Legal"
     description: >
-      Auditoria legal completa do projeto:
+      Identifique riscos legais baseados no código e funcionalidades do projeto:
       
-      1. **API Terms**: Conformidade com termos das APIs
-      2. **Data Privacy**: Conformidade LGPD/GDPR
-      3. **Automation Risks**: Riscos legais de automação
-      4. **Terms of Service**: Política de uso adequada
-      5. **Liability**: Responsabilidades e riscos
-      6. **Compliance Strategy**: Plano de conformidade
+      1. **Licenciamento**: Verifique licença do projeto e compatibilidade de dependências
+      2. **APIs Externas**: Analise conformidade com termos de APIs identificadas no código
+      3. **Dados Pessoais**: Identifique manipulação de dados e requisitos LGPD/GDPR
+      4. **Automação**: Avalie riscos legais de funcionalidades de automação encontradas
+      5. **Propriedade Intelectual**: Verifique riscos de violação de IP
+      6. **Compliance**: Proponha plano de adequação legal
+      
+      IMPORTANTE: Analise APENAS as funcionalidades presentes no código fornecido.
     
     expected_output: >
       Relatório legal com:
-      - Score compliance (0-100)
-      - Riscos legais críticos
-      - Não conformidades identificadas
-      - Plano adequação legal
-      - Políticas necessárias
-      - Roadmap compliance
+      - Licença identificada e análise de compatibilidade
+      - APIs externas detectadas e conformidade com termos
+      - Riscos legais identificados no código
+      - Recomendações de adequação LGPD/GDPR se aplicável
+      - Políticas e documentos legais necessários
+      - Roadmap de compliance
       
-  otimizacao_ia:
-    agent: "engenheiro_ia"
-    name: "Otimização do Pipeline de IA"
+  analise_tecnologica:
+    agent: "analista_tecnologia"
+    name: "Análise Tecnológica e Stack"
     description: >
-      Análise e otimização dos componentes de IA:
+      Analise o stack tecnológico e padrões do projeto fornecido:
       
-      1. **LLM Integration**: Avalie uso do Gemini e outros LLMs
-      2. **Prompt Engineering**: Analise qualidade dos prompts
-      3. **Performance**: Avalie latência e custos APIs IA
-      4. **Personalização**: Estratégias de personalização
-      5. **Model Selection**: Adequação dos modelos escolhidos
-      6. **AI Strategy**: Roadmap de melhorias em IA
+      1. **Stack Tecnológico**: Identifique linguagens, frameworks e bibliotecas usadas
+      2. **Dependências**: Analise dependências e suas versões
+      3. **Padrões de Código**: Identifique padrões de design e boas práticas
+      4. **Performance**: Avalie possíveis gargalos de performance no código
+      5. **Segurança**: Identifique vulnerabilidades conhecidas em dependências
+      6. **Modernização**: Sugira atualizações e melhorias tecnológicas
+      
+      IMPORTANTE: Base sua análise EXCLUSIVAMENTE no código e configurações fornecidos.
     
     expected_output: >
-      Análise IA com:
-      - Score otimização IA (0-100)
-      - Bottlenecks identificados
+      Análise tecnológica com:
+      - Stack completo identificado (linguagens, frameworks, bibliotecas)
+      - Versões de dependências e status (atualizadas/desatualizadas/vulneráveis)
+      - Padrões de código identificados
+      - Oportunidades de otimização de performance
+      - Vulnerabilidades de segurança encontradas
+      - Recomendações de modernização priorizadas
       - Oportunidades de melhoria
       - Estratégia personalização
       - Otimizações custo sugeridas

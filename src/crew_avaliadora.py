@@ -16,6 +16,9 @@ from typing import Dict, List, Optional
 import logging
 
 # Import custom utilities
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from utils.config_loader import load_config
 
 # Configuração de logging
@@ -55,9 +58,13 @@ class CodebaseAnalysisCrewV2:
         if "MODEL" not in os.environ:
             os.environ["MODEL"] = "gemini/gemini-2.5-flash"
         
+        # Define caminho padrão da configuração relativo ao projeto
+        if config_path is None:
+            config_path = Path(__file__).parent.parent / "config" / "crew_config.yaml"
+        
         # Carrega configuração YAML
         try:
-            self.config = load_config(config_path)
+            self.config = load_config(str(config_path))
             logger.info(f"✅ Configuração carregada: {self.config.get_crew_name()}")
         except Exception as e:
             logger.error(f"❌ Erro ao carregar configuração: {e}")
@@ -147,64 +154,86 @@ class CodebaseAnalysisCrewV2:
             verbose=True,
         )
         
+        # Setup logging to file
+        log_dir = Path(__file__).parent.parent / "outputs" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = log_dir / f"crew_execution_{timestamp}.log"
+        
+        # File handler
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(file_handler)
+        
         try:
+            logger.info(f"📝 Log sendo salvo em: {log_file}")
+            logger.info(f"📊 Input codebase report size: {len(codebase_report)} chars")
+            logger.info(f"👥 Agentes na crew: {len(crew.agents)}")
+            logger.info(f"📋 Tasks na crew: {len(crew.tasks)}")
+            
+            # Log das tasks configuradas
+            for i, task in enumerate(crew.tasks, 1):
+                logger.info(f"  Task {i}: {task.description[:100]}...")
+            
+            logger.info("🎬 Executando crew.kickoff()...")
+            
             # Executa análise
             result = crew.kickoff(inputs=inputs)
-            logger.info("✅ Análise completa finalizada!")
+            
+            logger.info("✅ crew.kickoff() finalizado!")
+            logger.info(f"📦 Tipo do resultado: {type(result)}")
+            logger.info(f"📦 Atributos do resultado: {dir(result)}")
+            
+            # Extrai texto do resultado (CrewOutput)
+            if hasattr(result, 'raw'):
+                result_text = str(result.raw)
+                logger.info(f"✅ Extraído result.raw ({len(result_text)} chars)")
+            elif hasattr(result, 'output'):
+                result_text = str(result.output)
+                logger.info(f"✅ Extraído result.output ({len(result_text)} chars)")
+            else:
+                result_text = str(result)
+                logger.info(f"✅ Usando str(result) ({len(result_text)} chars)")
+            
+            logger.info(f"📄 Primeiros 500 chars do resultado:\n{result_text[:500]}")
             
             # Salva resultado
             if output_file:
-                self._save_report(result, output_file)
+                logger.info(f"💾 Salvando relatório em: {output_file}")
+                self._save_report(result_text, output_file)
             
-            return result
+            logger.info("✅ Análise completa finalizada!")
+            return result_text
             
         except Exception as e:
             logger.error(f"❌ Erro durante análise: {e}")
+            import traceback
+            logger.error(f"❌ Traceback:\n{traceback.format_exc()}")
             raise
+        finally:
+            # Remove file handler
+            logger.removeHandler(file_handler)
+            file_handler.close()
     
-    def _save_report(self, result: str, output_file: str):
-        """💾 Salva relatório final com template profissional"""
+    def _save_report(self, result_text: str, output_file: str):
+        """💾 Salva relatório final diretamente (sem template)"""
         try:
-            from utils.template_engine import TemplateEngine
+            logger.info(f"💾 Iniciando salvamento do relatório...")
+            logger.info(f"📏 Tamanho do result_text: {len(result_text)} chars")
+            logger.info(f"📝 Primeiras 300 chars:\n{result_text[:300]}")
             
             os.makedirs(os.path.dirname(output_file) or ".", exist_ok=True)
             
-            # Tenta usar template engine se disponível
-            try:
-                template_path = "templates/template_relatorio_final.md"
-                if os.path.exists(template_path):
-                    logger.info("📝 Aplicando template profissional...")
-                    engine = TemplateEngine(template_path)
-                    
-                    # Extrai scores do resultado
-                    scores = engine.extract_scores(result)
-                    
-                    # Cria contexto básico
-                    context = {
-                        'project_name': 'Projeto Analisado',
-                        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        'analysis_output': result,
-                        **scores  # Adiciona scores extraídos
-                    }
-                    
-                    # Renderiza com template
-                    final_content = engine.render(context)
-                    logger.info(f"✅ Template aplicado ({len(final_content)} chars)")
-                else:
-                    logger.warning("⚠️ Template não encontrado, salvando resultado direto")
-                    final_content = result
-                    
-            except Exception as e:
-                logger.warning(f"⚠️ Erro ao aplicar template: {e}, salvando resultado direto")
-                final_content = result
-            
             # Valida que há conteúdo
-            if not final_content or len(final_content.strip()) < 100:
-                raise ValueError(f"Relatório vazio ou muito curto ({len(final_content)} chars)")
+            if not result_text or len(result_text.strip()) < 100:
+                raise ValueError(f"Relatório vazio ou muito curto ({len(result_text)} chars)")
             
-            # Salva arquivo
+            logger.info(f"💾 Escrevendo arquivo: {output_file}")
+            
+            # Salva arquivo diretamente
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(final_content)
+                f.write(result_text)
             
             # Valida que arquivo foi escrito
             if not os.path.exists(output_file):
@@ -214,10 +243,17 @@ class CodebaseAnalysisCrewV2:
             if file_size == 0:
                 raise IOError(f"Arquivo {output_file} está vazio")
             
-            logger.info(f"📄 Relatório salvo em: {output_file} ({file_size} bytes)")
+            logger.info(f"✅ Relatório salvo em: {output_file} ({file_size:,} bytes)")
+            
+            # Lê de volta para confirmar
+            with open(output_file, 'r', encoding='utf-8') as f:
+                saved_content = f.read()
+                logger.info(f"✅ Confirmado: arquivo contém {len(saved_content)} chars")
             
         except Exception as e:
             logger.error(f"❌ Erro ao salvar relatório: {e}")
+            import traceback
+            logger.error(f"❌ Traceback:\n{traceback.format_exc()}")
             raise
 
 
