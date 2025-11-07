@@ -1,12 +1,23 @@
 # 🚀 CrewAI - Sistema de Avaliação Ultra-Profissional de Codebase
+# 🚀 CrewAI - Ultra-Professional Codebase Assessment System
 
-## 📋 Visão Geral
+## 🇧🇷 Português
 
-Sistema plug-and-play que utiliza **6 especialistas IA** para gerar análises profissionais de codebase usando **Gemini 2.5 Flash**. 
+Sistema plug-and-play que utiliza **6 especialistas IA** para gerar análises profissionais de codebase usando **Gemini 2.5 Flash**.
 
-### 🎯 Fluxo Completo
+## 🇺🇸 English
+
+Plug-and-play system that uses **6 AI specialists** to generate professional codebase analysis using **Gemini 2.5 Flash**.
+
+---
+
+## 📋 Visão Geral | Overview
+
+### 🎯 Fluxo Completo | Complete Flow
+
 ```
 📂 Codebase → 🐍 Script Análise → 📄 Relatório → 🤝 CrewAI → 📑 Relatório Ultra-Profissional
+📂 Codebase → 🐍 Analysis Script → 📄 Report → 🤝 CrewAI → 📑 Ultra-Professional Report
 ```
 
 ### 🎭 Especialistas da Crew

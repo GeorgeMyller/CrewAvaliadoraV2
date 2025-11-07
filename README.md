@@ -1,73 +1,121 @@
-# CrewAvaliadora
+# CrewAvaliadora 🚀
+
+## 🇧🇷 Português
+
+Sistema de análise de codebase alimentado por IA usando 6 agentes especializados com Google Gemini 2.5 Flash e framework CrewAI.
+
+### 🎯 Visão Geral
+
+CrewAvaliadora é uma ferramenta abrangente de análise de codebase que usa inteligência artificial para fornecer code reviews de nível profissional, análise de arquitetura, avaliações de qualidade e relatórios de viabilidade comercial.
+
+---
+
+## 🇺🇸 English
 
 AI-powered codebase analysis system using 6 specialized agents powered by Google Gemini 2.5 Flash and CrewAI framework.
 
-## 🎯 Overview
+### 🎯 Overview
 
 CrewAvaliadora is a comprehensive codebase analysis tool that uses artificial intelligence to provide professional-grade code reviews, architecture analysis, quality assessments, and business viability reports.
 
-### Key Features
+### 🌟 Principais Recursos | Key Features
 
+**🇧🇷 Português:**
+- **6 Agentes IA Especializados**: Arquiteto de Software, Engenheiro de QA, Redator Técnico, Gerente de Produto, Especialista Legal e Engenheiro de IA
+- **Análise Abrangente**: Arquitetura, qualidade de código, documentação, viabilidade comercial, conformidade legal e otimização de IA
+- **Controle de Custos**: Rastreamento de custos de API e limitação de taxa integrados
+- **Pronto para Produção**: Suite de testes completa, pipeline CI/CD e ferramentas profissionais
+- **Saída Flexível**: Gera relatórios markdown detalhados com insights acionáveis
+
+**🇺🇸 English:**
 - **6 Specialized AI Agents**: Software Architect, QA Engineer, Technical Writer, Product Manager, Legal Specialist, and AI Engineer
 - **Comprehensive Analysis**: Architecture, code quality, documentation, business viability, legal compliance, and AI optimization
 - **Cost-Controlled**: Built-in API cost tracking and rate limiting
 - **Production-Ready**: Complete test suite, CI/CD pipeline, and professional tooling
 - **Flexible Output**: Generates detailed markdown reports with actionable insights
 
-## 🚀 Quick Start
+## 🚀 Início Rápido | Quick Start
 
-### Prerequisites
+### 🇧🇷 Pré-requisitos | 🇺🇸 Prerequisites
 
 - Python 3.12+
 - uv package manager
 - Google Gemini API key
 
-### Installation
+### 🇧🇷 Instalação | 🇺🇸 Installation
 
 ```bash
-# Clone the repository
+# Clone o repositório | Clone the repository
 git clone <repository-url>
 cd CrewAvaliadora
 
-# Install dependencies
+# Instale as dependências | Install dependencies
 uv sync
 
-# Configure environment
+# Configure o ambiente | Configure environment
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY
+# 🇧🇷 Edite .env e adicione sua GEMINI_API_KEY
+# 🇺🇸 Edit .env and add your GEMINI_API_KEY
 ```
 
-### Get API Key
+### 🇧🇷 Obter Chave API | 🇺🇸 Get API Key
 
+**🇧🇷 Português:**
+1. Visite [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Crie uma chave API gratuita
+3. Adicione ao arquivo `.env`
+
+**🇺🇸 English:**
 1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Create a free API key
 3. Add to `.env` file
 
-### Verify System Health
+### 🇧🇷 Verificar Saúde do Sistema | 🇺🇸 Verify System Health
 
 ```bash
-# Run health check to verify everything is configured correctly
+# 🇧🇷 Execute verificação de saúde para confirmar configuração
+# 🇺🇸 Run health check to verify everything is configured correctly
 uv run python utils/health_check.py
 
-# This will check:
-# - Python version
-# - Required packages
-# - Environment variables
-# - Project structure
-# - Gemini API connection
+# 🇧🇷 Isto verificará:
+# 🇺🇸 This will check:
+# - Python version / Versão do Python
+# - Required packages / Pacotes necessários
+# - Environment variables / Variáveis de ambiente
+# - Project structure / Estrutura do projeto
+# - Gemini API connection / Conexão com API Gemini
 ```
 
-### Run Analysis
+### 🇧🇷 Executar Análise | 🇺🇸 Run Analysis
 
 ```bash
-# Analyze current directory (limited to 3 files for testing)
+# 🇧🇷 Analisar diretório atual (limitado a 3 arquivos para teste)
+# 🇺🇸 Analyze current directory (limited to 3 files for testing)
 uv run python crew_avaliacao_completa.py
 
-# Generate basic report
+# 🇧🇷 Gerar relatório básico
+# 🇺🇸 Generate basic report
 uv run python gerar_relatorio.py .
 ```
 
-## 📊 Generated Reports
+## 📊 Relatórios Gerados | Generated Reports
+
+**🇧🇷 Português:**
+
+Os relatórios são salvos em `outputs/reports/` e incluem:
+
+- Resumo executivo com pontuação geral de qualidade
+- Análise de arquitetura e recomendações
+- Avaliação de qualidade de código
+- Auditoria de documentação
+- Avaliação de viabilidade comercial
+- Revisão de conformidade legal
+- Sugestões de otimização de IA
+- Roadmap em 3 fases (0-3, 3-6, 6-12 meses)
+- Quick wins (alto impacto, baixo esforço)
+- Top 5 riscos críticos com planos de mitigação
+
+**🇺🇸 English:**
 
 Reports are saved to `outputs/reports/` and include:
 
@@ -82,69 +130,113 @@ Reports are saved to `outputs/reports/` and include:
 - Quick wins (high impact, low effort)
 - Top 5 critical risks with mitigation plans
 
-## 🏗️ Project Structure
+## 🏗️ Estrutura do Projeto | Project Structure
 
 ```
 CrewAvaliadora/
-├── tests/                      # Test suite
-├── utils/                      # Utility modules
-│   ├── api_cost_tracker.py    # API cost tracking & rate limiting
-│   └── codebase_analyzer.py   # Consolidated analysis utilities
-├── outputs/                    # Generated reports (gitignored)
-│   ├── reports/               # Analysis reports
-│   └── metadata/              # API usage metrics
-├── crew_avaliadora/           # CrewAI project structure
-├── crewai_system/             # System documentation
-├── avaliacao_gemini.py        # Gemini integration
-├── crew_avaliacao_completa.py # Main analysis system
-├── gerar_relatorio.py         # Report generator
-└── .env.example               # Environment template
+├── src/
+│   ├── crew_avaliadora.py       # 🇧🇷 Sistema principal | 🇺🇸 Main system
+│   └── legacy/                  # 🇧🇷 Código arquivado | 🇺🇸 Archived code
+├── config/
+│   └── crew_config.yaml         # 🇧🇷 Config agentes | 🇺🇸 Agent config
+├── utils/                       # 🇧🇷 Módulos utilitários | 🇺🇸 Utility modules
+│   ├── api_cost_tracker.py      # 🇧🇷 Rastreamento custos | 🇺🇸 Cost tracking
+│   ├── config_loader.py         # 🇧🇷 Carregador YAML | 🇺🇸 YAML loader
+│   ├── health_check.py          # 🇧🇷 Diagnósticos | 🇺🇸 Diagnostics
+│   └── template_engine.py       # 🇧🇷 Renderização | 🇺🇸 Report rendering
+├── templates/
+│   └── template_relatorio_final_v2.md  # 🇧🇷 Template Jinja2 | 🇺🇸 Jinja2 template
+├── outputs/                     # 🇧🇷 Relatórios gerados | 🇺🇸 Generated reports
+│   ├── reports/                 # 🇧🇷 Relatórios finais | 🇺🇸 Final reports
+│   ├── analysis/                # 🇧🇷 Dados brutos | 🇺🇸 Raw data
+│   ├── logs/                    # 🇧🇷 Logs execução | 🇺🇸 Execution logs
+│   └── metadata/                # 🇧🇷 Métricas API | 🇺🇸 API metrics
+├── tests/                       # 🇧🇷 Testes | 🇺🇸 Test suite
+└── docs/                        # 🇧🇷 Documentação | 🇺🇸 Documentation
 ```
 
-## 🧪 Testing
+## 🧪 Testes | Testing
 
+**🇧🇷 Português:**
+```bash
+# Executar todos os testes
+uv run pytest tests/ -v
+
+# Executar arquivo de teste específico
+uv run pytest tests/test_basic.py -v
+
+# Com cobertura
+uv run pytest --cov=src tests/
+```
+
+**🇺🇸 English:**
 ```bash
 # Run all tests
 uv run pytest tests/ -v
 
 # Run specific test file
 uv run pytest tests/test_basic.py -v
+
+# With coverage
+uv run pytest --cov=src tests/
 ```
 
-## 🛠️ Development
+## 🛠️ Desenvolvimento | Development
 
-### Setup Development Environment
+### 🇧🇷 Configurar Ambiente de Desenvolvimento | 🇺🇸 Setup Development Environment
 
 ```bash
-# Install dev dependencies
+# 🇧🇷 Instalar dependências de dev | 🇺🇸 Install dev dependencies
 uv sync --dev
 
-# Install pre-commit hooks
+# 🇧🇷 Instalar hooks pre-commit | 🇺🇸 Install pre-commit hooks
 uv run pre-commit install
 
-# Run linting
+# 🇧🇷 Executar linting | 🇺🇸 Run linting
 uv run ruff check .
 uv run ruff format .
 
-# Run type checking
+# 🇧🇷 Verificação de tipos | 🇺🇸 Type checking
 uv run mypy . --ignore-missing-imports
 ```
 
-### Contributing
+### 🇧🇷 Contribuindo | 🇺🇸 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+**🇧🇷 Português:** Veja [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes detalhadas.
 
-## 📝 Documentation
+**🇺🇸 English:** See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
+## 📝 Documentação | Documentation
+
+**🇧🇷 Português:**
+- [README_CREW.md](README_CREW.md) - Documentação detalhada do sistema CrewAI
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Diretrizes de contribuição
+- [PROJECT_REVIEW.md](PROJECT_REVIEW.md) - Revisão do projeto
+
+**🇺🇸 English:**
 - [README_CREW.md](README_CREW.md) - Detailed CrewAI system documentation
-- [crewai_system/README.md](crewai_system/README.md) - System architecture
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
-- [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Implementation status
+- [PROJECT_REVIEW.md](PROJECT_REVIEW.md) - Project review
 
-## 💰 API Cost Management
+## 💰 Gerenciamento de Custos API | API Cost Management
+
+**🇧🇷 Português:**
+
+O sistema inclui rastreamento de custos integrado:
+- Limite padrão: $5 USD por execução
+- Máximo de 100 chamadas de API por execução
+- Limitação de taxa: 60 chamadas/minuto
+- Métricas de custo salvas em `outputs/metadata/`
+
+Configure limites no `.env`:
+```bash
+MAX_API_CALLS_PER_RUN=100
+MAX_COST_PER_RUN_USD=5.00
+```
+
+**🇺🇸 English:**
 
 The system includes built-in cost tracking:
-
 - Default limit: $5 USD per run
 - Maximum 100 API calls per run
 - Rate limiting: 60 calls/minute
@@ -156,14 +248,32 @@ MAX_API_CALLS_PER_RUN=100
 MAX_COST_PER_RUN_USD=5.00
 ```
 
-## 🔒 Security
+## 🔒 Segurança | Security
 
+**🇧🇷 Português:**
+- Chaves API armazenadas em variáveis de ambiente (nunca no código)
+- Hooks pre-commit verificam segredos
+- Scanning de segurança Bandit no CI/CD
+- Validação e sanitização de entrada
+
+**🇺🇸 English:**
 - API keys stored in environment variables (never in code)
 - Pre-commit hooks scan for secrets
 - Bandit security scanning in CI/CD
 - Input validation and sanitization
 
-## 📈 CI/CD Pipeline
+## 📈 Pipeline CI/CD
+
+**🇧🇷 Português:**
+
+Testes automatizados a cada push:
+- Testes unitários com pytest
+- Linting de código com ruff
+- Verificação de tipos com mypy
+- Scanning de segurança com bandit
+- Relatório de cobertura
+
+**🇺🇸 English:**
 
 Automated testing on every push:
 - Unit tests with pytest
@@ -172,41 +282,45 @@ Automated testing on every push:
 - Security scanning with bandit
 - Coverage reporting
 
-## 🤝 The 6 AI Agents
+## 🤝 Os 6 Agentes IA | The 6 AI Agents
 
-1. **🏗️ Software Architect** - Architecture patterns, scalability, integrations
-2. **🧪 QA Engineer** - Test coverage, code quality, vulnerabilities
-3. **📄 Technical Writer** - Documentation quality, onboarding guides
-4. **🚀 Product Manager** - Market readiness, business viability, monetization
-5. **⚖️ Legal Specialist** - LGPD/GDPR compliance, API terms, risk mitigation
-6. **🤖 AI Engineer** - LLM optimization, prompt engineering, cost efficiency
+| 🇧🇷 Português | 🇺🇸 English | 🎯 Foco | Focus |
+|---------------|-------------|---------|-------|
+| 🏗️ **Arquiteto de Software** | **Software Architect** | Padrões arquiteturais, escalabilidade, integrações | Architecture patterns, scalability, integrations |
+| 🧪 **Engenheiro QA** | **QA Engineer** | Cobertura de testes, qualidade, vulnerabilidades | Test coverage, quality, vulnerabilities |
+| 📄 **Redator Técnico** | **Technical Writer** | Qualidade da documentação, guias | Documentation quality, guides |
+| 🚀 **Gerente de Produto** | **Product Manager** | Prontidão de mercado, viabilidade comercial | Market readiness, business viability |
+| ⚖️ **Especialista Legal** | **Legal Specialist** | Conformidade LGPD/GDPR, riscos | LGPD/GDPR compliance, risks |
+| 🤖 **Engenheiro de IA** | **AI Engineer** | Otimização LLM, engenharia de prompts | LLM optimization, prompt engineering |
 
-## 📊 Example Output
+## 📊 Exemplo de Saída | Example Output
 
 ```markdown
-# Executive Summary
-Overall Quality Score: 78/100
+# 🇧🇷 Resumo Executivo | 🇺🇸 Executive Summary
+Pontuação Geral de Qualidade | Overall Quality Score: 78/100
 
-**Strengths:**
-- Well-documented API integration
-- Modular agent architecture
-- Good error handling
+**🇧🇷 Pontos Fortes | 🇺🇸 Strengths:**
+- Integração API bem documentada | Well-documented API integration
+- Arquitetura modular de agentes | Modular agent architecture
+- Boa manipulação de erros | Good error handling
 
-**Critical Issues:**
-1. Missing test coverage (Priority: HIGH)
-2. No rate limiting (Priority: HIGH)
+**🇧🇷 Problemas Críticos | 🇺🇸 Critical Issues:**
+1. Falta cobertura de testes | Missing test coverage (Prioridade | Priority: HIGH)
+2. Sem limitação de taxa | No rate limiting (Prioridade | Priority: HIGH)
 ...
 ```
 
-## 🔧 Configuration
+## 🔧 Configuração | Configuration
 
-Key environment variables:
+**🇧🇷 Variáveis de ambiente principais:**
+
+**🇺🇸 Key environment variables:**
 
 ```bash
-# Required
+# 🇧🇷 Obrigatório | 🇺🇸 Required
 GEMINI_API_KEY=your_api_key_here
 
-# Optional
+# 🇧🇷 Opcional | 🇺🇸 Optional
 MODEL=gemini/gemini-2.5-flash
 MAX_FILES_TO_ANALYZE=300
 MAX_FILE_SIZE_BYTES=2097152
@@ -214,53 +328,70 @@ OUTPUT_DIR=outputs/reports
 LOG_LEVEL=INFO
 ```
 
-## 📦 Dependencies
+## 📦 Dependências | Dependencies
 
-Core:
+**🇧🇷 Principais:**
+
+**🇺🇸 Core:**
+
 - `crewai>=0.157.0` - Multi-agent framework
 - `google-generativeai>=0.8.5` - Gemini API
 - `python-dotenv>=1.1.1` - Environment management
 
-Dev:
+**🇧🇷 Desenvolvimento:**
+
+**🇺🇸 Dev:**
+
 - `pytest>=7.4.0` - Testing framework
 - `ruff>=0.1.9` - Linting and formatting
 - `mypy>=1.7.0` - Type checking
 - `pre-commit>=3.5.0` - Git hooks
 
-## 🐛 Troubleshooting
+## 🐛 Resolução de Problemas | Troubleshooting
 
-**API Key Error:**
+### 🇧🇷 Erro de Chave API | 🇺🇸 API Key Error
+
 ```bash
-# Verify key is set
+# 🇧🇷 Verificar se a chave está definida | 🇺🇸 Verify key is set
 echo $GEMINI_API_KEY
 
-# Or check .env file
+# 🇧🇷 Ou verificar arquivo .env | 🇺🇸 Or check .env file
 cat .env
 ```
 
-**Import Errors:**
+### 🇧🇷 Erros de Importação | 🇺🇸 Import Errors
+
 ```bash
-# Reinstall dependencies
+# 🇧🇷 Reinstalar dependências | 🇺🇸 Reinstall dependencies
 uv sync --reinstall
 ```
 
-**Permission Issues:**
+### 🇧🇷 Problemas de Permissão | 🇺🇸 Permission Issues
+
 ```bash
-# Ensure output directories exist
+# 🇧🇷 Garantir que diretórios de saída existam
+# 🇺🇸 Ensure output directories exist
 mkdir -p outputs/reports outputs/metadata
 ```
 
-## 📄 License
+## 📄 Licença | License
 
-MIT License - See LICENSE file for details
+**🇧🇷 Português:** Licença MIT - Veja o arquivo LICENSE para detalhes.
 
-## 🙏 Acknowledgments
+**🇺🇸 English:** MIT License - See LICENSE file for details.
 
-Built with:
+## 🙏 Agradecimentos | Acknowledgments
+
+**🇧🇷 Construído com:**
+
+**🇺🇸 Built with:**
+
 - [CrewAI](https://github.com/joaomdmoura/crewAI) - Multi-agent orchestration
 - [Google Gemini](https://ai.google.dev/) - Large language model
 - [uv](https://github.com/astral-sh/uv) - Fast Python package manager
 
 ---
 
-**Developed with ❤️ using CrewAI + Google Gemini 2.5 Flash**
+**🇧🇷 Desenvolvido com ❤️ usando CrewAI + Google Gemini 2.5 Flash**
+
+**🇺🇸 Developed with ❤️ using CrewAI + Google Gemini 2.5 Flash**
