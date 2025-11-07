@@ -37,6 +37,8 @@ agents:
       escalabilidade. Analisa o código real do projeto para fornecer insights precisos.
     max_iterations: 3
     delegation: false
+    tools:
+      - "file_search"
     
   engenheiro_qualidade:
     name: "EngenheiroQualidadeTestes"
@@ -51,6 +53,8 @@ agents:
       Especialista em testes de APIs e mock de serviços externos.
     max_iterations: 3
     delegation: false
+    tools:
+      - "file_search"
     
   documentador_tecnico:
     name: "DocumentadorTecnicoSenior"
@@ -65,6 +69,10 @@ agents:
       Conhece Sphinx, MkDocs e padrões de documentação REST APIs.
     max_iterations: 3
     delegation: false
+    tools:
+      - "file_search"
+    llm:
+      model: "gemini/gemini-1.5-flash-latest" # Example of a smaller model for a specific task
     
   product_manager:
     name: "ProductManagerEstrategico"
@@ -79,6 +87,8 @@ agents:
       crescimento. Avalia projetos baseando-se exclusivamente no que está implementado.
     max_iterations: 3
     delegation: false
+    tools:
+      - "file_search"
     
   especialista_legal:
     name: "ConsultorJuridicoTecnologia"
@@ -93,6 +103,8 @@ agents:
       real para identificar uso de APIs, dados pessoais e possíveis riscos regulatórios.
     max_iterations: 3
     delegation: false
+    tools:
+      - "file_search"
     
   analista_tecnologia:
     name: "AnalistaTecnologiaModerna"
@@ -107,6 +119,28 @@ agents:
       Analisa o código real para identificar oportunidades de otimização e modernização.
     max_iterations: 3
     delegation: false
+    tools:
+      - "file_search"
+
+  meta_analista:
+    name: "MetaAnalista"
+    emoji: "🧠"
+    role: "Meta Analista e Orquestrador"
+    goal: >
+      Orquestrar a equipe de agentes especializados para produzir uma análise de codebase 
+      profunda, coesa e acionável. Atuar como o ponto central de consolidação, 
+      garantindo que o relatório final seja mais do que a soma de suas partes.
+    backstory: >
+      Um líder de engenharia experiente, com uma visão holística sobre desenvolvimento 
+      de software, negócios e estratégia. Você não executa a análise diretamente, 
+      mas guia os especialistas, sintetiza seus achados, identifica sinergias e 
+      conflitos, e tece uma narrativa coesa que conecta os pontos entre arquitetura, 
+      qualidade, produto, e mais. Sua especialidade é o "deep thinking": planejar, 
+      refletir, criticar e sintetizar.
+    max_iterations: 5
+    delegation: true
+    tools:
+      - "file_search"
 
 # 📋 DEFINIÇÃO DAS TASKS ESPECIALIZADAS
 tasks:
@@ -262,6 +296,51 @@ tasks:
       - Estratégia personalização
       - Otimizações custo sugeridas
       - Roadmap evolução IA
+
+  orquestracao_analise:
+    agent: "meta_analista"
+    name: "Orquestração da Análise e Síntese do Relatório Final"
+    description: >
+      Você é o maestro desta análise. Seu objetivo é orquestrar os outros agentes 
+      para produzir um relatório final de alta qualidade.
+
+      RELATÓRIO DA CODEBASE INICIAL:
+      {codebase_report}
+
+      Seu processo de "Deep Thinking" deve seguir estes passos:
+
+      1.  **Planejamento (Plan)**: Com base no relatório inicial, defina um plano de 
+          análise. Quais são as áreas mais críticas a serem investigadas? Quais 
+          agentes devem ser acionados e em que ordem?
+
+      2.  **Delegação (Delegate)**: Delegue as tarefas de análise para os agentes 
+          especializados (Arquiteto, QA, Documentador, etc.). Forneça a eles o 
+          contexto necessário do `{codebase_report}`.
+
+      3.  **Síntese (Synthesize)**: Reúna os resultados de todos os agentes. 
+          Combine as análises individuais em um rascunho de relatório consolidado.
+
+      4.  **Reflexão e Crítica (Reflect & Critique)**: Leia o rascunho consolidado. 
+          Existem contradições? Há lacunas na análise? A qualidade está alta? 
+          Se necessário, peça a um agente para refinar ou aprofundar uma parte 
+          específica da sua análise.
+
+      5.  **Relatório Final (Report)**: Produza o relatório final ultra-profissional, 
+          combinando todas as análises refinadas em um documento coeso e bem 
+          estruturado, seguindo o `expected_output`.
+
+    expected_output: >
+      Um relatório final consolidado e coeso que integra as análises de todos os 
+      especialistas. O relatório deve ser estruturado, profissional e fornecer 
+      uma visão 360º do projeto, com seções claras para:
+      - Sumário Executivo (visão geral para C-level)
+      - Análise Arquitetural e Tecnológica (para líderes técnicos e sêniors)
+      - Análise de Qualidade e Testes (para a equipe de engenharia)
+      - Análise de Documentação e Onboarding (para novos desenvolvedores)
+      - Análise de Produto e Viabilidade Comercial (para PMs e stakeholders)
+      - Análise de Riscos Legais e Compliance (para o jurídico e gestão)
+      - Roadmap de Melhorias Priorizadas (com quick wins e iniciativas estratégicas)
+      - Conclusão Geral.
 
 # 📑 CONFIGURAÇÃO DO RELATÓRIO FINAL
 final_report:

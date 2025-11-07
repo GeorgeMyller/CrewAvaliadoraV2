@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from utils.config_loader import load_config
+from crewai_tools import FileSearchTool
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +72,7 @@ class CodebaseAnalysisCrewV2:
             raise
         
         # Cria agentes e tasks a partir da configuração
+        self.file_search_tool = FileSearchTool()
         self.agents = self._create_agents_from_config()
         self.tasks = self._create_tasks_from_config()
         
@@ -83,6 +85,19 @@ class CodebaseAnalysisCrewV2:
         
         for agent_key, agent_data in agents_config.items():
             try:
+                tools = []
+                if "tools" in agent_data:
+                    if "file_search" in agent_data["tools"]:
+                        tools.append(self.file_search_tool)
+
+                llm = None
+                if "llm" in agent_data:
+                    # This is a simplified example. In a real scenario, you would
+                    # initialize a new LLM instance based on the config.
+                    # For now, we'll just log it.
+                    logger.info(f"Agent {agent_data['name']} uses a custom model: {agent_data['llm'].get('model')}")
+
+
                 agent = Agent(
                     role=f"{agent_data.get('emoji', '')} {agent_data['role']}",
                     goal=agent_data['goal'],
@@ -90,6 +105,8 @@ class CodebaseAnalysisCrewV2:
                     verbose=True,
                     max_iter=agent_data.get('max_iterations', 3),
                     allow_delegation=agent_data.get('delegation', False),
+                    tools=tools,
+                    llm=llm, # Assign the custom LLM
                 )
                 agents[agent_key] = agent
                 logger.info(f"✅ Agente criado: {agent_data['name']}")
