@@ -20,6 +20,10 @@ dependencies = [
     "google-generativeai>=0.8.5",
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
+    "ruff>=0.14.3",
+    "safety>=3.7.0",
+    "streamlit",
+    "watchdog>=6.0.0",
 ]
 
 [project.optional-dependencies]

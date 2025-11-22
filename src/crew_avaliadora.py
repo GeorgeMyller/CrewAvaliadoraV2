@@ -20,7 +20,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from utils.config_loader import load_config
-from crewai_tools import FileSearchTool
+from crewai_tools import FileReadTool, DirectoryReadTool
+from src.tools.custom_tools import RunLinterTool, CheckDependenciesTool, ExecuteTestsTool, GrepTool
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -38,13 +39,14 @@ class CodebaseAnalysisCrewV2:
     Permite fácil customização sem mexer no código.
     """
     
-    def __init__(self, gemini_api_key: Optional[str] = None, config_path: Optional[str] = None):
+    def __init__(self, gemini_api_key: Optional[str] = None, config_path: Optional[str] = None, repo_path: Optional[str] = None):
         """
         Inicializa a crew com configuração YAML e Gemini 2.5 Flash
         
         Args:
             gemini_api_key: API key do Gemini (se None, usa GEMINI_API_KEY do .env)
             config_path: Caminho para crew_config.yaml (se None, usa config/crew_config.yaml)
+            repo_path: Caminho para o repositório clonado (necessário para ferramentas de análise dinâmica)
         """
         # Carrega API key
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
@@ -63,6 +65,8 @@ class CodebaseAnalysisCrewV2:
         if config_path is None:
             config_path = Path(__file__).parent.parent / "config" / "crew_config.yaml"
         
+        self.repo_path = repo_path
+        
         # Carrega configuração YAML
         try:
             self.config = load_config(str(config_path))
@@ -72,7 +76,15 @@ class CodebaseAnalysisCrewV2:
             raise
         
         # Cria agentes e tasks a partir da configuração
-        self.file_search_tool = FileSearchTool()
+        if self.repo_path:
+            self.file_read_tool = FileReadTool(root_dir=self.repo_path)
+            self.directory_read_tool = DirectoryReadTool(directory=self.repo_path)
+            self.grep_tool = GrepTool(repo_path=self.repo_path)
+        else:
+            self.file_read_tool = FileReadTool()
+            self.directory_read_tool = DirectoryReadTool()
+            self.grep_tool = None
+
         self.agents = self._create_agents_from_config()
         self.tasks = self._create_tasks_from_config()
         
@@ -88,7 +100,16 @@ class CodebaseAnalysisCrewV2:
                 tools = []
                 if "tools" in agent_data:
                     if "file_search" in agent_data["tools"]:
-                        tools.append(self.file_search_tool)
+                        tools.append(self.file_read_tool)
+                        tools.append(self.directory_read_tool)
+                        if self.grep_tool:
+                            tools.append(self.grep_tool)
+                    if "run_linter" in agent_data["tools"] and self.repo_path:
+                        tools.append(RunLinterTool(repo_path=self.repo_path))
+                    if "check_dependencies" in agent_data["tools"] and self.repo_path:
+                        tools.append(CheckDependenciesTool(repo_path=self.repo_path))
+                    if "execute_tests" in agent_data["tools"] and self.repo_path:
+                        tools.append(ExecuteTestsTool(repo_path=self.repo_path))
 
                 llm = None
                 if "llm" in agent_data:
@@ -144,13 +165,14 @@ class CodebaseAnalysisCrewV2:
         
         return tasks
     
-    def analyze_codebase(self, codebase_report: str, output_file: Optional[str] = None) -> str:
+    def analyze_codebase(self, codebase_report: str, output_file: Optional[str] = None, diff_content: Optional[str] = None) -> str:
         """
         🔍 Executa análise completa da codebase
         
         Args:
             codebase_report: Relatório inicial da codebase gerado por gerar_relatorio.py
             output_file: Arquivo para salvar o relatório final
+            diff_content: Conteúdo do git diff para análise incremental (opcional)
             
         Returns:
             Relatório final ultra-profissional
@@ -160,7 +182,8 @@ class CodebaseAnalysisCrewV2:
         # Prepara inputs para as tasks
         inputs = {
             "codebase_report": codebase_report,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "diff_context": diff_content if diff_content else "Nenhuma alteração incremental fornecida (análise completa do estado atual)."
         }
         
         # Cria crew

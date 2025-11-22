@@ -24,12 +24,16 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 
-def clone_repository(repo_url: str, target_dir: str) -> bool:
+def clone_repository(repo_url: str, target_dir: str, depth: int = 1) -> bool:
     """Clone repositório do GitHub"""
     try:
         logger.info(f"📥 Clonando repositório: {repo_url}")
+        cmd = ['git', 'clone', repo_url, target_dir]
+        if depth > 0:
+            cmd.extend(['--depth', str(depth)])
+            
         result = subprocess.run(
-            ['git', 'clone', '--depth', '1', repo_url, target_dir],
+            cmd,
             capture_output=True,
             text=True,
             timeout=120
@@ -45,6 +49,38 @@ def clone_repository(repo_url: str, target_dir: str) -> bool:
     except Exception as e:
         logger.error(f"❌ Erro: {e}")
         return False
+
+
+def get_git_diff(repo_path: str, base_ref: str, head_ref: str) -> str:
+    """Obtém o diff entre duas referências git"""
+    try:
+        logger.info(f"🔍 Obtendo diff entre {base_ref} e {head_ref}...")
+        
+        # Fetch se necessário (se clonado com depth 1, pode não ter histórico suficiente)
+        # Mas assumindo que o usuário fornece refs válidas que existem no clone
+        
+        # Garante que temos as refs
+        subprocess.run(['git', 'fetch', '--all'], cwd=repo_path, capture_output=True)
+        
+        result = subprocess.run(
+            ['git', 'diff', base_ref, head_ref],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        if result.returncode == 0:
+            diff_content = result.stdout
+            logger.info(f"✅ Diff obtido ({len(diff_content)} chars)")
+            return diff_content
+        else:
+            logger.error(f"❌ Erro ao obter diff: {result.stderr}")
+            return ""
+            
+    except Exception as e:
+        logger.error(f"❌ Erro ao obter diff: {e}")
+        return ""
 
 
 def generate_base_report(repo_path: str, output_file: str) -> bool:
@@ -85,7 +121,7 @@ def generate_base_report(repo_path: str, output_file: str) -> bool:
         return False
 
 
-def run_crewai_analysis(base_report: str, output_dir: str, project_name: str) -> bool:
+def run_crewai_analysis(base_report: str, output_dir: str, project_name: str, repo_path: str = None, diff_content: str = None) -> bool:
     """Executa análise CrewAI"""
     try:
         logger.info("🚀 Iniciando análise CrewAI...")
@@ -103,8 +139,8 @@ def run_crewai_analysis(base_report: str, output_dir: str, project_name: str) ->
         output_file = os.path.join(output_dir, f"relatorio_final_{project_name}_{timestamp}.md")
         
         # Executa análise
-        crew = CodebaseAnalysisCrewV2()
-        result = crew.analyze_codebase(codebase_report, output_file)
+        crew = CodebaseAnalysisCrewV2(repo_path=repo_path)
+        result = crew.analyze_codebase(codebase_report, output_file, diff_content=diff_content)
         
         if os.path.exists(output_file):
             file_size = os.path.getsize(output_file)
@@ -165,7 +201,7 @@ def main():
         print()
         
         # 3. Executa análise CrewAI
-        if not run_crewai_analysis(str(base_report), str(outputs_dir), project_name):
+        if not run_crewai_analysis(str(base_report), str(outputs_dir), project_name, temp_dir):
             logger.error("❌ Falha na análise CrewAI")
             sys.exit(1)
         

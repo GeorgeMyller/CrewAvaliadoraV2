@@ -55,6 +55,8 @@ agents:
     delegation: false
     tools:
       - "file_search"
+      - "run_linter"
+      - "execute_tests"
     
   documentador_tecnico:
     name: "DocumentadorTecnicoSenior"
@@ -121,6 +123,7 @@ agents:
     delegation: false
     tools:
       - "file_search"
+      - "check_dependencies"
 
   meta_analista:
     name: "MetaAnalista"
@@ -297,6 +300,30 @@ tasks:
       - Otimizações custo sugeridas
       - Roadmap evolução IA
 
+  analise_impacto_mudancas:
+    agent: "meta_analista"
+    name: "Análise de Impacto Incremental"
+    description: >
+      Analise as alterações recentes no código (diff) e avalie seu impacto.
+      
+      DIFF DAS ALTERAÇÕES:
+      {diff_context}
+      
+      Se houver um diff fornecido acima, execute:
+      1. **Resumo das Mudanças**: O que foi alterado (arquivos, lógica)?
+      2. **Impacto Arquitetural**: As mudanças respeitam a arquitetura? Introduzem dívida técnica?
+      3. **Impacto na Qualidade**: Há novos testes? O código segue os padrões?
+      4. **Riscos de Segurança**: As alterações introduzem novas vulnerabilidades?
+      
+      Se NÃO houver diff (ou for a mensagem padrão), ignore esta tarefa ou forneça um resumo geral.
+    
+    expected_output: >
+      Relatório de impacto incremental (se aplicável):
+      - Resumo das alterações
+      - Avaliação de impacto (Arquitetura, Qualidade, Segurança)
+      - Recomendações específicas para o diff
+      - Se não houver diff, indicar "Análise completa (sem diff incremental)"
+
   orquestracao_analise:
     agent: "meta_analista"
     name: "Orquestração da Análise e Síntese do Relatório Final"
@@ -306,10 +333,13 @@ tasks:
 
       RELATÓRIO DA CODEBASE INICIAL:
       {codebase_report}
+      
+      CONTEXTO DE MUDANÇAS (DIFF):
+      {diff_context}
 
       Seu processo de "Deep Thinking" deve seguir estes passos:
 
-      1.  **Planejamento (Plan)**: Com base no relatório inicial, defina um plano de 
+      1.  **Planejamento (Plan)**: Com base no relatório inicial e no diff (se houver), defina um plano de 
           análise. Quais são as áreas mais críticas a serem investigadas? Quais 
           agentes devem ser acionados e em que ordem?
 
@@ -319,6 +349,7 @@ tasks:
 
       3.  **Síntese (Synthesize)**: Reúna os resultados de todos os agentes. 
           Combine as análises individuais em um rascunho de relatório consolidado.
+          SE HOUVER DIFF: Destaque explicitamente o impacto das mudanças recentes.
 
       4.  **Reflexão e Crítica (Reflect & Critique)**: Leia o rascunho consolidado. 
           Existem contradições? Há lacunas na análise? A qualidade está alta? 
@@ -334,6 +365,7 @@ tasks:
       especialistas. O relatório deve ser estruturado, profissional e fornecer 
       uma visão 360º do projeto, com seções claras para:
       - Sumário Executivo (visão geral para C-level)
+      - Análise de Impacto Incremental (SE HOUVER DIFF: O que mudou e seus riscos)
       - Análise Arquitetural e Tecnológica (para líderes técnicos e sêniors)
       - Análise de Qualidade e Testes (para a equipe de engenharia)
       - Análise de Documentação e Onboarding (para novos desenvolvedores)
