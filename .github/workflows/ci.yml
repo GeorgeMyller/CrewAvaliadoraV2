@@ -64,10 +64,10 @@ jobs:
       - name: Run Bandit security check
         run: uv run bandit -r src/ -x src/legacy/ -f json -o bandit-report.json
 
-      - name: Run Safety check for dependencies
-        env:
-          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
-        run: uv run safety scan --json
+      - name: Run Safety CLI to check for vulnerabilities
+        uses: pyupio/safety-action@v1
+        with:
+          api-key: ${{ secrets.SAFETY_API_KEY }}
 
       - name: Check for secrets
         uses: trufflesecurity/trufflehog@main
