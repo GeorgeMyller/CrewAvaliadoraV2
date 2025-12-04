@@ -293,8 +293,10 @@ jobs:
       - name: Slack notification on failure
         if: steps.status.outputs.status == 'failure'
         uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           payload: |
             {
               "text": "❌ CI Pipeline Failed",
@@ -325,8 +327,10 @@ jobs:
       - name: Slack notification on success
         if: steps.status.outputs.status == 'success' && github.event_name == 'push'
         uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           payload: |
             {
               "text": "✅ CI Pipeline Passed",
