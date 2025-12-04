@@ -65,6 +65,8 @@ jobs:
         run: uv run bandit -r src/ -x src/legacy/ -f json -o bandit-report.json
 
       - name: Run Safety check for dependencies
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
         run: uv run safety scan --json
 
       - name: Check for secrets
