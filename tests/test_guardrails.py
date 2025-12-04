@@ -15,7 +15,7 @@ class TestInputGuard:
             "This is a normal code description",
             "feature/new-login-page",
             "main",
-            "v1.0.0"
+            "v1.0.0",
         ]
         for input_str in valid_inputs:
             is_valid, error = guard.validate_prompt(input_str)
@@ -32,7 +32,7 @@ class TestInputGuard:
             "import os; os.system('ls')",
             "sudo rm -rf /",
             "eval(print('hacked'))",
-            "exec('import os')"
+            "exec('import os')",
         ]
         for input_str in unsafe_inputs:
             is_valid, error = guard.validate_prompt(input_str)

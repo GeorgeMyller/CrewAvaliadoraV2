@@ -65,7 +65,7 @@ jobs:
         run: uv run bandit -r src/ -x src/legacy/ -f json -o bandit-report.json
 
       - name: Run Safety check for dependencies
-        run: uv run safety check --json
+        run: uv run safety scan --json
 
       - name: Check for secrets
         uses: trufflesecurity/trufflehog@main

@@ -18,9 +18,9 @@ dependencies = [
     "crewai>=0.157.0",
     "crewai-tools>=0.60.0",
     "google-generativeai>=0.8.5",
-    "guardrails-ai>=0.1.8",
+    "guardrails-ai>=0.5.0",
     "h2>=4.3.0",
-    "litellm>=1.80.7",
+    "litellm>=1.37.14",
     "pypdf>=6.4.0",
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
@@ -95,3 +95,8 @@ omit = [
     "venv/*",
     "*/__pycache__/*",
 ]
+
+[[tool.uv.index]]
+name = "safety"
+url = "https://pkgs.safetycli.com/repository/acessoai/project/crewavaliadorav2/pypi/simple/"
+default = false
