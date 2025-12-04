@@ -18,11 +18,16 @@ dependencies = [
     "crewai>=0.157.0",
     "crewai-tools>=0.60.0",
     "google-generativeai>=0.8.5",
+    "h2>=4.3.0",
+    "litellm>=1.80.7",
+    "pypdf>=6.4.0",
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
     "ruff>=0.14.3",
     "safety>=3.7.0",
+    "starlette>=0.50.0",
     "streamlit",
+    "urllib3>=2.5.0",
     "watchdog>=6.0.0",
 ]
 

@@ -71,6 +71,7 @@ outputs/logs/*
 !outputs/reports/.gitkeep
 !outputs/analysis/.gitkeep
 !outputs/logs/.gitkeep
+outputs/*
 
 # Backup files
 *.backup
