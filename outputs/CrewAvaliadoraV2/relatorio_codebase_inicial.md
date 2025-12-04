@@ -1,54 +1,56 @@
 # 📊 Relatório Técnico da Codebase
-**Gerado em:** 2025-12-04 10:43:44
-**Diretório analisado:** `/var/folders/g1/7nfb0bns5zbftz_zqwwbbyjw0000gn/T/crew_analysis_CrewAvaliadoraV2_8ucgdc1l`
-**Total de arquivos:** 120
-**Tamanho total:** 1.25 MB
+**Gerado em:** 2025-12-04 18:34:45
+**Diretório analisado:** `/var/folders/g1/7nfb0bns5zbftz_zqwwbbyjw0000gn/T/crew_analysis_CrewAvaliadoraV2_lluwyuvk`
+**Total de arquivos:** 122
+**Tamanho total:** 1.36 MB
 
 ## 📈 Distribuição por Extensão
 
-- **.py**: 57 arquivos (522.26 KB)
-- **.md**: 36 arquivos (385.24 KB)
+- **.py**: 61 arquivos (527.16 KB)
+- **.md**: 32 arquivos (490.35 KB)
 - **.yaml**: 8 arquivos (52.53 KB)
-- **no_extension**: 6 arquivos (945.00 B)
-- **.toml**: 3 arquivos (3.06 KB)
+- **no_extension**: 6 arquivos (955.00 B)
+- **.toml**: 3 arquivos (3.47 KB)
 - **.sh**: 3 arquivos (3.83 KB)
 - **.example**: 2 arquivos (2.92 KB)
 - **.txt**: 2 arquivos (124.00 B)
 - **.png**: 2 arquivos (296.98 KB)
-- **.yml**: 1 arquivos (9.36 KB)
+- **.json**: 1 arquivos (2.00 KB)
+- **.ini**: 1 arquivos (100.00 B)
+- **.yml**: 1 arquivos (9.37 KB)
 
 ## 📁 Estrutura de Diretórios
 
-- `src/legacy/crewai_system_old/core/instagram`: 31 arquivos (644.45 KB)
-- `root`: 16 arquivos (69.19 KB)
-- `src/legacy/crewai_system_old/scripts`: 10 arquivos (67.39 KB)
-- `src`: 4 arquivos (36.70 KB)
-- `src/legacy`: 4 arquivos (53.78 KB)
+- `src/legacy/crewai_system_old/core/instagram`: 31 arquivos (638.92 KB)
+- `src/legacy/crewai_system_old/scripts`: 10 arquivos (66.46 KB)
+- `root`: 9 arquivos (41.09 KB)
+- `src`: 5 arquivos (42.74 KB)
+- `outputs/htmltopdf-batch-mac`: 4 arquivos (67.99 KB)
+- `src/legacy`: 4 arquivos (54.45 KB)
 - `src/legacy/crewai_system_old`: 4 arquivos (16.50 KB)
-- `utils`: 3 arquivos (16.46 KB)
-- `outputs/htmltopdf-batch-mac`: 3 arquivos (45.19 KB)
+- `utils`: 3 arquivos (16.64 KB)
 - `src/legacy/crew_avaliadora_old`: 3 arquivos (3.09 KB)
-- `src/legacy/crew_avaliadora_old/src/latest_ai_development`: 3 arquivos (3.99 KB)
+- `src/legacy/crew_avaliadora_old/src/latest_ai_development`: 3 arquivos (4.19 KB)
 - `src/legacy/latest_ai_development`: 3 arquivos (3.09 KB)
-- `src/legacy/latest_ai_development/src/latest_ai_development`: 3 arquivos (4.19 KB)
+- `src/legacy/latest_ai_development/src/latest_ai_development`: 3 arquivos (4.15 KB)
+- `tests`: 2 arquivos (3.00 KB)
 - `docs`: 2 arquivos (14.31 KB)
 - `outputs/agenteinstagram`: 2 arquivos (65.08 KB)
+- `outputs/AprenderEscrita`: 2 arquivos (29.12 KB)
 - `outputs/groups_evo_crewai-escolher-envio-para-grupo-ou-para-meu-numero`: 2 arquivos (63.10 KB)
+- `outputs/CrewAvaliadoraV2`: 2 arquivos (83.81 KB)
 - `outputs/Continuador`: 2 arquivos (49.33 KB)
-- `src/legacy/crew_avaliadora_old/src/latest_ai_development/tools`: 2 arquivos (668.00 B)
+- `src/security`: 2 arquivos (1.93 KB)
+- `src/legacy/crew_avaliadora_old/src/latest_ai_development/tools`: 2 arquivos (631.00 B)
 - `src/legacy/crew_avaliadora_old/src/latest_ai_development/config`: 2 arquivos (10.41 KB)
-- `src/legacy/latest_ai_development/src/latest_ai_development/tools`: 2 arquivos (668.00 B)
+- `src/legacy/latest_ai_development/src/latest_ai_development/tools`: 2 arquivos (631.00 B)
 - `src/legacy/latest_ai_development/src/latest_ai_development/config`: 2 arquivos (1.40 KB)
 - `src/legacy/crewai_system_old/config`: 2 arquivos (13.97 KB)
 - `src/legacy/crewai_system_old/docs`: 2 arquivos (19.13 KB)
 - `config`: 1 arquivos (16.86 KB)
-- `tests`: 1 arquivos (988.00 B)
 - `scripts`: 1 arquivos (463.00 B)
 - `.github`: 1 arquivos (12.28 KB)
-- `.github/workflows`: 1 arquivos (9.36 KB)
-- `templates`: 1 arquivos (12.98 KB)
-- `outputs`: 1 arquivos (1.97 KB)
-- `outputs/analysis`: 1 arquivos (0.00 B)
+- `.github/workflows`: 1 arquivos (9.37 KB)
 
 ## 📖 README / Descrição do Projeto
 
@@ -283,14 +285,20 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
 ]
 dependencies = [
-    "crewai>=0.157.0",
+    "crewai[google-genai]>=0.157.0",
     "crewai-tools>=0.60.0",
     "google-generativeai>=0.8.5",
+    "guardrails-ai>=0.5.0",
+    "h2>=4.3.0",
+    "litellm>=1.37.14",
+    "pypdf>=6.4.0",
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
     "ruff>=0.14.3",
     "safety>=3.7.0",
+    "starlette>=0.50.0",
     "streamlit",
+    "urllib3>=2.5.0",
     "watchdog>=6.0.0",
 ]
 
@@ -303,11 +311,15 @@ dev = [
     "mypy>=1.7.0",
     "bandit>=1.7.5",
     "pre-commit>=3.5.0",
+    "types-PyYAML>=6.0.12.12",
 ]
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+exclude = ["src/legacy"]
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -333,6 +345,8 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
+explicit_package_bases = true
+exclude = ["src/legacy"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -353,6 +367,10 @@ omit = [
     "*/__pycache__/*",
 ]
 
+[[tool.uv.index]]
+
+... (truncado após 100 linhas)
+
 ```
 
 
@@ -360,7 +378,7 @@ omit = [
 
 *Esta seção contém amostras dos principais arquivos de código para análise detalhada.*
 
-### src/legacy/crew_avaliacao_completa.py (36.38 KB)
+### src/legacy/crew_avaliacao_completa.py (37.36 KB)
 
 ```python
 #!/usr/bin/env python3
@@ -374,21 +392,22 @@ Gera relatórios ultra-profissionais para devs juniores e seniores.
 Fluxo: Codebase → Script Python → Relatório → CrewAI → Relatório Ultra-Profissional
 """
 
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Crew, Process, Task
+
 try:
     import crewai_tools
+
     HAVE_CREWAI_TOOLS = True
 except Exception:
     crewai_tools = None
     HAVE_CREWAI_TOOLS = False
-from dotenv import load_dotenv
-import os
 import json
-from datetime import datetime
-from typing import Dict, List, Optional
 import logging
+import os
 import re
-from urllib.parse import urlparse
+from datetime import datetime
+
+from dotenv import load_dotenv
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -397,61 +416,60 @@ logger = logging.getLogger(__name__)
 # Carrega variáveis de ambiente
 load_dotenv()
 
+
 class CodebaseAnalysisCrew:
     """
     🤝 CrewAI para Avaliação Completa de Codebase
-    
+
     Roles especializados:
     📐 Arquiteto de Software
-    🧪 Engenheiro de Qualidade  
+    🧪 Engenheiro de Qualidade
     📄 Documentador Técnico
     🚀 Product Manager
     ⚖️ Especialista Legal
     🤖 Engenheiro de IA
     """
-    
-    def __init__(self, gemini_api_key: Optional[str] = None, project_name: Optional[str] = None):
+
+    def __init__(self, gemini_api_key: str | None = None, project_name: str | None = None):
         """Inicializa a crew com configuração Gemini 2.5 Flash"""
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         if not self.gemini_api_key:
-            raise ValueError("❌ GEMINI_API_KEY não encontrada! Configure no .env ou passe como parâmetro")
-        
+            raise ValueError(
+                "❌ GEMINI_API_KEY não encontrada! Configure no .env ou passe como parâmetro"
+            )
+
         # Remove espaços em branco da API key se houver
         self.gemini_api_key = self.gemini_api_key.strip()
-        
+
         logger.info(f"✅ GEMINI_API_KEY carregada: {self.gemini_api_key[:10]}...")
-        
+
         # Set environment variables for CrewAI's built-in LLM handling
         # Following the pattern from latest_ai_development example
         os.environ["GEMINI_API_KEY"] = self.gemini_api_key
         if "MODEL" not in os.environ:
             os.environ["MODEL"] = "gemini/gemini-2.5-flash"
-        
+
         # CrewAI will automatically handle LLM instantiation from env vars
         # No need for manual LLM() instantiation
         self.llm = None
-        
+
         # Setup output directory structure
         self.project_name = project_name or "unknown_project"
         self.output_base_dir = self._setup_output_directory()
-        
+
         # Tools para leitura de arquivos (só instanciaremos ferramentas reais se disponíveis)
         if HAVE_CREWAI_TOOLS and crewai_tools is not None:
             try:
                 self.file_tool = crewai_tools.FileReadTool()
-                self.dir_tool = crewai_tools.DirectoryReadTool()
-            except Exception:
-                # se qualquer erro ao instanciar, caímos para None e usamos leitura direta
-                self.file_tool = None
 
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/image_validator.py (29.13 KB)
+### src/legacy/crewai_system_old/core/instagram/image_validator.py (28.70 KB)
 
 ```python
-""" 
+"""
 Este módulo fornece a classe InstagramImageValidator para validação e processamento de imagens conforme os requisitos oficiais do Instagram.
 Funcionalidades principais:
 - Validação de imagens para diferentes tipos de postagens (feed, stories, reels, carrossel), incluindo checagem de dimensões, proporção, formato e tamanho do arquivo.
@@ -468,11 +486,11 @@ Uso recomendado para automação de publicações, validação prévia de conte�
 
 """
 
+import logging
+import os
+import time
 
 from PIL import Image
-import os
-import logging
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -493,9 +511,9 @@ class InstagramImageValidator:
     MIN_ASPECT_RATIO = 0.8  # 4:5 portrait orientation (1080x1350)
     MAX_ASPECT_RATIO = 1.91  # Landscape orientation (1080x566)
     SQUARE_RATIO = 1.0  # 1:1 square (1080x1080) - SEMPRE ACEITO
-    
+
     # Stories e Reels: 9:16 (720x1280 mínimo)
-    STORIES_RATIO = 9/16  # 0.5625 para stories/reels
+    STORIES_RATIO = 9 / 16  # 0.5625 para stories/reels
     STORIES_MIN_WIDTH = 720
     STORIES_MIN_HEIGHT = 1280
 
@@ -536,7 +554,7 @@ class InstagramImageValidator:
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/instagram_video_processor.py (27.36 KB)
+### src/legacy/crewai_system_old/core/instagram/instagram_video_processor.py (26.83 KB)
 
 ```python
 """
@@ -571,19 +589,18 @@ Utilize as funções de validação antes de postar vídeos no Instagram para ga
 
 """
 
-
-import os
-from moviepy.editor import VideoFileClip
-import tempfile
-from typing import Dict, Any
-import logging
-from PIL import Image
-from datetime import datetime
-import subprocess
 import json
+import logging
+import os
+import subprocess
+import tempfile
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any
+
 import moviepy.editor as mp
+from moviepy.editor import VideoFileClip
+from PIL import Image
 from src.agent_social_media.utils.media.paths import Paths
 
 # Defina um diretório temporário para o moviepy usar (opcional, mas recomendado)
@@ -610,24 +627,25 @@ _apply_pillow_patch()
 
 
 class VideoProcessor:
-
     @staticmethod
-    def get_video_info(video_path: str) -> Dict[str, Any]:
+    def get_video_info(video_path: str) -> dict[str, Any]:
         """
         Get video information using moviepy instead of ffprobe.
 
         Args:
             video_path: Path to the video file
 
+        Returns:
+            Dictionary with video metadata
 
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/instagram_carousel_service.py (26.77 KB)
+### src/legacy/crewai_system_old/core/instagram/instagram_carousel_service.py (26.15 KB)
 
 ```python
-""" 
+"""
 Serviço para gerenciamento de upload e publicação de carrosséis no Instagram.
 
 Este módulo fornece a classe `InstagramCarouselService`, que permite validar mídias,
@@ -659,19 +677,19 @@ Uso recomendado para automação de postagens de carrosséis em contas do Instag
 
 """
 
-import os
-import time
 import logging
+import os
 import random
-from typing import Optional, List
+import time
 from datetime import datetime
+
 from dotenv import load_dotenv
 from src.agent_social_media.core.instagram.base_instagram_service import (
-    BaseInstagramService,
     AuthenticationError,
+    BaseInstagramService,
+    InstagramAPIError,
     PermissionError,
     RateLimitError,
-    InstagramAPIError,
 )
 
 logger = logging.getLogger("InstagramCarouselService")
@@ -712,10 +730,10 @@ class RateLimitState:
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/base_instagram_service.py (22.55 KB)
+### src/legacy/crewai_system_old/core/instagram/base_instagram_service.py (22.30 KB)
 
 ```python
-""" 
+"""
 
     BaseInstagramService fornece uma base robusta para interação com a Instagram Graph API, incluindo tratamento avançado de erros, controle de limite de requisições (rate limiting) e verificação de permissões.
 Classes:
@@ -743,15 +761,14 @@ Uso:
 
 """
 
-
-
-import time
 import json
 import logging
-import requests
-from urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 import random
+import time
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -796,11 +813,12 @@ class RateLimitError(Exception):
         super().__init__(message)
 
 
+
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/scripts/crew_avaliacao_completa.py (21.28 KB)
+### src/legacy/crewai_system_old/scripts/crew_avaliacao_completa.py (20.87 KB)
 
 ```python
 #!/usr/bin/env python3
@@ -814,14 +832,14 @@ Gera relatórios ultra-profissionais para devs juniores e seniores.
 Fluxo: Codebase → Script Python → Relatório → CrewAI → Relatório Ultra-Profissional
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
-from crewai_tools import FileReadTool, DirectoryReadTool
-from dotenv import load_dotenv
-import os
 import json
-from datetime import datetime
-from typing import Dict, List, Optional
 import logging
+import os
+from datetime import datetime
+
+from crewai import LLM, Agent, Crew, Process, Task
+from crewai_tools import DirectoryReadTool, FileReadTool
+from dotenv import load_dotenv
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -830,25 +848,26 @@ logger = logging.getLogger(__name__)
 # Carrega variáveis de ambiente
 load_dotenv()
 
+
 class CodebaseAnalysisCrew:
     """
     🤝 CrewAI para Avaliação Completa de Codebase
-    
+
     Roles especializados:
     📐 Arquiteto de Software
-    🧪 Engenheiro de Qualidade  
+    🧪 Engenheiro de Qualidade
     📄 Documentador Técnico
     🚀 Product Manager
     ⚖️ Especialista Legal
     🤖 Engenheiro de IA
     """
-    
-    def __init__(self, gemini_api_key: Optional[str] = None):
+
+    def __init__(self, gemini_api_key: str | None = None):
         """Inicializa a crew com configuração Gemini 2.5 Flash"""
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         if not self.gemini_api_key:
             raise ValueError("❌ GEMINI_API_KEY não encontrada! Configure no .env")
-            
+
         # Configuração otimizada do Gemini 2.5 Flash
         self.llm = LLM(
             model="google/gemini-2.5-flash",
@@ -856,18 +875,18 @@ class CodebaseAnalysisCrew:
             temperature=0.3,  # Análise mais focada
             max_tokens=8192,  # Máximo para respostas detalhadas
         )
-        
+
         # Tools para leitura de arquivos
         self.file_tool = FileReadTool()
         self.dir_tool = DirectoryReadTool()
-        
+
         # Cria agentes especializados
         self.agents = self._create_agents()
         self.tasks = self._create_tasks()
-        
-    def _create_agents(self) -> Dict[str, Agent]:
+
+    def _create_agents(self) -> dict[str, Agent]:
         """🎭 Cria todos os agentes especializados"""
-        
+
         agents = {
             # 📐 Arquiteto de Software
             "arquiteto": Agent(
@@ -882,13 +901,12 @@ class CodebaseAnalysisCrew:
                 APIs de redes sociais e automação. Especialista em Instagram Graph API v23, WhatsApp Business API
                 e arquiteturas para SaaS. Conhece profundamente padrões como Repository, Factory, Observer e
                 estratégias de rate limiting para APIs.""",
-                tools=[self.file_tool, self.dir_tool],
 
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/filter.py (19.65 KB)
+### src/legacy/crewai_system_old/core/instagram/filter.py (19.04 KB)
 
 ```python
 """
@@ -915,31 +933,31 @@ Uso recomendado para automação de postagens e preparação de imagens para red
 
 """
 
-import sys
-import os
-import time
-import shutil
 import logging
+import os
+import shutil
+import sys
+import time
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import os
-from PIL import Image, UnidentifiedImageError
+
 import pilgram
+from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
 
 
 class FilterImage:
-
     @staticmethod
     def validate_image(image_path):
         """
         Valida se o arquivo é uma imagem válida e pode ser processada.
-        
+
         Args:
             image_path (str): Caminho para o arquivo de imagem
-            
+
         Returns:
             bool: True se a imagem é válida, False caso contrário
         """
@@ -948,38 +966,38 @@ class FilterImage:
             if not os.path.exists(image_path):
                 logger.error(f"Erro: Arquivo não encontrado: {image_path}")
                 return False
-            
+
             # Verificar se o arquivo não está vazio
             if os.path.getsize(image_path) == 0:
                 logger.error(f"Erro: Arquivo vazio: {image_path}")
                 return False
-            
+
             # Tentar abrir a imagem
             with Image.open(image_path) as img:
                 # Verificar se é uma imagem válida tentando acessar suas propriedades
                 img.verify()
-                
+
             # Reabrir para uso (verify() fecha o arquivo)
             with Image.open(image_path) as img:
                 # Verificar formato suportado
-                if img.format not in ['JPEG', 'PNG', 'WEBP', 'BMP']:
+                if img.format not in ["JPEG", "PNG", "WEBP", "BMP"]:
                     logger.error(f"Erro: Formato não suportado: {img.format}")
                     return False
-                
+
                 # Verificar dimensões mínimas
                 if img.size[0] < 10 or img.size[1] < 10:
                     logger.error(f"Erro: Imagem muito pequena: {img.size}")
                     return False
-                    
+
 
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/instagram_post_service.py (19.13 KB)
+### src/legacy/crewai_system_old/core/instagram/instagram_post_service.py (18.93 KB)
 
 ```python
-""" 
+"""
 Serviço para publicação de imagens no Instagram, com gerenciamento de containers de mídia, tratamento de limites de taxa (rate limit), persistência de estado e estatísticas de publicação.
 
 Classes:
@@ -1027,16 +1045,17 @@ Principais métodos:
         Retorna lista de containers pendentes, com informações sobre próximas tentativas e erros.
 """
 
-import os
-import time
 import json
 import logging
+import os
 import random
+import time
 from datetime import datetime
+
 from src.agent_social_media.core.instagram.base_instagram_service import (
     BaseInstagramService,
-    RateLimitError,
     InstagramAPIError,
+    RateLimitError,
 )
 
 logger = logging.getLogger("InstagramPostService")
@@ -1058,13 +1077,12 @@ class InstagramPostService(BaseInstagramService):
         self._load_state()
 
         # Attempt to process any pending containers from previous runs
-        self._process_pending_containers()
 
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/carousel_poster.py (18.26 KB)
+### src/legacy/crewai_system_old/core/instagram/carousel_poster.py (17.99 KB)
 
 ```python
 # src/instagram/carousel_poster.py
@@ -1110,17 +1128,20 @@ Uso típico:
 
 """
 
-import os
-import time
 import logging
 import mimetypes
-from typing import List, Tuple, Callable, Dict, Optional
+import os
+import time
+from collections.abc import Callable
+
 from dotenv import load_dotenv
+from src.agent_social_media.core.instagram.image_uploader import (
+    ImageUploader,
+)  # Para upload das imagens
 from src.agent_social_media.core.instagram.instagram_carousel_service import (
     InstagramCarouselService,
     RateLimitError,
 )
-from src.agent_social_media.core.instagram.image_uploader import ImageUploader  # Para upload das imagens
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -1144,15 +1165,12 @@ class CarouselError(Exception):
         super().__init__(message)
         self.error_code = error_code
         self.error_subcode = error_subcode
-        self.fb_trace_id = fb_trace_id
-        self.is_retriable = is_retriable
-
 
 ... (truncado após 80 linhas)
 
 ```
 
-### src/legacy/crewai_system_old/core/instagram/carousel_normalizer.py (17.60 KB)
+### src/legacy/crewai_system_old/core/instagram/carousel_normalizer.py (17.50 KB)
 
 ```python
 """
@@ -1181,10 +1199,11 @@ Todos os métodos são estáticos e podem ser utilizados independentemente.
 
 """
 
-import os
 import logging
+import os
 import tempfile
-from typing import List, Tuple, Optional, Dict
+from typing import Optional
+
 from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger("CarouselNormalizer")
@@ -1234,7 +1253,6 @@ class CarouselNormalizer:
             logger.error(f"Error getting aspect ratio for {image_path}: {str(e)}")
             return 0
 
-    @staticmethod
 
 ... (truncado após 80 linhas)
 
@@ -1245,54 +1263,54 @@ class CarouselNormalizer:
 
 - `src/legacy/crewai_system_old/core/instagram/moldura.png` (227.81 KB)
 - `src/legacy/crewai_system_old/core/instagram/moldura2.png` (69.17 KB)
+- `outputs/CrewAvaliadoraV2/relatorio_codebase_inicial.md` (46.76 KB)
 - `outputs/agenteinstagram/relatorio_codebase_inicial.md` (43.40 KB)
 - `outputs/groups_evo_crewai-escolher-envio-para-grupo-ou-para-meu-numero/relatorio_codebase_inicial.md` (39.82 KB)
-- `src/legacy/crew_avaliacao_completa.py` (36.38 KB)
+- `src/legacy/crew_avaliacao_completa.py` (37.36 KB)
+- `outputs/CrewAvaliadoraV2/relatorio_final_CrewAvaliadoraV2_20251204_104347.md` (37.05 KB)
 - `outputs/Continuador/relatorio_codebase_inicial.md` (29.42 KB)
-- `src/legacy/crewai_system_old/core/instagram/image_validator.py` (29.13 KB)
-- `src/legacy/crewai_system_old/core/instagram/instagram_video_processor.py` (27.36 KB)
-- `src/legacy/crewai_system_old/core/instagram/instagram_carousel_service.py` (26.77 KB)
+- `src/legacy/crewai_system_old/core/instagram/image_validator.py` (28.70 KB)
+- `src/legacy/crewai_system_old/core/instagram/instagram_video_processor.py` (26.83 KB)
+- `src/legacy/crewai_system_old/core/instagram/instagram_carousel_service.py` (26.15 KB)
 - `outputs/groups_evo_crewai-escolher-envio-para-grupo-ou-para-meu-numero/relatorio_final_groups_evo_crewai-escolher-envio-para-grupo-ou-para-meu-numero_20251102_122900.md` (23.28 KB)
-- `src/legacy/crewai_system_old/core/instagram/base_instagram_service.py` (22.55 KB)
+- `outputs/htmltopdf-batch-mac/relatorio_final_htmltopdf-batch-mac_20251122_150800.md` (22.80 KB)
+- `src/legacy/crewai_system_old/core/instagram/base_instagram_service.py` (22.30 KB)
 - `outputs/agenteinstagram/relatorio_final_agenteinstagram_20251102_143749.md` (21.67 KB)
-- `src/legacy/crewai_system_old/scripts/crew_avaliacao_completa.py` (21.28 KB)
+- `outputs/AprenderEscrita/relatorio_final_AprenderEscrita_20251122_211931.md` (21.19 KB)
 - `outputs/htmltopdf-batch-mac/relatorio_final_htmltopdf-batch-mac_20251122_150036.md` (21.12 KB)
+- `src/legacy/crewai_system_old/scripts/crew_avaliacao_completa.py` (20.87 KB)
 - `outputs/htmltopdf-batch-mac/relatorio_final_htmltopdf-batch-mac_20251122_150334.md` (20.29 KB)
 - `outputs/Continuador/relatorio_final_Continuador_20251102_101535.md` (19.91 KB)
-- `src/legacy/crewai_system_old/core/instagram/filter.py` (19.65 KB)
-- `src/legacy/crewai_system_old/core/instagram/instagram_post_service.py` (19.13 KB)
-- `src/legacy/crewai_system_old/core/instagram/carousel_poster.py` (18.26 KB)
-- `src/legacy/crewai_system_old/core/instagram/carousel_normalizer.py` (17.60 KB)
+- `src/legacy/crewai_system_old/core/instagram/filter.py` (19.04 KB)
+- `src/legacy/crewai_system_old/core/instagram/instagram_post_service.py` (18.93 KB)
+- `src/legacy/crewai_system_old/core/instagram/carousel_poster.py` (17.99 KB)
+- `src/legacy/crewai_system_old/core/instagram/carousel_normalizer.py` (17.50 KB)
 - `config/crew_config.yaml` (16.86 KB)
-- `src/legacy/crewai_system_old/core/instagram/advanced_crew_post_instagram.py` (16.18 KB)
-- `src/crew_avaliadora.py` (15.35 KB)
+- `src/legacy/crewai_system_old/core/instagram/advanced_crew_post_instagram.py` (16.04 KB)
+- `src/crew_avaliadora.py` (15.71 KB)
 - `src/legacy/crewai_system_old/templates/template_relatorio_final.md` (14.97 KB)
-- `src/legacy/crewai_system_old/core/instagram/instagram_reels_publisher.py` (14.55 KB)
-- `src/legacy/crewai_system_old/core/instagram/discover_instagram_ids.py` (13.26 KB)
+- `src/legacy/crewai_system_old/core/instagram/instagram_reels_publisher.py` (14.50 KB)
 - `README.md` (13.08 KB)
+- `src/legacy/crewai_system_old/core/instagram/discover_instagram_ids.py` (13.05 KB)
 - `templates/template_relatorio_final_v2.md` (12.98 KB)
-- `src/legacy/crewai_system_old/core/instagram/crew_post_instagram.py` (12.85 KB)
+- `src/legacy/crewai_system_old/core/instagram/crew_post_instagram.py` (12.80 KB)
 - `.github/copilot-instructions.md` (12.28 KB)
-- `PROJECT_REVIEW.md` (12.07 KB)
 - `CONTRIBUTING.md` (11.66 KB)
+- `src/streamlit_app.py` (11.33 KB)
 - `README_CREW.md` (10.62 KB)
-- `src/legacy/crewai_system_old/core/instagram/debug_carousel.py` (10.45 KB)
+- `src/legacy/crewai_system_old/core/instagram/debug_carousel.py` (10.33 KB)
 - `src/legacy/crewai_system_old/docs/README_CREW.md` (10.27 KB)
 - `docs/ARCHITECTURE.md` (10.26 KB)
-- `src/legacy/avaliacao_gemini.py` (9.98 KB)
-- `src/legacy/crewai_system_old/scripts/crew_gemini_simples.py` (9.98 KB)
 - `src/legacy/crewai_system_old/config/crew_config.yaml` (9.89 KB)
 - `src/legacy/crewai_system_old/scripts/crew_config.yaml` (9.89 KB)
-- `src/legacy/crewai_system_old/core/instagram/image_uploader.py` (9.83 KB)
-- `src/legacy/crewai_system_old/core/instagram/discover_instagram_accounts.py` (9.40 KB)
-- `.github/workflows/ci.yml` (9.36 KB)
-- `src/legacy/crewai_system_old/core/instagram/border.py` (9.22 KB)
-- `src/legacy/crewai_system_old/core/instagram/crew_factory.py` (9.10 KB)
-- `src/legacy/crewai_system_old/core/instagram/video_processor.py` (8.99 KB)
+- `src/legacy/avaliacao_gemini.py` (9.82 KB)
+- `src/legacy/crewai_system_old/scripts/crew_gemini_simples.py` (9.82 KB)
+- `src/legacy/crewai_system_old/core/instagram/image_uploader.py` (9.41 KB)
+- `.github/workflows/ci.yml` (9.37 KB)
+- `src/legacy/crewai_system_old/core/instagram/border.py` (9.14 KB)
+- `src/legacy/crewai_system_old/core/instagram/discover_instagram_accounts.py` (8.98 KB)
+- `src/legacy/crewai_system_old/core/instagram/crew_factory.py` (8.86 KB)
 - `src/legacy/crewai_system_old/docs/ENTREGA_FINAL_CREWAI.md` (8.85 KB)
-- `src/legacy/crewai_system_old/scripts/crew_health_check.py` (8.70 KB)
-- `src/legacy/crewai_system_old/core/instagram/configure_frame_fit.py` (8.64 KB)
-- `src/legacy/crewai_system_old/scripts/demo_crew_avaliacao.py` (8.59 KB)
 
 ---
 *Relatório gerado automaticamente para análise CrewAI*

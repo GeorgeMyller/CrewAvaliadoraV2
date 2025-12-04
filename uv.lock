@@ -646,6 +646,11 @@ wheels = [
     { url = "https://pkgs.safetycli.com/package/acessoai/pypi/packages/06/87/8ab9924b79025165ed7f1b04a90f9b80137d18ceae9b8e34445a8495320c/crewai-1.6.1-py3-none-any.whl", hash = "sha256:8cec403ab89183bda28b830c722b6bc22457a2151a6aa46f07730e6fe7ab2723", size = 642861, upload_time = "2025-11-29T01:58:23.232Z" },
 ]
 
+[package.optional-dependencies]
+google-genai = [
+    { name = "google-genai" },
+]
+
 [[package]]
 name = "crewai-tools"
 version = "1.6.1"
@@ -672,7 +677,7 @@ name = "crewavaliadora"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "crewai" },
+    { name = "crewai", extra = ["google-genai"] },
     { name = "crewai-tools" },
     { name = "google-generativeai" },
     { name = "guardrails-ai" },
@@ -704,7 +709,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.7.5" },
-    { name = "crewai", specifier = ">=0.157.0" },
+    { name = "crewai", extras = ["google-genai"], specifier = ">=0.157.0" },
     { name = "crewai-tools", specifier = ">=0.60.0" },
     { name = "google-generativeai", specifier = ">=0.8.5" },
     { name = "guardrails-ai", specifier = ">=0.5.0" },
@@ -1195,6 +1200,11 @@ wheels = [
     { url = "https://pkgs.safetycli.com/package/acessoai/pypi/packages/6f/d1/385110a9ae86d91cc14c5282c61fe9f4dc41c0b9f7d423c6ad77038c4448/google_auth-2.43.0-py2.py3-none-any.whl", hash = "sha256:af628ba6fa493f75c7e9dbe9373d148ca9f4399b5ea29976519e0a3848eddd16", size = 223114, upload_time = "2025-11-06T00:13:35.209Z" },
 ]
 
+[package.optional-dependencies]
+requests = [
+    { name = "requests" },
+]
+
 [[package]]
 name = "google-auth-httplib2"
 version = "0.2.1"
@@ -1206,6 +1216,25 @@ dependencies = [
 sdist = { url = "https://pkgs.safetycli.com/package/acessoai/pypi/packages/e0/83/7ef576d1c7ccea214e7b001e69c006bc75e058a3a1f2ab810167204b698b/google_auth_httplib2-0.2.1.tar.gz", hash = "sha256:5ef03be3927423c87fb69607b42df23a444e434ddb2555b73b3679793187b7de", size = 11086, upload_time = "2025-10-30T21:13:16.569Z" }
 wheels = [
     { url = "https://pkgs.safetycli.com/package/acessoai/pypi/packages/44/a7/ca23dd006255f70e2bc469d3f9f0c82ea455335bfd682ad4d677adc435de/google_auth_httplib2-0.2.1-py3-none-any.whl", hash = "sha256:1be94c611db91c01f9703e7f62b0a59bbd5587a95571c7b6fade510d648bc08b", size = 9525, upload_time = "2025-10-30T21:13:15.758Z" },
+]
+
+[[package]]
+name = "google-genai"
+version = "1.53.0"
+source = { registry = "https://pkgs.safetycli.com/repository/acessoai/project/crewavaliadorav2/pypi/simple/" }
+dependencies = [
+    { name = "anyio" },
+    { name = "google-auth", extra = ["requests"] },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "tenacity" },
+    { name = "typing-extensions" },
+    { name = "websockets" },
+]
+sdist = { url = "https://pkgs.safetycli.com/package/acessoai/pypi/packages/de/b3/36fbfde2e21e6d3bc67780b61da33632f495ab1be08076cf0a16af74098f/google_genai-1.53.0.tar.gz", hash = "sha256:938a26d22f3fd32c6eeeb4276ef204ef82884e63af9842ce3eac05ceb39cbd8d", size = 260102, upload_time = "2025-12-03T17:21:23.233Z" }
+wheels = [
+    { url = "https://pkgs.safetycli.com/package/acessoai/pypi/packages/40/f2/97fefdd1ad1f3428321bac819ae7a83ccc59f6439616054736b7819fa56c/google_genai-1.53.0-py3-none-any.whl", hash = "sha256:65a3f99e5c03c372d872cda7419f5940e723374bb12a2f3ffd5e3e56e8eb2094", size = 262015, upload_time = "2025-12-03T17:21:21.934Z" },
 ]
 
 [[package]]
