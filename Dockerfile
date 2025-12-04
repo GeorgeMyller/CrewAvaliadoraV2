@@ -20,7 +20,7 @@ RUN uv sync --frozen --no-dev
 
 # Copy source code
 COPY src/ src/
-COPY .streamlit/ .streamlit/
+
 COPY docs/ docs/
 COPY README.md .
 
