@@ -13,12 +13,17 @@ class InputGuard:
     Uses pattern matching and heuristics to detect potential attacks.
     """
 
-    # Common prompt injection patterns
-    INJECTION_PATTERNS = [
+    # Patterns that indicate an attempt to override system instructions
+    PROMPT_INJECTION_PATTERNS = [
         r"ignore previous instructions",
         r"ignore all previous instructions",
         r"forget all previous instructions",
         r"system override",
+    ]
+
+    # Patterns that look like dangerous code execution
+    # These might be valid in a codebase analysis context, so we can disable checking them
+    DANGEROUS_CODE_PATTERNS = [
         r"delete all files",
         r"rm -rf",
         r"drop table",
@@ -30,15 +35,24 @@ class InputGuard:
     ]
 
     def __init__(self):
-        self.patterns = [re.compile(p, re.IGNORECASE) for p in self.INJECTION_PATTERNS]
-        logger.info("🛡️ InputGuard initialized with basic injection patterns")
+        self.prompt_patterns = [re.compile(p, re.IGNORECASE) for p in self.PROMPT_INJECTION_PATTERNS]
+        self.code_patterns = [re.compile(p, re.IGNORECASE) for p in self.DANGEROUS_CODE_PATTERNS]
+        logger.info("🛡️ InputGuard initialized with separated patterns")
 
-    def validate_prompt(self, prompt: str) -> tuple[bool, str | None]:
+    def validate_prompt(
+        self, 
+        prompt: str, 
+        max_length: int = 10000,
+        check_code_patterns: bool = True
+    ) -> tuple[bool, str | None]:
         """
         Validates a user prompt against known injection patterns.
 
         Args:
             prompt: The user input string to validate
+            max_length: Maximum allowed length for the input (default: 10000)
+            check_code_patterns: Whether to check for dangerous code patterns (default: True)
+                               Set to False when analyzing trusted codebases.
 
         Returns:
             tuple: (is_valid, error_message)
@@ -47,14 +61,21 @@ class InputGuard:
             return False, "Input cannot be empty"
 
         # Check length
-        if len(prompt) > 10000:
-            return False, "Input too long (max 10000 chars)"
+        if len(prompt) > max_length:
+            return False, f"Input too long (max {max_length} chars)"
 
-        # Check against patterns
-        for pattern in self.patterns:
+        # Check against prompt injection patterns (ALWAYS CHECKED)
+        for pattern in self.prompt_patterns:
             if pattern.search(prompt):
                 logger.warning(f"⚠️ Potential prompt injection detected: {pattern.pattern}")
                 return False, "Potential security risk detected in input. Request blocked."
+
+        # Check against dangerous code patterns (OPTIONAL)
+        if check_code_patterns:
+            for pattern in self.code_patterns:
+                if pattern.search(prompt):
+                    logger.warning(f"⚠️ Potential dangerous code detected: {pattern.pattern}")
+                    return False, "Potential security risk detected in input. Request blocked."
 
         return True, None
 

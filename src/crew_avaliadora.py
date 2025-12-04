@@ -203,7 +203,8 @@ class CodebaseAnalysisCrewV2:
         guard = InputGuard()
 
         # Validate codebase report content (prevent injection via file content)
-        is_valid, error = guard.validate_prompt(codebase_report)
+        # Allow up to 500k chars for codebase report and disable code pattern checks (since it contains code)
+        is_valid, error = guard.validate_prompt(codebase_report, max_length=500000, check_code_patterns=False)
         if not is_valid:
             logger.error(f"⛔ Security Violation: {error}")
             raise ValueError(f"Security Violation: {error}")
