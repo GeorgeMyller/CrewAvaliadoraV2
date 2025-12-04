@@ -130,8 +130,8 @@ def run_crewai_analysis(
     base_report: str,
     output_dir: str,
     project_name: str,
-    repo_path: str = None,
-    diff_content: str = None,
+    repo_path: str | None = None,
+    diff_content: str | None = None,
 ) -> bool:
     """Executa análise CrewAI"""
     try:

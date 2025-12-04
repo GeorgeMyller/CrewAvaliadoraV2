@@ -71,7 +71,7 @@ class CodebaseAnalysisCrewV2:
 
         # Define caminho padrão da configuração relativo ao projeto
         if config_path is None:
-            config_path = Path(__file__).parent.parent / "config" / "crew_config.yaml"
+            config_path = str(Path(__file__).parent.parent / "config" / "crew_config.yaml")
 
         self.repo_path = repo_path
 
@@ -84,6 +84,9 @@ class CodebaseAnalysisCrewV2:
             raise
 
         # Cria agentes e tasks a partir da configuração
+        # Initialize tools
+        self.grep_tool: GrepTool | None = None
+
         if self.repo_path:
             self.file_read_tool = FileReadTool(root_dir=self.repo_path)
             self.directory_read_tool = DirectoryReadTool(directory=self.repo_path)
@@ -105,7 +108,7 @@ class CodebaseAnalysisCrewV2:
 
         for agent_key, agent_data in agents_config.items():
             try:
-                tools = []
+                tools: list = []
                 if "tools" in agent_data:
                     if "file_search" in agent_data["tools"]:
                         tools.append(self.file_read_tool)
@@ -191,7 +194,24 @@ class CodebaseAnalysisCrewV2:
         Returns:
             Relatório final ultra-profissional
         """
+        """
         logger.info("🚀 Iniciando análise completa da codebase...")
+
+        # Security Check
+        from src.security.guardrails import InputGuard
+        guard = InputGuard()
+        
+        # Validate codebase report content (prevent injection via file content)
+        is_valid, error = guard.validate_prompt(codebase_report)
+        if not is_valid:
+            logger.error(f"⛔ Security Violation: {error}")
+            raise ValueError(f"Security Violation: {error}")
+
+        if diff_content:
+            is_valid, error = guard.validate_prompt(diff_content)
+            if not is_valid:
+                logger.error(f"⛔ Security Violation in Diff: {error}")
+                raise ValueError(f"Security Violation in Diff: {error}")
 
         # Prepara inputs para as tasks
         inputs = {

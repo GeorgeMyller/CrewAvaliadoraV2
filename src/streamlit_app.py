@@ -138,6 +138,27 @@ def app():
             st.error("❌ Informe uma URL válida do repositório (começando com http/https).")
             return
 
+        # Security Check
+        from src.security.guardrails import InputGuard
+        guard = InputGuard()
+        
+        is_valid, error = guard.validate_prompt(repo_url)
+        if not is_valid:
+            st.error(f"⛔ Erro de Segurança: {error}")
+            return
+
+        if analyze_mode == "Incremental (Diff)":
+            if base_ref:
+                is_valid, error = guard.validate_prompt(base_ref)
+                if not is_valid:
+                    st.error(f"⛔ Erro de Segurança (Base Ref): {error}")
+                    return
+            if head_ref:
+                is_valid, error = guard.validate_prompt(head_ref)
+                if not is_valid:
+                    st.error(f"⛔ Erro de Segurança (Head Ref): {error}")
+                    return
+
         project_name = repo_url.rstrip("/").split("/")[-1].replace(".git", "")
         outputs_dir = ROOT / "outputs" / project_name
         outputs_dir.mkdir(parents=True, exist_ok=True)

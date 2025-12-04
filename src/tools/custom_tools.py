@@ -11,7 +11,7 @@ class RunLinterTool(BaseTool):
     description: str = "Executes ruff linter on the codebase to find quality issues. Returns the output of the linter."
     repo_path: str = Field(..., description="Path to the repository to analyze")
 
-    def _run(self, argument: str = None) -> str:
+    def _run(self, argument: str | None = None) -> str:
         """
         Executes ruff linter on the repository.
         The 'argument' parameter is ignored as we run on the whole repo.
@@ -46,7 +46,7 @@ class CheckDependenciesTool(BaseTool):
     description: str = "Checks dependencies for known vulnerabilities using safety or pip-audit. Returns the security report."
     repo_path: str = Field(..., description="Path to the repository to analyze")
 
-    def _run(self, argument: str = None) -> str:
+    def _run(self, argument: str | None = None) -> str:
         """
         Checks dependencies for vulnerabilities.
         """
@@ -87,7 +87,7 @@ class ExecuteTestsTool(BaseTool):
     description: str = "Executes the project's test suite using pytest. Returns the test results."
     repo_path: str = Field(..., description="Path to the repository to analyze")
 
-    def _run(self, argument: str = None) -> str:
+    def _run(self, argument: str | None = None) -> str:
         """
         Executes tests using pytest.
         """

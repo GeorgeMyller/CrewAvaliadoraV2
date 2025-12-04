@@ -28,9 +28,11 @@ IGNORE_EXTENSIONS = {".log", ".lock", ".pyc", ".pyo", ".tmp", ".cache", ".DS_Sto
 MAX_FILE_SIZE = 1024 * 1024  # 1MB
 
 
+from typing import Any
+
 def scan_directory(base_path: str) -> dict:
     """Escaneia diretório e coleta estatísticas"""
-    stats = {
+    stats: dict[str, Any] = {
         "total_files": 0,
         "total_size": 0,
         "by_extension": defaultdict(lambda: {"count": 0, "size": 0}),

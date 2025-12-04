@@ -291,7 +291,7 @@ jobs:
           fi
 
       - name: Slack notification on failure
-        if: steps.status.outputs.status == 'failure'
+        if: steps.status.outputs.status == 'failure' && secrets.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1.27.0
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
@@ -325,7 +325,7 @@ jobs:
             }
 
       - name: Slack notification on success
-        if: steps.status.outputs.status == 'success' && github.event_name == 'push'
+        if: steps.status.outputs.status == 'success' && github.event_name == 'push' && secrets.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1.27.0
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
