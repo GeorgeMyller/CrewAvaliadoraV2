@@ -28,8 +28,8 @@ Thank you for your interest in contributing to CrewAvaliadora! This document pro
 
 ### 🇧🇷 Pré-requisitos | 🇺🇸 Prerequisites
 
-- Python 3.12 ou superior | Python 3.12 or higher
-- uv package manager
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) package manager
 - Git
 - Uma chave API do Gemini | A Gemini API key
 
@@ -41,12 +41,15 @@ git clone <repository-url>
 cd CrewAvaliadora
 
 # 🇧🇷 Instalar dependências | 🇺🇸 Install dependencies
-uv sync --all-extras --dev
+uv sync --dev
 
 # 🇧🇷 Copiar e configurar ambiente | 🇺🇸 Copy and configure environment
 cp .env.example .env
 # 🇧🇷 Edite .env e adicione sua GEMINI_API_KEY
 # 🇺🇸 Edit .env and add your GEMINI_API_KEY
+
+# 🇧🇷 Instalar hooks pre-commit | 🇺🇸 Install pre-commit hooks
+uv run pre-commit install
 
 # 🇧🇷 Executar testes para verificar instalação | 🇺🇸 Run tests to verify setup
 uv run pytest tests/ -v
@@ -156,35 +159,6 @@ git push origin feature/nome-da-sua-funcionalidade
 - Test both success and failure cases
 - Mock external API calls
 
-**🇧🇷 Exemplo | 🇺🇸 Example:**
-
-```python
-def test_setup_gemini_with_api_key():
-    """
-    🇧🇷 Teste se setup_gemini configura corretamente com chave API válida.
-    🇺🇸 Test that setup_gemini configures correctly with valid API key.
-    """
-    with patch.dict(os.environ, {"GEMINI_API_KEY": "test_key_123"}):
-        model = setup_gemini()
-        assert model is not None
-```
-
-### 🇧🇷 Executando Testes | 🇺🇸 Running Tests
-
-```bash
-# 🇧🇷 Todos os testes | 🇺🇸 All tests
-uv run pytest
-
-# 🇧🇷 Com saída verbosa | 🇺🇸 With verbose output
-uv run pytest -v
-
-# 🇧🇷 Teste específico | 🇺🇸 Specific test
-uv run pytest tests/test_basic.py::test_project_structure
-
-# 🇧🇷 Pular testes lentos | 🇺🇸 Skip slow tests
-uv run pytest -m "not slow"
-```
-
 ## 📚 Documentação | Documentation
 
 ### 🇧🇷 Documentação de Código | 🇺🇸 Code Documentation
@@ -198,47 +172,6 @@ uv run pytest -m "not slow"
 - Add docstrings to all public functions and classes
 - Use Google-style docstrings
 - Include type hints
-
-**🇧🇷 Exemplo | 🇺🇸 Example:**
-
-```python
-def analyze_file(file_path: Path, max_chars: int = 6000) -> str:
-    """
-    🇧🇷 Analisa um único arquivo usando a API Gemini.
-    🇺🇸 Analyze a single file using Gemini API.
-    
-    Args:
-        file_path: 🇧🇷 Caminho para o arquivo a analisar
-                   🇺🇸 Path to the file to analyze
-        max_chars: 🇧🇷 Máximo de caracteres a ler do arquivo
-                   🇺🇸 Maximum characters to read from file
-        
-    Returns:
-        🇧🇷 Texto de análise do Gemini
-        🇺🇸 Analysis text from Gemini
-        
-    Raises:
-        FileNotFoundError: 🇧🇷 Se o arquivo não existir
-                           🇺🇸 If file doesn't exist
-        ValueError: 🇧🇷 Se o arquivo for muito grande
-                    🇺🇸 If file is too large
-    """
-    pass
-```
-
-### 🇧🇷 Atualizações de README | 🇺🇸 README Updates
-
-**🇧🇷 Atualize arquivos README relevantes quando:**
-- Adicionar novas funcionalidades
-- Alterar opções de configuração
-- Modificar passos de instalação
-- Adicionar dependências
-
-**🇺🇸 Update relevant README files when:**
-- Adding new features
-- Changing configuration options
-- Modifying installation steps
-- Adding dependencies
 
 ## 🏗️ Diretrizes de Arquitetura | Architecture Guidelines
 
@@ -271,67 +204,6 @@ CrewAvaliadora/
 - Avoid duplication
 - Use type hints
 
-### 🇧🇷 Tratamento de Erros | 🇺🇸 Error Handling
-
-**🇧🇷 Português:**
-- Use tipos de exceção específicos
-- Forneça mensagens de erro úteis
-- Registre erros apropriadamente
-- Limpe recursos em blocos finally
-
-**🇺🇸 English:**
-- Use specific exception types
-- Provide helpful error messages
-- Log errors appropriately
-- Clean up resources in finally blocks
-
-**🇧🇷 Exemplo | 🇺🇸 Example:**
-
-```python
-try:
-    result = api_call()
-except APIError as e:
-    logger.error(f"🇧🇷 Chamada API falhou | 🇺🇸 API call failed: {e}")
-    raise
-except Exception as e:
-    logger.exception("🇧🇷 Erro inesperado | 🇺🇸 Unexpected error")
-    raise
-finally:
-    cleanup_resources()
-```
-
-## 🔒 Segurança | Security
-
-**🇧🇷 Português:**
-- Nunca faça commit de chaves API ou segredos
-- Use variáveis de ambiente para dados sensíveis
-- Valide todas as entradas do usuário
-- Sanitize caminhos de arquivo
-- Revise dependências quanto a vulnerabilidades
-
-**🇺🇸 English:**
-- Never commit API keys or secrets
-- Use environment variables for sensitive data
-- Validate all user inputs
-- Sanitize file paths
-- Review dependencies for vulnerabilities
-
-## 📊 Performance | Desempenho
-
-**🇧🇷 Português:**
-- Respeite limites de taxa da API
-- Rastreie custos de API
-- Cache resultados quando apropriado
-- Use operações assíncronas para I/O
-- Profile antes de otimizar
-
-**🇺🇸 English:**
-- Respect API rate limits
-- Track API costs
-- Cache results when appropriate
-- Use async operations for I/O
-- Profile before optimizing
-
 ## 🐛 Reportando Issues | Reporting Issues
 
 **🇧🇷 Ao reportar issues, inclua:**
@@ -339,7 +211,6 @@ finally:
 - Sistema operacional
 - Passos para reproduzir
 - Comportamento esperado vs real
-- Mensagens de erro e stack traces
 - Logs relevantes
 
 **🇺🇸 When reporting issues, include:**
@@ -347,46 +218,7 @@ finally:
 - Operating system
 - Steps to reproduce
 - Expected vs actual behavior
-- Error messages and stack traces
 - Relevant logs
-
-## 💡 Solicitações de Funcionalidades | Feature Requests
-
-**🇧🇷 Para solicitações de funcionalidades:**
-- Descreva o problema que está tentando resolver
-- Explique sua solução proposta
-- Discuta alternativas consideradas
-- Note quaisquer mudanças que quebrem compatibilidade
-
-**🇺🇸 For feature requests:**
-- Describe the problem you're trying to solve
-- Explain your proposed solution
-- Discuss alternatives considered
-- Note any breaking changes
-
-## 📞 Obtendo Ajuda | Getting Help
-
-**🇧🇷 Português:**
-- Verifique a documentação existente
-- Pesquise issues fechadas
-- Pergunte em discussões
-- Marque mantenedores se urgente
-
-**🇺🇸 English:**
-- Check existing documentation
-- Search closed issues
-- Ask in discussions
-- Tag maintainers if urgent
-
-## 🏆 Reconhecimento | Recognition
-
-**🇧🇷 Contribuidores serão:**
-
-**🇺🇸 Contributors will be:**
-
-- 🇧🇷 Listados em CONTRIBUTORS.md | 🇺🇸 Listed in CONTRIBUTORS.md
-- 🇧🇷 Mencionados nas notas de versão | 🇺🇸 Mentioned in release notes
-- 🇧🇷 Creditados na documentação | 🇺🇸 Credited in documentation
 
 ---
 

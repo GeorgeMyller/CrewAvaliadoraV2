@@ -39,7 +39,7 @@ CrewAvaliadora is a comprehensive codebase analysis tool that uses artificial in
 ### 🇧🇷 Pré-requisitos | 🇺🇸 Prerequisites
 
 - Python 3.12+
-- uv package manager
+- [uv](https://github.com/astral-sh/uv) package manager
 - Google Gemini API key
 
 ### 🇧🇷 Instalação | 🇺🇸 Installation
@@ -75,34 +75,26 @@ cp .env.example .env
 ```bash
 # 🇧🇷 Execute verificação de saúde para confirmar configuração
 # 🇺🇸 Run health check to verify everything is configured correctly
-uv run python utils/health_check.py
-
-# 🇧🇷 Isto verificará:
-# 🇺🇸 This will check:
-# - Python version / Versão do Python
-# - Required packages / Pacotes necessários
-# - Environment variables / Variáveis de ambiente
-# - Project structure / Estrutura do projeto
-# - Gemini API connection / Conexão com API Gemini
+uv run python src/utils/health_check.py
 ```
 
 ### 🇧🇷 Executar Análise | 🇺🇸 Run Analysis
 
 ```bash
-# 🇧🇷 Analisar diretório atual (limitado a 3 arquivos para teste)
-# 🇺🇸 Analyze current directory (limited to 3 files for testing)
-uv run python crew_avaliacao_completa.py
+# 🇧🇷 Iniciar aplicação Streamlit (Interface Gráfica)
+# 🇺🇸 Start Streamlit application (GUI)
+uv run streamlit run src/streamlit_app.py
 
-# 🇧🇷 Gerar relatório básico
-# 🇺🇸 Generate basic report
-uv run python gerar_relatorio.py .
+# 🇧🇷 Ou executar via linha de comando
+# 🇺🇸 Or run via command line
+uv run python src/main.py
 ```
 
 ## 📊 Relatórios Gerados | Generated Reports
 
 **🇧🇷 Português:**
 
-Os relatórios são salvos em `outputs/reports/` e incluem:
+Os relatórios são salvos em `outputs/` e incluem:
 
 - Resumo executivo com pontuação geral de qualidade
 - Análise de arquitetura e recomendações
@@ -117,7 +109,7 @@ Os relatórios são salvos em `outputs/reports/` e incluem:
 
 **🇺🇸 English:**
 
-Reports are saved to `outputs/reports/` and include:
+Reports are saved to `outputs/` and include:
 
 - Executive summary with overall quality score
 - Architecture analysis and recommendations
@@ -135,24 +127,17 @@ Reports are saved to `outputs/reports/` and include:
 ```
 CrewAvaliadora/
 ├── src/
-│   ├── crew_avaliadora.py       # 🇧🇷 Sistema principal | 🇺🇸 Main system
-│   └── legacy/                  # 🇧🇷 Código arquivado | 🇺🇸 Archived code
-├── config/
-│   └── crew_config.yaml         # 🇧🇷 Config agentes | 🇺🇸 Agent config
-├── utils/                       # 🇧🇷 Módulos utilitários | 🇺🇸 Utility modules
-│   ├── api_cost_tracker.py      # 🇧🇷 Rastreamento custos | 🇺🇸 Cost tracking
-│   ├── config_loader.py         # 🇧🇷 Carregador YAML | 🇺🇸 YAML loader
-│   ├── health_check.py          # 🇧🇷 Diagnósticos | 🇺🇸 Diagnostics
-│   └── template_engine.py       # 🇧🇷 Renderização | 🇺🇸 Report rendering
-├── templates/
-│   └── template_relatorio_final_v2.md  # 🇧🇷 Template Jinja2 | 🇺🇸 Jinja2 template
+│   ├── analyze_repo.py          # 🇧🇷 Lógica de análise | 🇺🇸 Analysis logic
+│   ├── streamlit_app.py         # 🇧🇷 Interface Web | 🇺🇸 Web Interface
+│   ├── config/                  # 🇧🇷 Configurações | 🇺🇸 Configuration
+│   ├── crew/                    # 🇧🇷 Definição dos Agentes | 🇺🇸 Agent Definitions
+│   ├── security/                # 🇧🇷 Segurança | 🇺🇸 Security
+│   ├── tools/                   # 🇧🇷 Ferramentas | 🇺🇸 Tools
+│   └── utils/                   # 🇧🇷 Utilitários | 🇺🇸 Utilities
+├── docs/                        # 🇧🇷 Documentação | 🇺🇸 Documentation
 ├── outputs/                     # 🇧🇷 Relatórios gerados | 🇺🇸 Generated reports
-│   ├── reports/                 # 🇧🇷 Relatórios finais | 🇺🇸 Final reports
-│   ├── analysis/                # 🇧🇷 Dados brutos | 🇺🇸 Raw data
-│   ├── logs/                    # 🇧🇷 Logs execução | 🇺🇸 Execution logs
-│   └── metadata/                # 🇧🇷 Métricas API | 🇺🇸 API metrics
 ├── tests/                       # 🇧🇷 Testes | 🇺🇸 Test suite
-└── docs/                        # 🇧🇷 Documentação | 🇺🇸 Documentation
+└── pyproject.toml               # 🇧🇷 Dependências | 🇺🇸 Dependencies
 ```
 
 ## 🧪 Testes | Testing
@@ -162,9 +147,6 @@ CrewAvaliadora/
 # Executar todos os testes
 uv run pytest tests/ -v
 
-# Executar arquivo de teste específico
-uv run pytest tests/test_basic.py -v
-
 # Com cobertura
 uv run pytest --cov=src tests/
 ```
@@ -173,9 +155,6 @@ uv run pytest --cov=src tests/
 ```bash
 # Run all tests
 uv run pytest tests/ -v
-
-# Run specific test file
-uv run pytest tests/test_basic.py -v
 
 # With coverage
 uv run pytest --cov=src tests/
@@ -209,14 +188,14 @@ uv run mypy . --ignore-missing-imports
 ## 📝 Documentação | Documentation
 
 **🇧🇷 Português:**
-- [README_CREW.md](README_CREW.md) - Documentação detalhada do sistema CrewAI
+- [docs/README.md](docs/README.md) - Índice da documentação
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Arquitetura do sistema
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Diretrizes de contribuição
-- [PROJECT_REVIEW.md](PROJECT_REVIEW.md) - Revisão do projeto
 
 **🇺🇸 English:**
-- [README_CREW.md](README_CREW.md) - Detailed CrewAI system documentation
+- [docs/README.md](docs/README.md) - Documentation index
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
-- [PROJECT_REVIEW.md](PROJECT_REVIEW.md) - Project review
 
 ## 💰 Gerenciamento de Custos API | API Cost Management
 
@@ -226,7 +205,6 @@ O sistema inclui rastreamento de custos integrado:
 - Limite padrão: $5 USD por execução
 - Máximo de 100 chamadas de API por execução
 - Limitação de taxa: 60 chamadas/minuto
-- Métricas de custo salvas em `outputs/metadata/`
 
 Configure limites no `.env`:
 ```bash
@@ -240,7 +218,6 @@ The system includes built-in cost tracking:
 - Default limit: $5 USD per run
 - Maximum 100 API calls per run
 - Rate limiting: 60 calls/minute
-- Cost metrics saved to `outputs/metadata/`
 
 Configure limits in `.env`:
 ```bash
@@ -261,118 +238,6 @@ MAX_COST_PER_RUN_USD=5.00
 - Pre-commit hooks scan for secrets
 - Bandit security scanning in CI/CD
 - Input validation and sanitization
-
-## 📈 Pipeline CI/CD
-
-**🇧🇷 Português:**
-
-Testes automatizados a cada push:
-- Testes unitários com pytest
-- Linting de código com ruff
-- Verificação de tipos com mypy
-- Scanning de segurança com bandit
-- Relatório de cobertura
-
-**🇺🇸 English:**
-
-Automated testing on every push:
-- Unit tests with pytest
-- Code linting with ruff
-- Type checking with mypy
-- Security scanning with bandit
-- Coverage reporting
-
-## 🤝 Os 6 Agentes IA | The 6 AI Agents
-
-| 🇧🇷 Português | 🇺🇸 English | 🎯 Foco | Focus |
-|---------------|-------------|---------|-------|
-| 🏗️ **Arquiteto de Software** | **Software Architect** | Padrões arquiteturais, escalabilidade, integrações | Architecture patterns, scalability, integrations |
-| 🧪 **Engenheiro QA** | **QA Engineer** | Cobertura de testes, qualidade, vulnerabilidades | Test coverage, quality, vulnerabilities |
-| 📄 **Redator Técnico** | **Technical Writer** | Qualidade da documentação, guias | Documentation quality, guides |
-| 🚀 **Gerente de Produto** | **Product Manager** | Prontidão de mercado, viabilidade comercial | Market readiness, business viability |
-| ⚖️ **Especialista Legal** | **Legal Specialist** | Conformidade LGPD/GDPR, riscos | LGPD/GDPR compliance, risks |
-| 🤖 **Engenheiro de IA** | **AI Engineer** | Otimização LLM, engenharia de prompts | LLM optimization, prompt engineering |
-
-## 📊 Exemplo de Saída | Example Output
-
-```markdown
-# 🇧🇷 Resumo Executivo | 🇺🇸 Executive Summary
-Pontuação Geral de Qualidade | Overall Quality Score: 78/100
-
-**🇧🇷 Pontos Fortes | 🇺🇸 Strengths:**
-- Integração API bem documentada | Well-documented API integration
-- Arquitetura modular de agentes | Modular agent architecture
-- Boa manipulação de erros | Good error handling
-
-**🇧🇷 Problemas Críticos | 🇺🇸 Critical Issues:**
-1. Falta cobertura de testes | Missing test coverage (Prioridade | Priority: HIGH)
-2. Sem limitação de taxa | No rate limiting (Prioridade | Priority: HIGH)
-...
-```
-
-## 🔧 Configuração | Configuration
-
-**🇧🇷 Variáveis de ambiente principais:**
-
-**🇺🇸 Key environment variables:**
-
-```bash
-# 🇧🇷 Obrigatório | 🇺🇸 Required
-GEMINI_API_KEY=your_api_key_here
-
-# 🇧🇷 Opcional | 🇺🇸 Optional
-MODEL=gemini/gemini-2.5-flash
-MAX_FILES_TO_ANALYZE=300
-MAX_FILE_SIZE_BYTES=2097152
-OUTPUT_DIR=outputs/reports
-LOG_LEVEL=INFO
-```
-
-## 📦 Dependências | Dependencies
-
-**🇧🇷 Principais:**
-
-**🇺🇸 Core:**
-
-- `crewai>=0.157.0` - Multi-agent framework
-- `google-generativeai>=0.8.5` - Gemini API
-- `python-dotenv>=1.1.1` - Environment management
-
-**🇧🇷 Desenvolvimento:**
-
-**🇺🇸 Dev:**
-
-- `pytest>=7.4.0` - Testing framework
-- `ruff>=0.1.9` - Linting and formatting
-- `mypy>=1.7.0` - Type checking
-- `pre-commit>=3.5.0` - Git hooks
-
-## 🐛 Resolução de Problemas | Troubleshooting
-
-### 🇧🇷 Erro de Chave API | 🇺🇸 API Key Error
-
-```bash
-# 🇧🇷 Verificar se a chave está definida | 🇺🇸 Verify key is set
-echo $GEMINI_API_KEY
-
-# 🇧🇷 Ou verificar arquivo .env | 🇺🇸 Or check .env file
-cat .env
-```
-
-### 🇧🇷 Erros de Importação | 🇺🇸 Import Errors
-
-```bash
-# 🇧🇷 Reinstalar dependências | 🇺🇸 Reinstall dependencies
-uv sync --reinstall
-```
-
-### 🇧🇷 Problemas de Permissão | 🇺🇸 Permission Issues
-
-```bash
-# 🇧🇷 Garantir que diretórios de saída existam
-# 🇺🇸 Ensure output directories exist
-mkdir -p outputs/reports outputs/metadata
-```
 
 ## 📄 Licença | License
 
