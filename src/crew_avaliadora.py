@@ -360,7 +360,7 @@ def main():
     print()
 
     try:
-        result = crew.analyze_codebase(codebase_report, output_file)
+        crew.analyze_codebase(codebase_report, output_file)
 
         # Valida que o relatório foi gerado corretamente
         if os.path.exists(output_file):

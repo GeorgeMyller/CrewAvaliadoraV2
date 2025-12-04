@@ -151,7 +151,7 @@ def run_crewai_analysis(
 
         # Executa análise
         crew = CodebaseAnalysisCrewV2(repo_path=repo_path)
-        result = crew.analyze_codebase(codebase_report, output_file, diff_content=diff_content)
+        crew.analyze_codebase(codebase_report, output_file, diff_content=diff_content)
 
         if os.path.exists(output_file):
             file_size = os.path.getsize(output_file)
