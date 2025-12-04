@@ -1,5 +1,7 @@
 import pytest
+
 from src.security.guardrails import InputGuard
+
 
 class TestInputGuard:
     @pytest.fixture

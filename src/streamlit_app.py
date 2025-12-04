@@ -140,8 +140,9 @@ def app():
 
         # Security Check
         from src.security.guardrails import InputGuard
+
         guard = InputGuard()
-        
+
         is_valid, error = guard.validate_prompt(repo_url)
         if not is_valid:
             st.error(f"⛔ Erro de Segurança: {error}")

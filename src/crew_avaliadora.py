@@ -194,13 +194,14 @@ class CodebaseAnalysisCrewV2:
         Returns:
             Relatório final ultra-profissional
         """
-        """
+
         logger.info("🚀 Iniciando análise completa da codebase...")
 
         # Security Check
         from src.security.guardrails import InputGuard
+
         guard = InputGuard()
-        
+
         # Validate codebase report content (prevent injection via file content)
         is_valid, error = guard.validate_prompt(codebase_report)
         if not is_valid:

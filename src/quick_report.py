@@ -9,6 +9,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # Configurações
 IGNORE_FOLDERS = {
@@ -27,8 +28,6 @@ IGNORE_FOLDERS = {
 IGNORE_EXTENSIONS = {".log", ".lock", ".pyc", ".pyo", ".tmp", ".cache", ".DS_Store"}
 MAX_FILE_SIZE = 1024 * 1024  # 1MB
 
-
-from typing import Any
 
 def scan_directory(base_path: str) -> dict:
     """Escaneia diretório e coleta estatísticas"""
