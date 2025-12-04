@@ -133,6 +133,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/crew_test
           REDIS_URL: redis://localhost:6379/0
+          PYTHONPATH: .
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
