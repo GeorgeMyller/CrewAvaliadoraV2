@@ -275,6 +275,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs: [ lint, security, test, type-check, build, docker ]
+    env:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
     steps:
       - name: Determine job status
@@ -291,7 +293,7 @@ jobs:
           fi
 
       - name: Slack notification on failure
-        if: steps.status.outputs.status == 'failure' && secrets.SLACK_WEBHOOK != ''
+        if: steps.status.outputs.status == 'failure' && env.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1.27.0
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
@@ -325,7 +327,7 @@ jobs:
             }
 
       - name: Slack notification on success
-        if: steps.status.outputs.status == 'success' && github.event_name == 'push' && secrets.SLACK_WEBHOOK != ''
+        if: steps.status.outputs.status == 'success' && github.event_name == 'push' && env.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1.27.0
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
