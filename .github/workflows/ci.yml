@@ -35,11 +35,9 @@ jobs:
 
       - name: Run Ruff check
         run: uv run ruff check src/ tests/
-        continue-on-error: true
 
       - name: Run Ruff format check
         run: uv run ruff format --check src/ tests/
-        continue-on-error: true
 
   security:
     name: 🔐 Security Checks
@@ -65,11 +63,9 @@ jobs:
 
       - name: Run Bandit security check
         run: uv run bandit -r src/ -x src/legacy/ -f json -o bandit-report.json
-        continue-on-error: true
 
       - name: Run Safety check for dependencies
         run: uv run safety check --json
-        continue-on-error: true
 
       - name: Check for secrets
         uses: trufflesecurity/trufflehog@main
@@ -166,7 +162,6 @@ jobs:
 
       - name: Run mypy type checker
         run: uv run mypy src/ --exclude src/legacy/ --ignore-missing-imports
-        continue-on-error: true
 
   build:
     name: 🏗️ Build & Artifacts
