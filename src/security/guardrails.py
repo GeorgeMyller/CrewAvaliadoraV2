@@ -42,7 +42,7 @@ class InputGuard:
     def validate_prompt(
         self, 
         prompt: str, 
-        max_length: int = 10000,
+        max_length: int = 100000,
         check_code_patterns: bool = True
     ) -> tuple[bool, str | None]:
         """
