@@ -40,8 +40,8 @@ class InputGuard:
         logger.info("🛡️ InputGuard initialized with separated patterns")
 
     def validate_prompt(
-        self, 
-        prompt: str, 
+        self,
+        prompt: str,
         max_length: int = 100000,
         check_code_patterns: bool = True
     ) -> tuple[bool, str | None]:
