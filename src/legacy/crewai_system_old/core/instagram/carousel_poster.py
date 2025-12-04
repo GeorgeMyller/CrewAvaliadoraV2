@@ -41,17 +41,20 @@ Uso típico:
 
 """
 
-import os
-import time
 import logging
 import mimetypes
-from typing import List, Tuple, Callable, Dict, Optional
+import os
+import time
+from collections.abc import Callable
+
 from dotenv import load_dotenv
+from src.agent_social_media.core.instagram.image_uploader import (
+    ImageUploader,
+)  # Para upload das imagens
 from src.agent_social_media.core.instagram.instagram_carousel_service import (
     InstagramCarouselService,
     RateLimitError,
 )
-from src.agent_social_media.core.instagram.image_uploader import ImageUploader  # Para upload das imagens
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -144,8 +147,8 @@ class ServerError(CarouselError):
 
 
 def validate_carousel_images(
-    image_paths: List[str], validator_func: Callable[[str], bool]
-) -> Tuple[List[str], List[str]]:
+    image_paths: list[str], validator_func: Callable[[str], bool]
+) -> tuple[list[str], list[str]]:
     """Valida uma lista de imagens para o carrossel.
 
     Args:
@@ -189,8 +192,8 @@ def validate_carousel_images(
 
 
 def upload_carousel_images(
-    image_paths: List[str], progress_callback: Callable[[int, int], None] = None
-) -> Tuple[bool, List[Dict[str, str]], List[str]]:
+    image_paths: list[str], progress_callback: Callable[[int, int], None] = None
+) -> tuple[bool, list[dict[str, str]], list[str]]:
     """Faz upload de uma lista de imagens para o Imgur (ou outro serviço).
 
     Args:
@@ -219,13 +222,11 @@ def upload_carousel_images(
             progress_callback(index + 1, total_images)  # Chama o callback de progresso
         try:
             # Log before upload attempt to track any issues
-            logger.info(
-                f"Attempting to upload image {index+1}/{total_images}: {image_path}"
-            )
+            logger.info(f"Attempting to upload image {index + 1}/{total_images}: {image_path}")
             result = uploader.upload_from_path(image_path)
             uploaded_images.append(result)
             uploaded_urls.append(result["url"])
-            logger.info(f"Uploaded image {index+1}/{total_images}: {result['url']}")
+            logger.info(f"Uploaded image {index + 1}/{total_images}: {result['url']}")
         except Exception as e:
             failed_images.append(image_path)
             logger.error(f"Error uploading image {image_path}: {str(e)}")
@@ -238,7 +239,7 @@ def upload_carousel_images(
     return success, uploaded_images, uploaded_urls
 
 
-def cleanup_uploaded_images(uploaded_images: List[Dict[str, str]]):
+def cleanup_uploaded_images(uploaded_images: list[dict[str, str]]):
     """Exclui imagens que foram enviadas para o Imgur (ou outro serviço)."""
     uploader = ImageUploader()
     success_count = 0
@@ -251,16 +252,14 @@ def cleanup_uploaded_images(uploaded_images: List[Dict[str, str]]):
                 success_count += 1
             except Exception as e:
                 fail_count += 1
-                logger.error(
-                    f"Error deleting image {image_info.get('id', 'unknown')}: {e}"
-                )
+                logger.error(f"Error deleting image {image_info.get('id', 'unknown')}: {e}")
 
     logger.info(f"Image cleanup: {success_count} deleted, {fail_count} failed")
 
 
 def post_carousel_to_instagram(
-    image_paths: List[str], caption: str, image_urls: List[str] = None
-) -> Optional[str]:
+    image_paths: list[str], caption: str, image_urls: list[str] = None
+) -> str | None:
     """
     Publica um carrossel no Instagram. Esta função *não* faz upload das imagens,
     assume que elas já foram enviadas e que você tem as URLs.
@@ -303,9 +302,7 @@ def post_carousel_to_instagram(
 
     # Truncate caption if needed
     if len(caption) > 2200:
-        logger.warning(
-            f"Caption too long ({len(caption)} chars), truncating to 2200 chars"
-        )
+        logger.warning(f"Caption too long ({len(caption)} chars), truncating to 2200 chars")
         caption = caption[:2197] + "..."
 
     # Create container with retry logic
@@ -315,18 +312,16 @@ def post_carousel_to_instagram(
 
     for attempt in range(max_retries):
         try:
-            logger.info(
-                f"Attempt {attempt+1}/{max_retries} to create carousel container..."
-            )
+            logger.info(f"Attempt {attempt + 1}/{max_retries} to create carousel container...")
             container_id = service.create_carousel_container(image_urls, caption)
 
             if container_id:
                 logger.info(
-                    f"Carousel container created successfully on attempt {attempt+1}: {container_id}"
+                    f"Carousel container created successfully on attempt {attempt + 1}: {container_id}"
                 )
                 break
             else:
-                logger.warning(f"Attempt {attempt+1} failed. Container returned null.")
+                logger.warning(f"Attempt {attempt + 1} failed. Container returned null.")
                 if attempt < max_retries - 1:
                     logger.info(f"Waiting {retry_delay}s before next attempt...")
                     time.sleep(retry_delay)
@@ -335,7 +330,7 @@ def post_carousel_to_instagram(
         except RateLimitError as e:
             retry_after = getattr(e, "retry_seconds", retry_delay)
             logger.warning(
-                f"Rate limit exceeded while creating container (attempt {attempt+1}). Waiting {retry_after}s..."
+                f"Rate limit exceeded while creating container (attempt {attempt + 1}). Waiting {retry_after}s..."
             )
 
             if attempt < max_retries - 1:
@@ -347,7 +342,7 @@ def post_carousel_to_instagram(
                     retry_after=retry_after,
                 )
         except Exception as e:
-            error_msg = f"Error creating carousel container (attempt {attempt+1}): {e}"
+            error_msg = f"Error creating carousel container (attempt {attempt + 1}): {e}"
             logger.error(error_msg)
 
             if hasattr(e, "response") and hasattr(e.response, "json"):
@@ -365,14 +360,10 @@ def post_carousel_to_instagram(
                             )
                     elif error_code in [10, 200, 203, 803]:
                         if attempt >= max_retries - 1:
-                            raise PermissionError(
-                                error_msg, error_code, error_subcode, fb_trace_id
-                            )
+                            raise PermissionError(error_msg, error_code, error_subcode, fb_trace_id)
                     elif error_code in [1, 2, 4, 17, 341]:
                         if attempt >= max_retries - 1:
-                            raise ServerError(
-                                error_msg, error_code, error_subcode, fb_trace_id
-                            )
+                            raise ServerError(error_msg, error_code, error_subcode, fb_trace_id)
                     elif error_code == 2207024:  # Carousel validation error
                         if attempt >= max_retries - 1:
                             raise CarouselCreationError(
@@ -399,9 +390,7 @@ def post_carousel_to_instagram(
     # Wait for container processing
     status = service.wait_for_container_status(container_id)
     if status != "FINISHED":
-        error_msg = (
-            f"Carousel container did not finish processing. Final status: {status}"
-        )
+        error_msg = f"Carousel container did not finish processing. Final status: {status}"
         logger.error(error_msg)
         raise CarouselCreationError(error_msg)
 
@@ -411,16 +400,16 @@ def post_carousel_to_instagram(
 
     for attempt in range(max_retries):
         try:
-            logger.info(f"Attempt {attempt+1}/{max_retries} to publish carousel...")
+            logger.info(f"Attempt {attempt + 1}/{max_retries} to publish carousel...")
             post_id = service.publish_carousel(container_id)
 
             if post_id:
                 logger.info(
-                    f"Carousel published successfully on attempt {attempt+1}! ID: {post_id}"
+                    f"Carousel published successfully on attempt {attempt + 1}! ID: {post_id}"
                 )
                 break
             else:
-                logger.warning(f"Attempt {attempt+1} failed. Null response from API.")
+                logger.warning(f"Attempt {attempt + 1} failed. Null response from API.")
                 if attempt < max_retries - 1:
                     logger.info(f"Waiting {retry_delay}s before next attempt...")
                     time.sleep(retry_delay)
@@ -429,7 +418,7 @@ def post_carousel_to_instagram(
         except RateLimitError as e:
             retry_after = getattr(e, "retry_seconds", retry_delay)
             logger.warning(
-                f"Rate limit exceeded while publishing (attempt {attempt+1}). Waiting {retry_after}s..."
+                f"Rate limit exceeded while publishing (attempt {attempt + 1}). Waiting {retry_after}s..."
             )
 
             if attempt < max_retries - 1:
@@ -441,7 +430,7 @@ def post_carousel_to_instagram(
                     retry_after=retry_after,
                 )
         except Exception as e:
-            error_msg = f"Error publishing carousel (attempt {attempt+1}): {e}"
+            error_msg = f"Error publishing carousel (attempt {attempt + 1}): {e}"
             logger.error(error_msg)
 
             if hasattr(e, "response") and hasattr(e.response, "json"):
@@ -471,9 +460,7 @@ def post_carousel_to_instagram(
                 )
 
     if not post_id:
-        raise CarouselPublishError(
-            f"Failed to publish carousel after {max_retries} attempts"
-        )
+        raise CarouselPublishError(f"Failed to publish carousel after {max_retries} attempts")
 
     logger.info(f"Carousel published successfully! ID: {post_id}")
     return post_id

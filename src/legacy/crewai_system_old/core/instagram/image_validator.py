@@ -1,4 +1,4 @@
-""" 
+"""
 Este módulo fornece a classe InstagramImageValidator para validação e processamento de imagens conforme os requisitos oficiais do Instagram.
 Funcionalidades principais:
 - Validação de imagens para diferentes tipos de postagens (feed, stories, reels, carrossel), incluindo checagem de dimensões, proporção, formato e tamanho do arquivo.
@@ -15,11 +15,11 @@ Uso recomendado para automação de publicações, validação prévia de conte�
 
 """
 
+import logging
+import os
+import time
 
 from PIL import Image
-import os
-import logging
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,9 @@ class InstagramImageValidator:
     MIN_ASPECT_RATIO = 0.8  # 4:5 portrait orientation (1080x1350)
     MAX_ASPECT_RATIO = 1.91  # Landscape orientation (1080x566)
     SQUARE_RATIO = 1.0  # 1:1 square (1080x1080) - SEMPRE ACEITO
-    
+
     # Stories e Reels: 9:16 (720x1280 mínimo)
-    STORIES_RATIO = 9/16  # 0.5625 para stories/reels
+    STORIES_RATIO = 9 / 16  # 0.5625 para stories/reels
     STORIES_MIN_WIDTH = 720
     STORIES_MIN_HEIGHT = 1280
 
@@ -90,7 +90,7 @@ class InstagramImageValidator:
         for i, img_path in enumerate(image_paths):
             try:
                 if not os.path.exists(img_path):
-                    invalid_images.append(f"Imagem {i+1}: arquivo não encontrado")
+                    invalid_images.append(f"Imagem {i + 1}: arquivo não encontrado")
                     continue
 
                 with Image.open(img_path) as img:
@@ -99,13 +99,13 @@ class InstagramImageValidator:
                     # Check dimensions
                     if width < cls.MIN_IMG_SIZE or height < cls.MIN_IMG_SIZE:
                         invalid_images.append(
-                            f"Imagem {i+1}: tamanho muito pequeno ({width}x{height})"
+                            f"Imagem {i + 1}: tamanho muito pequeno ({width}x{height})"
                         )
                         continue
 
                     if width > cls.MAX_IMG_SIZE or height > cls.MAX_IMG_SIZE:
                         invalid_images.append(
-                            f"Imagem {i+1}: tamanho muito grande ({width}x{height})"
+                            f"Imagem {i + 1}: tamanho muito grande ({width}x{height})"
                         )
                         continue
 
@@ -116,11 +116,11 @@ class InstagramImageValidator:
                     # Check format (Instagram accepts JPEG)
                     if img.format not in ["JPEG", "JPG"]:
                         logger.warning(
-                            f"Imagem {i+1} não está em formato JPEG/JPG. Formato atual: {img.format}"
+                            f"Imagem {i + 1} não está em formato JPEG/JPG. Formato atual: {img.format}"
                         )
 
             except Exception as e:
-                invalid_images.append(f"Imagem {i+1}: erro ao processar ({str(e)})")
+                invalid_images.append(f"Imagem {i + 1}: erro ao processar ({str(e)})")
 
         if invalid_images:
             return False, "Problemas encontrados:\n• " + "\n• ".join(invalid_images)
@@ -130,10 +130,7 @@ class InstagramImageValidator:
             first_ratio = aspect_ratios[0]
             for i, ratio in enumerate(aspect_ratios[1:], 2):
                 # Allow tolerance
-                if (
-                    abs(first_ratio - ratio) / first_ratio
-                    > cls.CAROUSEL_RATIO_TOLERANCE
-                ):
+                if abs(first_ratio - ratio) / first_ratio > cls.CAROUSEL_RATIO_TOLERANCE:
                     return (
                         False,
                         f"As imagens devem ter proporções similares. Imagem 1 ({first_ratio:.2f}:1) difere da imagem {i} ({ratio:.2f}:1)",
@@ -157,9 +154,7 @@ class InstagramImageValidator:
             return []
 
         normalized_paths = []
-        valid_image_data = (
-            []
-        )  # Store (path, width, height, aspect_ratio) for valid images
+        valid_image_data = []  # Store (path, width, height, aspect_ratio) for valid images
 
         # First pass: collect valid images and their properties
         for path in image_paths:
@@ -189,10 +184,7 @@ class InstagramImageValidator:
                 resized_path = cls.resize_for_instagram(path)
 
                 # Now adjust aspect ratio if needed
-                if (
-                    abs(ratio - target_ratio) / target_ratio
-                    > cls.CAROUSEL_RATIO_TOLERANCE
-                ):
+                if abs(ratio - target_ratio) / target_ratio > cls.CAROUSEL_RATIO_TOLERANCE:
                     with Image.open(resized_path) as img:
                         width, height = img.size
 
@@ -216,9 +208,7 @@ class InstagramImageValidator:
                         cropped_img = img.crop(crop_box)
                         cropped_img.save(output_path, quality=95)
                         normalized_paths.append(output_path)
-                        logger.info(
-                            f"Imagem ajustada para proporção alvo: {path} -> {output_path}"
-                        )
+                        logger.info(f"Imagem ajustada para proporção alvo: {path} -> {output_path}")
                 else:
                     # No aspect ratio adjustment needed
                     normalized_paths.append(resized_path)
@@ -323,9 +313,7 @@ class InstagramImageValidator:
             # 4. Final validation (simulates FINISHED container status)
             is_valid, issues = cls.validate_single_photo(processed_path)
             if not is_valid:
-                result["message"] = (
-                    f"Imagem processada ainda não atende requisitos: {issues}"
-                )
+                result["message"] = f"Imagem processada ainda não atende requisitos: {issues}"
                 return result
 
             # 5. Ready for publication (simulates media_publish step)
@@ -462,36 +450,38 @@ class InstagramImageValidator:
         """
         Corrige o aspect ratio de uma imagem para atender aos requisitos oficiais do Instagram.
         Usa estratégia inteligente baseada no tipo de conteúdo e dimensões originais.
-        
+
         Args:
             image_path (str): Caminho para a imagem
             output_path (str, optional): Caminho de saída
             content_type (str): Tipo de conteúdo ("feed", "story", "reel", "carousel")
-            
+
         Returns:
             str: Caminho da imagem corrigida
         """
         if output_path is None:
             filename, ext = os.path.splitext(image_path)
             output_path = f"{filename}_fixed_ratio{ext}"
-            
+
         try:
             with Image.open(image_path) as img:
                 width, height = img.size
                 current_ratio = width / height
-                
-                logger.info(f"Imagem original: {width}x{height}, ratio: {current_ratio:.3f}, tipo: {content_type}")
-                
+
+                logger.info(
+                    f"Imagem original: {width}x{height}, ratio: {current_ratio:.3f}, tipo: {content_type}"
+                )
+
                 # Determinar ratio alvo baseado no tipo de conteúdo e dimensões originais
                 target_ratio = cls._determine_best_ratio(current_ratio, width, height, content_type)
-                
+
                 # Se já está dentro dos limites para o tipo de conteúdo, não precisa corrigir
                 if cls._is_ratio_valid(current_ratio, content_type):
                     logger.info(f"Aspect ratio {current_ratio:.3f} já é válido para {content_type}")
                     return image_path
-                
+
                 logger.info(f"Corrigindo ratio de {current_ratio:.3f} para {target_ratio:.3f}")
-                
+
                 # Calcular novas dimensões com crop centralizado
                 if current_ratio < target_ratio:
                     # Imagem muito alta - cortar altura
@@ -505,86 +495,85 @@ class InstagramImageValidator:
                     new_height = height
                     crop_x = (width - new_width) // 2
                     crop_box = (crop_x, 0, crop_x + new_width, height)
-                
+
                 # Aplicar crop
                 img_cropped = img.crop(crop_box)
-                
+
                 # Ajustar tamanho se necessário
                 img_final = cls._resize_if_needed(img_cropped, content_type)
-                
+
                 # Salvar imagem corrigida com qualidade otimizada
-                if img_final.mode == 'RGBA':
+                if img_final.mode == "RGBA":
                     # Converter RGBA para RGB para JPEG
-                    background = Image.new('RGB', img_final.size, (255, 255, 255))
+                    background = Image.new("RGB", img_final.size, (255, 255, 255))
                     background.paste(img_final, mask=img_final.split()[-1])
                     img_final = background
-                
-                img_final.save(output_path, 'JPEG', quality=90, optimize=True)
-                
+
+                img_final.save(output_path, "JPEG", quality=90, optimize=True)
+
                 final_ratio = img_final.width / img_final.height
-                logger.info(f"Imagem corrigida: {img_final.width}x{img_final.height}, ratio: {final_ratio:.3f}")
-                
+                logger.info(
+                    f"Imagem corrigida: {img_final.width}x{img_final.height}, ratio: {final_ratio:.3f}"
+                )
+
                 return output_path
-                
+
         except Exception as e:
             logger.error(f"Erro ao corrigir aspect ratio: {str(e)}")
             return image_path  # Retorna original se falhar
-    
+
     @classmethod
     def _determine_best_ratio(cls, current_ratio, width, height, content_type):
         """Determina o melhor ratio alvo baseado nas características da imagem"""
-        
+
         if content_type in ["story", "reel"]:
             return cls.STORIES_RATIO  # 9:16 para stories/reels
-        
+
         # Para feed posts, escolher o ratio mais próximo que seja válido
         if content_type in ["feed", "carousel"]:
             # Se está próximo do quadrado, usar 1:1 (sempre aceito)
             if 0.9 <= current_ratio <= 1.1:
                 return cls.SQUARE_RATIO
-            
+
             # Se é muito vertical, usar 4:5 (portrait padrão)
             elif current_ratio < 0.9:
                 return cls.MIN_ASPECT_RATIO  # 4:5
-            
+
             # Se é horizontal, usar 1.91:1 (landscape padrão)
             else:
                 return cls.MAX_ASPECT_RATIO  # 1.91:1
-        
+
         # Default para feed quadrado
         return cls.SQUARE_RATIO
-    
+
     @classmethod
     def _is_ratio_valid(cls, ratio, content_type):
         """Verifica se o ratio é válido para o tipo de conteúdo"""
-        
+
         if content_type in ["story", "reel"]:
             # Stories/Reels: aceita próximo de 9:16
             return abs(ratio - cls.STORIES_RATIO) < 0.05
-        
+
         elif content_type in ["feed", "carousel"]:
             # Feed: entre 4:5 e 1.91:1
             return cls.MIN_ASPECT_RATIO <= ratio <= cls.MAX_ASPECT_RATIO
-        
+
         return False
-    
-    @classmethod 
+
+    @classmethod
     def _resize_if_needed(cls, img, content_type):
         """Redimensiona se necessário baseado nos requisitos do tipo de conteúdo"""
-        
+
         width, height = img.size
-        
+
         if content_type in ["story", "reel"]:
             # Stories precisam de mínimo 720x1280
             if width < cls.STORIES_MIN_WIDTH or height < cls.STORIES_MIN_HEIGHT:
-                scale_factor = max(
-                    cls.STORIES_MIN_WIDTH / width,
-                    cls.STORIES_MIN_HEIGHT / height
-                )
+                scale_factor = max(cls.STORIES_MIN_WIDTH / width, cls.STORIES_MIN_HEIGHT / height)
                 new_size = (int(width * scale_factor), int(height * scale_factor))
                 img = img.resize(new_size, Image.Resampling.LANCZOS)
                 logger.info(f"Redimensionado para stories: {new_size}")
-        
+
         else:
             # Feed posts: garantir limites gerais
             if width < cls.MIN_IMG_SIZE or height < cls.MIN_IMG_SIZE:
@@ -592,13 +581,13 @@ class InstagramImageValidator:
                 new_size = (int(width * scale_factor), int(height * scale_factor))
                 img = img.resize(new_size, Image.Resampling.LANCZOS)
                 logger.info(f"Redimensionado para tamanho mínimo: {new_size}")
-            
+
             elif width > cls.MAX_IMG_SIZE or height > cls.MAX_IMG_SIZE:
                 scale_factor = min(cls.MAX_IMG_SIZE / width, cls.MAX_IMG_SIZE / height)
                 new_size = (int(width * scale_factor), int(height * scale_factor))
                 img = img.resize(new_size, Image.Resampling.LANCZOS)
                 logger.info(f"Redimensionado para tamanho máximo: {new_size}")
-        
+
         return img
 
     @classmethod
@@ -606,17 +595,17 @@ class InstagramImageValidator:
         """
         Valida se uma imagem atende aos requisitos da API do Instagram.
         Baseado na documentação oficial da Instagram Platform API v23.
-        
+
         Args:
             image_path (str): Caminho para a imagem
             content_type (str): Tipo de conteúdo ("feed", "story", "reel", "carousel")
-            
+
         Returns:
             tuple: (is_valid, issues_list, recommendations)
         """
         issues = []
         recommendations = []
-        
+
         try:
             if not os.path.exists(image_path):
                 return False, ["Arquivo não encontrado"], []
@@ -624,60 +613,74 @@ class InstagramImageValidator:
             with Image.open(image_path) as img:
                 width, height = img.size
                 aspect_ratio = width / height
-                
-                logger.info(f"Validando {content_type}: {width}x{height}, ratio: {aspect_ratio:.3f}")
-                
+
+                logger.info(
+                    f"Validando {content_type}: {width}x{height}, ratio: {aspect_ratio:.3f}"
+                )
+
                 # Verificar formato (JPEG obrigatório para feed)
-                if content_type == "feed" and img.format not in ['JPEG', 'JPG']:
+                if content_type == "feed" and img.format not in ["JPEG", "JPG"]:
                     issues.append(f"Formato {img.format} não suportado para feed. Use JPEG.")
                     recommendations.append("Converter para JPEG")
-                
+
                 # Verificar dimensões mínimas
                 if content_type in ["story", "reel"]:
                     if width < cls.STORIES_MIN_WIDTH or height < cls.STORIES_MIN_HEIGHT:
-                        issues.append(f"Dimensões muito pequenas para {content_type}: {width}x{height}")
-                        recommendations.append(f"Redimensionar para pelo menos {cls.STORIES_MIN_WIDTH}x{cls.STORIES_MIN_HEIGHT}")
-                        
+                        issues.append(
+                            f"Dimensões muito pequenas para {content_type}: {width}x{height}"
+                        )
+                        recommendations.append(
+                            f"Redimensionar para pelo menos {cls.STORIES_MIN_WIDTH}x{cls.STORIES_MIN_HEIGHT}"
+                        )
+
                     # Verificar aspect ratio para stories/reels (9:16)
                     if not cls._is_ratio_valid(aspect_ratio, content_type):
-                        issues.append(f"Aspect ratio {aspect_ratio:.3f} inválido para {content_type}")
+                        issues.append(
+                            f"Aspect ratio {aspect_ratio:.3f} inválido para {content_type}"
+                        )
                         recommendations.append("Ajustar para proporção 9:16 (0.563)")
-                        
+
                 else:
                     # Feed posts
                     if width < cls.MIN_IMG_SIZE or height < cls.MIN_IMG_SIZE:
                         issues.append(f"Dimensões muito pequenas: {width}x{height}")
-                        recommendations.append(f"Redimensionar para pelo menos {cls.MIN_IMG_SIZE}x{cls.MIN_IMG_SIZE}")
-                    
+                        recommendations.append(
+                            f"Redimensionar para pelo menos {cls.MIN_IMG_SIZE}x{cls.MIN_IMG_SIZE}"
+                        )
+
                     if width > cls.MAX_IMG_SIZE or height > cls.MAX_IMG_SIZE:
                         issues.append(f"Dimensões muito grandes: {width}x{height}")
-                        recommendations.append(f"Redimensionar para máximo {cls.MAX_IMG_SIZE}x{cls.MAX_IMG_SIZE}")
-                    
+                        recommendations.append(
+                            f"Redimensionar para máximo {cls.MAX_IMG_SIZE}x{cls.MAX_IMG_SIZE}"
+                        )
+
                     # Verificar aspect ratio para feed
                     if not cls._is_ratio_valid(aspect_ratio, content_type):
                         issues.append(f"Aspect ratio {aspect_ratio:.3f} inválido para feed")
                         if aspect_ratio < cls.MIN_ASPECT_RATIO:
-                            recommendations.append("Cortar para proporção 4:5 (0.8) ou quadrado 1:1")
+                            recommendations.append(
+                                "Cortar para proporção 4:5 (0.8) ou quadrado 1:1"
+                            )
                         elif aspect_ratio > cls.MAX_ASPECT_RATIO:
                             recommendations.append("Cortar para proporção 1.91:1 ou quadrado 1:1")
-                
+
                 # Verificar qualidade/compressão
                 file_size = os.path.getsize(image_path)
                 if file_size > 8 * 1024 * 1024:  # 8MB
-                    issues.append(f"Arquivo muito grande: {file_size / (1024*1024):.1f}MB")
+                    issues.append(f"Arquivo muito grande: {file_size / (1024 * 1024):.1f}MB")
                     recommendations.append("Comprimir imagem (máximo ~8MB)")
-                
+
                 is_valid = len(issues) == 0
-                
+
                 if is_valid:
                     logger.info(f"✅ Imagem válida para {content_type}")
                 else:
                     logger.warning(f"⚠️ {len(issues)} problemas encontrados para {content_type}")
                     for issue in issues:
                         logger.warning(f"  - {issue}")
-                
+
                 return is_valid, issues, recommendations
-                
+
         except Exception as e:
             logger.error(f"Erro na validação: {str(e)}")
             return False, [f"Erro ao processar imagem: {str(e)}"], []

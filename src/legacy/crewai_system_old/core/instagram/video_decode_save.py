@@ -1,4 +1,4 @@
-""" 
+"""
 Módulo para decodificação e salvamento de vídeos em formato base64 recebidos via webhook.
 
 Classes:
@@ -17,10 +17,11 @@ Métodos:
 
 """
 
-import os
 import base64
-import time
 import logging
+import os
+import time
+
 from src.agent_social_media.utils.media.paths import Paths
 
 logger = logging.getLogger(__name__)

@@ -30,19 +30,18 @@ Utilize as funções de validação antes de postar vídeos no Instagram para ga
 
 """
 
-
-import os
-from moviepy.editor import VideoFileClip
-import tempfile
-from typing import Dict, Any
-import logging
-from PIL import Image
-from datetime import datetime
-import subprocess
 import json
+import logging
+import os
+import subprocess
+import tempfile
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any
+
 import moviepy.editor as mp
+from moviepy.editor import VideoFileClip
+from PIL import Image
 from src.agent_social_media.utils.media.paths import Paths
 
 # Defina um diretório temporário para o moviepy usar (opcional, mas recomendado)
@@ -69,9 +68,8 @@ _apply_pillow_patch()
 
 
 class VideoProcessor:
-
     @staticmethod
-    def get_video_info(video_path: str) -> Dict[str, Any]:
+    def get_video_info(video_path: str) -> dict[str, Any]:
         """
         Get video information using moviepy instead of ffprobe.
 
@@ -188,7 +186,6 @@ class VideoProcessor:
 
         try:
             with VideoFileClip(video_path) as clip:
-
                 # --- Verificações ---
                 if not VideoProcessor.check_duration(video_info["duration"], post_type):
                     # Cortar ou estender o video
@@ -216,36 +213,26 @@ class VideoProcessor:
                     else:
                         clip = clip.resize(height=600)  # Altura como base
 
-                if not VideoProcessor.check_codec(
-                    video_info["codec"], video_info["audio_codec"]
-                ):
+                if not VideoProcessor.check_codec(video_info["codec"], video_info["audio_codec"]):
                     # Definir codec de audio e video
                     clip = clip.set_codec("libx264")  # Codec de vídeo
                     if clip.audio:
                         clip.audio = clip.audio.set_codec("aac")  # Codec de áudio
 
-                if not VideoProcessor.check_aspect_ratio(
-                    clip.size[0], clip.size[1], post_type
-                ):
+                if not VideoProcessor.check_aspect_ratio(clip.size[0], clip.size[1], post_type):
                     # Ajustar a proporção (cortando)
                     if post_type == "reels":
                         target_aspect_ratio = 9 / 16
                     elif post_type == "carousel":
                         target_aspect_ratio = 1  # Exemplo, pode ser outro
                     else:
-                        target_aspect_ratio = (
-                            clip.size[0] / clip.size[1]
-                        )  # Manter original
+                        target_aspect_ratio = clip.size[0] / clip.size[1]  # Manter original
 
-                    clip = VideoProcessor._crop_to_aspect_ratio(
-                        clip, target_aspect_ratio
-                    )
+                    clip = VideoProcessor._crop_to_aspect_ratio(clip, target_aspect_ratio)
 
                 # --- Escrita do Arquivo Otimizado ---
                 # Usar um arquivo temporário
-                with tempfile.NamedTemporaryFile(
-                    suffix=".mp4", delete=False
-                ) as temp_file:
+                with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
                     temp_filename = temp_file.name
 
                 # Definindo Bitrate
@@ -348,9 +335,7 @@ class VideoProcessor:
                         f"Codec de vídeo não recomendado ({info['video_codec']}, recomendado: h264)"
                     )
 
-            if (
-                "audio_codec" in info and info["audio_codec"]
-            ):  # Pode ser None para vídeos sem áudio
+            if "audio_codec" in info and info["audio_codec"]:  # Pode ser None para vídeos sem áudio
                 if info["audio_codec"] not in ["aac"]:
                     issues.append(
                         f"Codec de áudio não recomendado ({info['audio_codec']}, recomendado: aac)"
@@ -388,9 +373,7 @@ class VideoProcessor:
                     check=True,
                 )
             except (subprocess.SubprocessError, FileNotFoundError):
-                logger.warning(
-                    "ffprobe não disponível, usando fallback para informações de vídeo"
-                )
+                logger.warning("ffprobe não disponível, usando fallback para informações de vídeo")
                 return None
 
             # Executar ffprobe para obter informações do vídeo em formato JSON
@@ -405,9 +388,7 @@ class VideoProcessor:
                 video_path,
             ]
 
-            result = subprocess.run(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-            )
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             if result.returncode != 0:
                 logger.warning(f"ffprobe falhou: {result.stderr}")
@@ -442,11 +423,7 @@ class VideoProcessor:
                     video_info["audio_channels"] = int(stream.get("channels", 0))
 
             # Calcular aspect ratio
-            if (
-                "width" in video_info
-                and "height" in video_info
-                and video_info["height"] > 0
-            ):
+            if "width" in video_info and "height" in video_info and video_info["height"] > 0:
                 video_info["aspect_ratio"] = video_info["width"] / video_info["height"]
 
             return video_info
@@ -476,9 +453,7 @@ class VideoProcessor:
 
             for file_path in Path(temp_dir).glob("*"):
                 if file_path.is_file():
-                    file_age = current_time - datetime.fromtimestamp(
-                        file_path.stat().st_mtime
-                    )
+                    file_age = current_time - datetime.fromtimestamp(file_path.stat().st_mtime)
                     age_hours = file_age.total_seconds() / 3600
 
                     if age_hours > max_age_hours:
@@ -626,7 +601,7 @@ class InstagramVideoProcessor:
         self.temp_dir = os.path.join(Paths.ROOT_DIR, "temp_videos")
         os.makedirs(self.temp_dir, exist_ok=True)
 
-    def process_video(self, video_path: str, post_type: str = "reel") -> Optional[str]:
+    def process_video(self, video_path: str, post_type: str = "reel") -> str | None:
         """
         Process and optimize a video for Instagram.
 
@@ -652,9 +627,7 @@ class InstagramVideoProcessor:
                 return None
 
             # Save processed video
-            output_path = os.path.join(
-                self.temp_dir, f"processed_{os.path.basename(video_path)}"
-            )
+            output_path = os.path.join(self.temp_dir, f"processed_{os.path.basename(video_path)}")
 
             processed.write_videofile(
                 output_path,
@@ -678,9 +651,7 @@ class InstagramVideoProcessor:
             logger.exception(f"Error processing video: {str(e)}")
             return None
 
-    def _optimize_video(
-        self, video: mp.VideoFileClip, specs: dict
-    ) -> Optional[mp.VideoFileClip]:
+    def _optimize_video(self, video: mp.VideoFileClip, specs: dict) -> mp.VideoFileClip | None:
         """
         Optimize video according to specifications.
         """
@@ -704,9 +675,7 @@ class InstagramVideoProcessor:
             current_ratio = video.size[1] / video.size[0]
             target_ratio = specs["aspect_ratio"]
 
-            if (
-                abs(current_ratio - target_ratio) > 0.1
-            ):  # If aspect ratio needs adjustment
+            if abs(current_ratio - target_ratio) > 0.1:  # If aspect ratio needs adjustment
                 logger.info(
                     f"Adjusting aspect ratio from {current_ratio:.2f} to {target_ratio:.2f}"
                 )

@@ -24,11 +24,12 @@ Uso:
 
 """
 
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
 import base64
 import logging
+import os
+
+import google.generativeai as genai
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -49,9 +50,7 @@ class CarouselDescriber:
 
         # Configurar o cliente Gemini
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel(
-            "gemini-2.0-flash" 
-        )  # Usando o modelo que suporta imagens
+        model = genai.GenerativeModel("gemini-2.0-flash")  # Usando o modelo que suporta imagens
 
         descriptions = []
 

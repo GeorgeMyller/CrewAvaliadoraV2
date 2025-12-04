@@ -127,9 +127,8 @@ def check_crewai_setup():
 def check_project_structure():
     """📁 Verifica estrutura do projeto"""
     required_files = [
-        "crew_avaliacao_completa.py",
-        "gerar_relatorio.py",
-        "avaliacao_gemini.py",
+        "src/crew_avaliadora.py",
+        "src/analyze_repo.py",
         "pyproject.toml",
         ".env.example"
     ]
@@ -204,7 +203,7 @@ def run_health_check():
     
     if passed_checks == total_checks:
         print("\n✅ SISTEMA PRONTO! Tudo funcionando perfeitamente.")
-        print("🚀 Você pode executar: uv run python crew_avaliacao_completa.py")
+        print("🚀 Você pode executar: uv run python src/crew_avaliadora.py")
         return True
     elif passed_checks >= total_checks * 0.7:
         print("\n⚠️ SISTEMA PARCIALMENTE PRONTO. Algumas configurações faltando.")

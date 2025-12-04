@@ -9,14 +9,14 @@ Gera relatórios ultra-profissionais para devs juniores e seniores.
 Fluxo: Codebase → Script Python → Relatório → CrewAI → Relatório Ultra-Profissional
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
-from crewai_tools import FileReadTool, DirectoryReadTool
-from dotenv import load_dotenv
-import os
 import json
-from datetime import datetime
-from typing import Dict, List, Optional
 import logging
+import os
+from datetime import datetime
+
+from crewai import LLM, Agent, Crew, Process, Task
+from crewai_tools import DirectoryReadTool, FileReadTool
+from dotenv import load_dotenv
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -25,25 +25,26 @@ logger = logging.getLogger(__name__)
 # Carrega variáveis de ambiente
 load_dotenv()
 
+
 class CodebaseAnalysisCrew:
     """
     🤝 CrewAI para Avaliação Completa de Codebase
-    
+
     Roles especializados:
     📐 Arquiteto de Software
-    🧪 Engenheiro de Qualidade  
+    🧪 Engenheiro de Qualidade
     📄 Documentador Técnico
     🚀 Product Manager
     ⚖️ Especialista Legal
     🤖 Engenheiro de IA
     """
-    
-    def __init__(self, gemini_api_key: Optional[str] = None):
+
+    def __init__(self, gemini_api_key: str | None = None):
         """Inicializa a crew com configuração Gemini 2.5 Flash"""
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         if not self.gemini_api_key:
             raise ValueError("❌ GEMINI_API_KEY não encontrada! Configure no .env")
-            
+
         # Configuração otimizada do Gemini 2.5 Flash
         self.llm = LLM(
             model="google/gemini-2.5-flash",
@@ -51,18 +52,18 @@ class CodebaseAnalysisCrew:
             temperature=0.3,  # Análise mais focada
             max_tokens=8192,  # Máximo para respostas detalhadas
         )
-        
+
         # Tools para leitura de arquivos
         self.file_tool = FileReadTool()
         self.dir_tool = DirectoryReadTool()
-        
+
         # Cria agentes especializados
         self.agents = self._create_agents()
         self.tasks = self._create_tasks()
-        
-    def _create_agents(self) -> Dict[str, Agent]:
+
+    def _create_agents(self) -> dict[str, Agent]:
         """🎭 Cria todos os agentes especializados"""
-        
+
         agents = {
             # 📐 Arquiteto de Software
             "arquiteto": Agent(
@@ -81,9 +82,8 @@ class CodebaseAnalysisCrew:
                 llm=self.llm,
                 verbose=True,
                 max_iter=3,
-                allow_delegation=False
+                allow_delegation=False,
             ),
-            
             # 🧪 Engenheiro de Qualidade
             "qa_engineer": Agent(
                 role="🔬 Engenheiro de Qualidade e Testes",
@@ -101,9 +101,8 @@ class CodebaseAnalysisCrew:
                 llm=self.llm,
                 verbose=True,
                 max_iter=3,
-                allow_delegation=False
+                allow_delegation=False,
             ),
-            
             # 📄 Documentador Técnico
             "documentador": Agent(
                 role="📚 Documentador Técnico Sênior",
@@ -121,9 +120,8 @@ class CodebaseAnalysisCrew:
                 llm=self.llm,
                 verbose=True,
                 max_iter=3,
-                allow_delegation=False
+                allow_delegation=False,
             ),
-            
             # 🚀 Product Manager
             "product_manager": Agent(
                 role="🎯 Product Manager Estratégico",
@@ -141,9 +139,8 @@ class CodebaseAnalysisCrew:
                 llm=self.llm,
                 verbose=True,
                 max_iter=3,
-                allow_delegation=False
+                allow_delegation=False,
             ),
-            
             # ⚖️ Especialista Legal
             "especialista_legal": Agent(
                 role="⚖️ Consultor Jurídico de Tecnologia",
@@ -160,9 +157,8 @@ class CodebaseAnalysisCrew:
                 llm=self.llm,
                 verbose=True,
                 max_iter=3,
-                allow_delegation=False
+                allow_delegation=False,
             ),
-            
             # 🤖 Engenheiro de IA
             "engenheiro_ia": Agent(
                 role="🧠 Engenheiro de IA Especialista",
@@ -180,15 +176,15 @@ class CodebaseAnalysisCrew:
                 llm=self.llm,
                 verbose=True,
                 max_iter=3,
-                allow_delegation=False
-            )
+                allow_delegation=False,
+            ),
         }
-        
+
         return agents
-    
-    def _create_tasks(self) -> List[Task]:
+
+    def _create_tasks(self) -> list[Task]:
         """📋 Cria tasks específicas para cada agente"""
-        
+
         tasks = [
             # Task do Arquiteto
             Task(
@@ -211,9 +207,8 @@ class CodebaseAnalysisCrew:
                 - Recomendações priorizadas (Alta/Média/Baixa)
                 - Diagrama conceitual em texto
                 """,
-                agent=self.agents["arquiteto"]
+                agent=self.agents["arquiteto"],
             ),
-            
             # Task do QA Engineer
             Task(
                 description="""🧪 AVALIAÇÃO DE QUALIDADE E TESTES
@@ -236,9 +231,8 @@ class CodebaseAnalysisCrew:
                 - Ferramentas e métricas sugeridas
                 - Roadmap de melhorias em qualidade
                 """,
-                agent=self.agents["qa_engineer"]
+                agent=self.agents["qa_engineer"],
             ),
-            
             # Task do Documentador
             Task(
                 description="""📄 AUDITORIA DE DOCUMENTAÇÃO
@@ -261,9 +255,8 @@ class CodebaseAnalysisCrew:
                 - Estratégia de manutenção
                 - Roadmap de melhorias documentais
                 """,
-                agent=self.agents["documentador"]
+                agent=self.agents["documentador"],
             ),
-            
             # Task do Product Manager
             Task(
                 description="""🚀 ANÁLISE DE VIABILIDADE COMERCIAL
@@ -286,9 +279,8 @@ class CodebaseAnalysisCrew:
                 - Modelo de monetização sugerido
                 - Riscos comerciais e mitigações
                 """,
-                agent=self.agents["product_manager"]
+                agent=self.agents["product_manager"],
             ),
-            
             # Task do Especialista Legal
             Task(
                 description="""⚖️ ANÁLISE DE CONFORMIDADE LEGAL
@@ -311,9 +303,8 @@ class CodebaseAnalysisCrew:
                 - Políticas necessárias
                 - Roadmap de compliance
                 """,
-                agent=self.agents["especialista_legal"]
+                agent=self.agents["especialista_legal"],
             ),
-            
             # Task do Engenheiro de IA
             Task(
                 description="""🤖 OTIMIZAÇÃO DO PIPELINE DE IA
@@ -336,15 +327,15 @@ class CodebaseAnalysisCrew:
                 - Otimizações de custo sugeridas
                 - Roadmap de evolução IA
                 """,
-                agent=self.agents["engenheiro_ia"]
-            )
+                agent=self.agents["engenheiro_ia"],
+            ),
         ]
-        
+
         return tasks
-    
+
     def create_final_report_task(self) -> Task:
         """📑 Cria task final para consolidação do relatório"""
-        
+
         return Task(
             description="""🎯 CONSOLIDAÇÃO DO RELATÓRIO FINAL
             
@@ -392,21 +383,21 @@ class CodebaseAnalysisCrew:
             - Formatação profissional
             """,
             agent=self.agents["arquiteto"],  # Arquiteto como consolidador final
-            context=self.tasks  # Recebe contexto de todas as tasks anteriores
+            context=self.tasks,  # Recebe contexto de todas as tasks anteriores
         )
-    
+
     def run_analysis(self, report_path: str = "relatorio_codebase_turbinado.md") -> str:
         """🚀 Executa análise completa da codebase"""
-        
+
         logger.info("🚀 Iniciando análise completa da codebase...")
-        
+
         # Verifica se o relatório de entrada existe
         if not os.path.exists(report_path):
             raise FileNotFoundError(f"❌ Relatório não encontrado: {report_path}")
-        
+
         # Adiciona task final de consolidação
         all_tasks = self.tasks + [self.create_final_report_task()]
-        
+
         # Configura a crew
         crew = Crew(
             agents=list(self.agents.values()),
@@ -415,19 +406,19 @@ class CodebaseAnalysisCrew:
             verbose=True,
             memory=True,
         )
-        
+
         # Executa a análise
         try:
             logger.info("🔄 Executando análise com CrewAI...")
             result = crew.kickoff()
-            
+
             # Salva resultado
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_file = f"relatorio_final_startup_{timestamp}.md"
-            
+
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(str(result))
-            
+
             # Cria também uma versão JSON com metadados
             metadata = {
                 "timestamp": timestamp,
@@ -435,19 +426,19 @@ class CodebaseAnalysisCrew:
                 "output_file": output_file,
                 "agents_used": list(self.agents.keys()),
                 "total_tasks": len(all_tasks),
-                "llm_model": "gemini-2.5-flash"
+                "llm_model": "gemini-2.5-flash",
             }
-            
+
             metadata_file = f"metadata_analise_{timestamp}.json"
             with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
-            
+
             logger.info("✅ Análise concluída!")
             logger.info(f"📄 Relatório salvo em: {output_file}")
             logger.info(f"📊 Metadados salvos em: {metadata_file}")
-            
+
             return output_file
-            
+
         except Exception as e:
             logger.error(f"❌ Erro durante análise: {str(e)}")
             raise
@@ -455,32 +446,32 @@ class CodebaseAnalysisCrew:
 
 def main():
     """🎯 Função principal para execução direta"""
-    
+
     print("🚀 CrewAI - Análise Completa de Codebase")
     print("=" * 50)
-    
+
     try:
         # Inicializa a crew
         crew_analyzer = CodebaseAnalysisCrew()
-        
+
         # Executa análise
         report_path = "relatorio_codebase_turbinado.md"
         if not os.path.exists(report_path):
             print(f"⚠️  Relatório '{report_path}' não encontrado!")
             print("💡 Execute primeiro o script de geração de relatório.")
             return
-        
+
         output_file = crew_analyzer.run_analysis(report_path)
-        
+
         print("\n🎉 Análise concluída com sucesso!")
         print(f"📄 Relatório final: {output_file}")
         print("\n👀 Visualize o relatório com:")
         print(f"   cat {output_file}")
-        
+
     except Exception as e:
         print(f"❌ Erro: {str(e)}")
         return 1
-    
+
     return 0
 
 

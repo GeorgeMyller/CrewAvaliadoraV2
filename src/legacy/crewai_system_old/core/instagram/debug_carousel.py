@@ -26,21 +26,19 @@ https://developers.facebook.com/docs/instagram-api/guides/content-publishing
 
 """
 
+import argparse
+import logging
 import os
 import sys
-import logging
-import argparse
+
 import requests
-from typing import List, Optional
 from dotenv import load_dotenv
 
 # Add parent directory to path so we can import our modules
-sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.agent_social_media.core.instagram.carousel_poster import upload_carousel_images
 from src.agent_social_media.core.instagram.base_instagram_service import BaseInstagramService
+from src.agent_social_media.core.instagram.carousel_poster import upload_carousel_images
 
 # Set up logging
 logging.basicConfig(
@@ -124,15 +122,11 @@ def clear_carousel_cache():
 
         # Manual file cleanup as fallback
         temp_path = os.path.join(
-            os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-            ),
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
             "temp",
         )
         carousel_files = [
-            f
-            for f in os.listdir(temp_path)
-            if os.path.isfile(os.path.join(temp_path, f))
+            f for f in os.listdir(temp_path) if os.path.isfile(os.path.join(temp_path, f))
         ]
         logger.info(f"Found {len(carousel_files)} files in temp directory")
 
@@ -144,7 +138,7 @@ def clear_carousel_cache():
         return False
 
 
-def validate_image_dimensions(image_paths: List[str]) -> bool:
+def validate_image_dimensions(image_paths: list[str]) -> bool:
     """Check that all images have the same aspect ratio"""
     from PIL import Image
 
@@ -187,7 +181,7 @@ def validate_image_dimensions(image_paths: List[str]) -> bool:
         return False
 
 
-def test_carousel_upload(image_paths: List[str]) -> bool:
+def test_carousel_upload(image_paths: list[str]) -> bool:
     """Test uploading images for carousel without actually posting"""
     logger.info("\n===== TESTING CAROUSEL UPLOAD =====")
 
@@ -207,7 +201,7 @@ def test_carousel_upload(image_paths: List[str]) -> bool:
         if success and len(image_urls) >= 2:
             logger.info(f"✅ Successfully uploaded {len(image_urls)} images")
             for i, url in enumerate(image_urls):
-                logger.info(f"  {i+1}. {url}")
+                logger.info(f"  {i + 1}. {url}")
             return True
         else:
             logger.error(
@@ -220,7 +214,7 @@ def test_carousel_upload(image_paths: List[str]) -> bool:
         return False
 
 
-def run_diagnostics(image_paths: Optional[List[str]] = None):
+def run_diagnostics(image_paths: list[str] | None = None):
     """Run all diagnostics"""
     logger.info("Starting Instagram Carousel Diagnostics...\n")
 
@@ -272,16 +266,12 @@ def run_diagnostics(image_paths: Optional[List[str]] = None):
         logger.info("- Make sure you have fewer than 25 API posts in a 24 hour period")
 
     logger.info("\nFor more help, see:")
-    logger.info(
-        "https://developers.facebook.com/docs/instagram-api/guides/content-publishing"
-    )
+    logger.info("https://developers.facebook.com/docs/instagram-api/guides/content-publishing")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Instagram Carousel Debug Utility")
-    parser.add_argument(
-        "--images", nargs="+", help="Paths to test images for carousel validation"
-    )
+    parser.add_argument("--images", nargs="+", help="Paths to test images for carousel validation")
 
     args = parser.parse_args()
 

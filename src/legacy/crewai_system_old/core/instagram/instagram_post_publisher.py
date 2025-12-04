@@ -30,10 +30,11 @@ Notas:
 
 """
 
-from src.agent_social_media.core.instagram.base_instagram_service import BaseInstagramService
 import logging
 import os
+
 from dotenv import load_dotenv
+from src.agent_social_media.core.instagram.base_instagram_service import BaseInstagramService
 
 logger = logging.getLogger("PostPublisher")
 
@@ -90,9 +91,7 @@ class PostPublisher(BaseInstagramService):
         params = {"creation_id": container_id}
 
         try:
-            result = self._make_request(
-                "POST", f"{self.ig_user_id}/media_publish", data=params
-            )
+            result = self._make_request("POST", f"{self.ig_user_id}/media_publish", data=params)
             if result and "id" in result:
                 post_id = result["id"]
                 logger.info(f"Foto publicada com sucesso: {post_id}")

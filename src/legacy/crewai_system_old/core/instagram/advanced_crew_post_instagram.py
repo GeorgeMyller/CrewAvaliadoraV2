@@ -30,13 +30,17 @@ Permite diferentes perfis de agentes CrewAI baseados na configuração do grupo
 
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
-from dotenv import load_dotenv
-import os
 import logging
-from typing import Dict, Any, Optional
-from src.agent_social_media.core.instagram.base_instagram_service import BaseInstagramService, InstagramAPIError, MediaError
+import os
+from typing import Any
 
+from crewai import LLM, Agent, Crew, Process, Task
+from dotenv import load_dotenv
+from src.agent_social_media.core.instagram.base_instagram_service import (
+    BaseInstagramService,
+    InstagramAPIError,
+    MediaError,
+)
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -48,25 +52,22 @@ class AdvancedInstagramPostCrew:
     com perfis de agentes personalizados baseados na configuração do grupo.
     """
 
-    def __init__(self, group_config: Optional[Dict[str, Any]] = None, crew: Optional[Crew] = None):
+    def __init__(self, group_config: dict[str, Any] | None = None, crew: Crew | None = None):
         """
         Inicializa os serviços, ferramentas, e configura os agentes e tarefas
         baseado na configuração do grupo.
-        
+
         Args:
             group_config: Configuração específica do grupo contendo perfil do agente
             crew: Uma instância de Crew pré-configurada (para testes).
         """
         self.group_config = group_config or {}
         self.agent_profile = self._extract_agent_profile()
-        
+
         # Configurar LLM Gemini para CrewAI
         gemini_api_key = self._get_gemini_api_key()
         if gemini_api_key:
-            self.llm_captioner = LLM(
-                model="gemini/gemini-2.0-flash",
-                api_key=gemini_api_key
-            )
+            self.llm_captioner = LLM(model="gemini/gemini-2.0-flash", api_key=gemini_api_key)
         else:
             logger.warning("⚠️  GEMINI_API_KEY não encontrada - usando LLM padrão")
             self.llm_captioner = None
@@ -78,28 +79,32 @@ class AdvancedInstagramPostCrew:
             self.create_crew()
 
         # Inicializar o serviço do Instagram para postagem
-        access_token = self.group_config.get('instagram_access_token') or os.getenv('INSTAGRAM_ACCESS_TOKEN')
-        ig_user_id = self.group_config.get('instagram_user_id') or os.getenv('INSTAGRAM_USER_ID')
-        
+        access_token = self.group_config.get("instagram_access_token") or os.getenv(
+            "INSTAGRAM_ACCESS_TOKEN"
+        )
+        ig_user_id = self.group_config.get("instagram_user_id") or os.getenv("INSTAGRAM_USER_ID")
+
         if not access_token or not ig_user_id:
-            logger.warning("⚠️  Token de acesso ou ID de usuário do Instagram não configurado. A postagem direta estará desativada.")
+            logger.warning(
+                "⚠️  Token de acesso ou ID de usuário do Instagram não configurado. A postagem direta estará desativada."
+            )
             self.instagram_service = None
         else:
             self.instagram_service = BaseInstagramService(access_token, ig_user_id)
 
-    def _get_gemini_api_key(self) -> Optional[str]:
+    def _get_gemini_api_key(self) -> str | None:
         """Obtém a chave da API do Gemini da configuração do grupo ou variável de ambiente"""
         return (
-            self.group_config.get('gemini_api_key') or 
-            os.getenv('ACESSOAI_GEMINI_API_KEY') or 
-            os.getenv('GEMINI_API_KEY')
+            self.group_config.get("gemini_api_key")
+            or os.getenv("ACESSOAI_GEMINI_API_KEY")
+            or os.getenv("GEMINI_API_KEY")
         )
 
-    def _extract_agent_profile(self) -> Dict[str, Any]:
+    def _extract_agent_profile(self) -> dict[str, Any]:
         """Extrai o perfil do agente da configuração do grupo"""
-        return self.group_config.get('crewai_agent_profile', self._get_default_profile())
+        return self.group_config.get("crewai_agent_profile", self._get_default_profile())
 
-    def _get_default_profile(self) -> Dict[str, Any]:
+    def _get_default_profile(self) -> dict[str, Any]:
         """Perfil padrão caso não haja configuração específica"""
         return {
             "profile_name": "Default Instagram Creator",
@@ -109,20 +114,20 @@ class AdvancedInstagramPostCrew:
             "brand_voice": "Generic",
             "content_style": "Divertido e descontraído",
             "target_audience": "Público geral do Instagram",
-            "hashtag_categories": ["#Instagram", "#Content", "#SocialMedia", "#Engagement"]
+            "hashtag_categories": ["#Instagram", "#Content", "#SocialMedia", "#Engagement"],
         }
 
     def _build_task_description(self) -> str:
         """Constrói a descrição da task baseada no perfil do agente"""
         profile = self.agent_profile
-        
+
         base_description = f"""
 Criar uma postagem no Instagram usando os seguintes insumos, seguindo o perfil específico:
 
-**PERFIL DO AGENTE: {profile['profile_name']}**
-- Voz da marca: {profile['brand_voice']}
-- Estilo de conteúdo: {profile['content_style']}
-- Público-alvo: {profile['target_audience']}
+**PERFIL DO AGENTE: {profile["profile_name"]}**
+- Voz da marca: {profile["brand_voice"]}
+- Estilo de conteúdo: {profile["content_style"]}
+- Público-alvo: {profile["target_audience"]}
 
 **Recebendo os seguintes insumos:**  
 1. **Insumo principal:**  
@@ -140,33 +145,33 @@ Criar uma postagem no Instagram usando os seguintes insumos, seguindo o perfil e
 
 **INSTRUÇÕES ESPECÍFICAS DO PERFIL:**
 """
-        
+
         # Adicionar instruções personalizadas se existirem
-        if 'custom_instructions' in profile:
-            custom = profile['custom_instructions']
+        if "custom_instructions" in profile:
+            custom = profile["custom_instructions"]
             base_description += f"\n- Tom: {custom.get('tone', 'Padrão')}"
-            
-            if custom.get('avoid_corporate_speak'):
+
+            if custom.get("avoid_corporate_speak"):
                 base_description += "\n- EVITAR linguagem corporativa formal"
-            
-            if custom.get('focus_personal_stories'):
+
+            if custom.get("focus_personal_stories"):
                 base_description += "\n- FOCAR em histórias pessoais e momentos autênticos"
-            
-            if custom.get('use_first_person'):
+
+            if custom.get("use_first_person"):
                 base_description += "\n- USAR primeira pessoa ('eu', 'meu', 'minha')"
-            
-            if 'personal_touches' in custom:
+
+            if "personal_touches" in custom:
                 base_description += "\n- Características pessoais:"
-                for touch in custom['personal_touches']:
+                for touch in custom["personal_touches"]:
                     base_description += f"\n  • {touch}"
 
         # Adicionar categorias de hashtags específicas
-        hashtag_cats = profile.get('hashtag_categories', [])
+        hashtag_cats = profile.get("hashtag_categories", [])
         if hashtag_cats:
             base_description += f"""
 
 **HASHTAGS PREFERENCIAIS:**
-Use preferencialmente hashtags destas categorias: {', '.join(hashtag_cats)}
+Use preferencialmente hashtags destas categorias: {", ".join(hashtag_cats)}
 """
 
         base_description += """
@@ -188,7 +193,7 @@ Tamanho: {tamanho}
 Usar emojis: {emojs}
 Usar gírias: {girias}
 """
-        
+
         return base_description
 
     def create_crew(self):
@@ -200,9 +205,9 @@ Usar gírias: {girias}
 
         # Agente para criação de legendas com perfil personalizado
         captioner = Agent(
-            role=profile['agent_role'],
-            goal=profile['agent_goal'],
-            backstory=profile['agent_backstory'],
+            role=profile["agent_role"],
+            goal=profile["agent_goal"],
+            backstory=profile["agent_backstory"],
             allow_delegation=False,
             llm=self.llm_captioner,
             verbose=True,
@@ -243,6 +248,7 @@ Usar gírias: {girias}
             if isinstance(inputs, str) and "<genero>" in inputs:
                 try:
                     import re
+
                     patterns = {
                         "genero": r"<genero>(.*?)</genero>",
                         "caption": r"<caption>(.*?)</caption>",
@@ -254,13 +260,13 @@ Usar gírias: {girias}
                         "emojs": r"<emojs>(.*?)</emojs>",
                         "girias": r"<girias>(.*?)</girias>",
                     }
-                    
+
                     parsed_inputs = {}
                     for key, pattern in patterns.items():
                         match = re.search(pattern, inputs, re.DOTALL)
                         if match:
                             parsed_inputs[key] = match.group(1).strip()
-                    
+
                     if parsed_inputs:
                         inputs = parsed_inputs
                     else:
@@ -278,11 +284,11 @@ Usar gírias: {girias}
                 inputs[key] = default_value
 
         resultado = self.crew.kickoff(inputs=inputs)
-        
+
         # NOVA CORREÇÃO: Detectar #story automaticamente na legenda gerada
         if resultado.raw and "#story" in resultado.raw.lower():
             logger.info("🎯 Hashtag #story detectada na legenda gerada!")
-            
+
             # Verificar se há mídia para postar como story
             media_url = inputs.get("media_url") or inputs.get("image_url")
             if media_url and self.instagram_service:
@@ -296,7 +302,7 @@ Usar gírias: {girias}
                     return f"Erro ao postar Story: {e}"
             else:
                 logger.warning("⚠️ Story detectado mas sem mídia ou serviço Instagram disponível")
-        
+
         # Postagem normal se não for story
         media_url = inputs.get("media_url")
         if media_url and self.instagram_service:
@@ -319,7 +325,9 @@ Usar gírias: {girias}
             logger.info("Detectada a hashtag #story. Tentando postar como um Story.")
             if self.instagram_service:
                 # Extrair o tipo de mídia da URL (simplificado)
-                media_type = "VIDEO" if any(ext in media_url for ext in [".mp4", ".mov"]) else "IMAGE"
+                media_type = (
+                    "VIDEO" if any(ext in media_url for ext in [".mp4", ".mov"]) else "IMAGE"
+                )
                 self.instagram_service.post_story(media_url, media_type)
             else:
                 logger.warning("⚠️ Serviço Instagram não configurado para postar Story")
@@ -330,7 +338,7 @@ Usar gírias: {girias}
             # Como a função de postagem no feed não está definida aqui, apenas logamos.
             print(f"Simulando postagem no feed com URL: {media_url} e legenda: {caption}")
 
-    def _get_default_inputs(self) -> Dict[str, str]:
+    def _get_default_inputs(self) -> dict[str, str]:
         """Valores padrão para inputs"""
         return {
             "genero": "Neutro",
@@ -344,27 +352,27 @@ Usar gírias: {girias}
             "girias": "sim",
         }
 
-    def get_profile_info(self) -> Dict[str, Any]:
+    def get_profile_info(self) -> dict[str, Any]:
         """Retorna informações sobre o perfil do agente atual"""
         return {
-            'profile_name': self.agent_profile['profile_name'],
-            'brand_voice': self.agent_profile['brand_voice'],
-            'content_style': self.agent_profile['content_style'],
-            'target_audience': self.agent_profile['target_audience'],
-            'hashtag_categories': self.agent_profile.get('hashtag_categories', []),
-            'group_id': self.group_config.get('group_id', 'N/A'),
-            'group_name': self.group_config.get('group_name', 'N/A')
+            "profile_name": self.agent_profile["profile_name"],
+            "brand_voice": self.agent_profile["brand_voice"],
+            "content_style": self.agent_profile["content_style"],
+            "target_audience": self.agent_profile["target_audience"],
+            "hashtag_categories": self.agent_profile.get("hashtag_categories", []),
+            "group_id": self.group_config.get("group_id", "N/A"),
+            "group_name": self.group_config.get("group_name", "N/A"),
         }
 
 
 # Função de fábrica para compatibilidade com código existente
-def create_instagram_crew_for_group(group_config: Optional[Dict[str, Any]] = None):
+def create_instagram_crew_for_group(group_config: dict[str, Any] | None = None):
     """
     Cria uma instância do AdvancedInstagramPostCrew para um grupo específico
-    
+
     Args:
         group_config: Configuração do grupo contendo perfil do agente
-        
+
     Returns:
         AdvancedInstagramPostCrew: Instância configurada para o grupo
     """
@@ -374,6 +382,6 @@ def create_instagram_crew_for_group(group_config: Optional[Dict[str, Any]] = Non
 # Classe para compatibilidade com código existente (usando configuração padrão)
 class InstagramPostCrew(AdvancedInstagramPostCrew):
     """Wrapper para compatibilidade com código existente"""
-    
+
     def __init__(self):
         super().__init__(group_config=None)

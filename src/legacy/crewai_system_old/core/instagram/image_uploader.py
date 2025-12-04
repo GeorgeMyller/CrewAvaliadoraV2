@@ -1,4 +1,4 @@
-""" 
+"""
 Módulo para upload e deleção de imagens no Imgur.
 
 Classes:
@@ -41,19 +41,18 @@ Uso:
 
 """
 
-import os
-import io
-import time
 import base64
-from PIL import Image
+import io
 import logging
+import os
 
 # sys.path manipulations are unnecessary in a properly packaged project; keep imports clean.
-
 import tempfile
+import time
+
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
-from typing import Dict
+from PIL import Image
 
 
 class ImageUploader:
@@ -67,9 +66,7 @@ class ImageUploader:
         self.retry_delay = 2  # seconds
 
         if not self.client_id or not self.client_secret:
-            raise ValueError(
-                "As credenciais do Imgur (client_id, client_secret) são obrigatórias."
-            )
+            raise ValueError("As credenciais do Imgur (client_id, client_secret) são obrigatórias.")
 
         self.client = ImgurClient(self.client_id, self.client_secret)
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -81,13 +78,11 @@ class ImageUploader:
         required_fields = ["id", "link", "deletehash"]
         for field in required_fields:
             if field not in response:
-                raise ValueError(
-                    f"Campo obrigatório '{field}' não encontrado na resposta do Imgur"
-                )
+                raise ValueError(f"Campo obrigatório '{field}' não encontrado na resposta do Imgur")
             if not response[field]:
                 raise ValueError(f"Campo '{field}' está vazio na resposta do Imgur")
 
-    def upload_from_path(self, image_path: str) -> Dict[str, str]:
+    def upload_from_path(self, image_path: str) -> dict[str, str]:
         """
         Faz o upload de uma imagem localizada no sistema de arquivos.
 
@@ -95,16 +90,12 @@ class ImageUploader:
         :return: Dicionário contendo id, url, e deletehash da imagem enviada.
         """
         if not os.path.exists(image_path):
-            raise FileNotFoundError(
-                f"O arquivo especificado não foi encontrado: {image_path}"
-            )
+            raise FileNotFoundError(f"O arquivo especificado não foi encontrado: {image_path}")
 
         retry_count = 0
         while retry_count < self.max_retries:
             try:
-                uploaded_image = self.client.upload_from_path(
-                    image_path, config=None, anon=True
-                )
+                uploaded_image = self.client.upload_from_path(image_path, config=None, anon=True)
 
                 # Validar resposta
                 self._validate_response(uploaded_image)
@@ -126,14 +117,10 @@ class ImageUploader:
                 )
                 retry_count += 1
                 if retry_count < self.max_retries:
-                    self.logger.info(
-                        f"Tentando novamente em {self.retry_delay} segundos..."
-                    )
+                    self.logger.info(f"Tentando novamente em {self.retry_delay} segundos...")
                     time.sleep(self.retry_delay * retry_count)  # Exponential backoff
                 else:
-                    self.logger.error(
-                        f"Falha após {self.max_retries} tentativas. Último erro: {e}"
-                    )
+                    self.logger.error(f"Falha após {self.max_retries} tentativas. Último erro: {e}")
                     raise
             except Exception as e:
                 self.logger.error(
@@ -141,19 +128,15 @@ class ImageUploader:
                 )
                 retry_count += 1
                 if retry_count < self.max_retries:
-                    self.logger.info(
-                        f"Tentando novamente em {self.retry_delay} segundos..."
-                    )
+                    self.logger.info(f"Tentando novamente em {self.retry_delay} segundos...")
                     time.sleep(self.retry_delay * retry_count)  # Exponential backoff
                 else:
-                    self.logger.error(
-                        f"Falha após {self.max_retries} tentativas. Último erro: {e}"
-                    )
+                    self.logger.error(f"Falha após {self.max_retries} tentativas. Último erro: {e}")
                     raise
         # Se o loop terminar sem sucesso (sem raise), considerar como falha
         raise RuntimeError("Limite de tentativas excedido ao enviar imagem ao Imgur")
 
-    def upload_from_base64(self, image_base64: str) -> Dict[str, str]:
+    def upload_from_base64(self, image_base64: str) -> dict[str, str]:
         """
         Faz o upload de uma imagem fornecida como string Base64.
 
@@ -215,16 +198,12 @@ class ImageUploader:
 
                 result = self.client.delete_image(deletehash)
                 if result:
-                    self.logger.info(
-                        f"Imagem deletada com sucesso após {attempt + 1} tentativa(s)"
-                    )
+                    self.logger.info(f"Imagem deletada com sucesso após {attempt + 1} tentativa(s)")
                     return True
 
             except ImgurClientError as e:
                 if hasattr(e, "status_code") and e.status_code == 404:
-                    self.logger.info(
-                        f"Imagem não encontrada (404) com deletehash: {deletehash}"
-                    )
+                    self.logger.info(f"Imagem não encontrada (404) com deletehash: {deletehash}")
                     return True  # Consider it a success if image doesn't exist
                 elif attempt < self.max_retries - 1:
                     self.logger.warning(

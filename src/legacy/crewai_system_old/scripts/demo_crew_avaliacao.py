@@ -10,18 +10,20 @@ Simula o fluxo completo com dados mockados para teste.
 import os
 import sys
 from datetime import datetime
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def create_demo_report():
     """📄 Cria um relatório de exemplo para demonstração"""
-    
+
     demo_content = f"""# 📊 Relatório Turbinado da Codebase - DEMO
 ## Agent Social Media - Automação WhatsApp→Instagram
 
 ### 📅 Informações Básicas
-- **Data de análise**: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
+- **Data de análise**: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}
 - **Projeto**: Agent Social Media
 - **Linguagem principal**: Python 3.12
 - **Framework**: CrewAI + Flask + Docker
@@ -197,88 +199,92 @@ WhatsApp Message → Queue → AI Processing → Instagram Post
 
     with open("relatorio_codebase_turbinado.md", "w", encoding="utf-8") as f:
         f.write(demo_content)
-    
+
     print("📄 Relatório demo criado: relatorio_codebase_turbinado.md")
     return "relatorio_codebase_turbinado.md"
 
+
 def test_gemini_connection():
     """🧪 Testa conexão com Gemini API"""
-    
+
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         print("❌ GEMINI_API_KEY não configurada!")
         print("💡 Configure no arquivo .env:")
         print("   GEMINI_API_KEY=sua_chave_aqui")
         return False
-    
+
     try:
         # Teste simples sem importar a biblioteca completa
         print("✅ Gemini API Key configurada!")
         print("📝 Teste de conexão será feito durante execução da crew...")
         return True
-        
+
     except Exception as e:
         print(f"❌ Erro na conexão com Gemini: {str(e)}")
         return False
 
+
 def run_demo_crew():
     """🤖 Executa demo da crew"""
-    
+
     print("🚀 DEMO - CrewAI Avaliação de Codebase")
     print("=" * 50)
-    
+
     # 1. Verifica dependências
     print("🔍 Verificando dependências...")
     try:
         from crew_avaliacao_completa import CodebaseAnalysisCrew
+
         print("✅ CrewAI classes importadas com sucesso!")
     except ImportError as e:
         print(f"❌ Erro ao importar: {str(e)}")
         print("💡 Execute: uv add crewai crewai-tools")
         return False
-    
+
     # 2. Testa conexão Gemini
     if not test_gemini_connection():
         return False
-    
+
     # 3. Cria relatório demo
     print("\n📄 Gerando relatório demo...")
     demo_report = create_demo_report()
-    
+
     # 4. Executa crew
     print("\n🤖 Executando análise da crew...")
     try:
         crew_analyzer = CodebaseAnalysisCrew()
         output_file = crew_analyzer.run_analysis(demo_report)
-        
+
         print("\n🎉 Demo concluída com sucesso!")
         print(f"📄 Relatório final: {output_file}")
-        
+
         # 5. Mostra preview do resultado
         if os.path.exists(output_file):
             print("\n👀 Preview do relatório:")
             print("-" * 40)
-            with open(output_file, 'r', encoding='utf-8') as f:
+            with open(output_file, encoding="utf-8") as f:
                 content = f.read()
                 # Mostra primeiras linhas
-                lines = content.split('\n')[:20]
+                lines = content.split("\n")[:20]
                 for line in lines:
                     print(line)
                 print("...")
                 print(f"\n📖 Arquivo completo: {output_file}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Erro na execução da crew: {str(e)}")
         return False
 
+
 def main():
     """🎯 Função principal do demo"""
-    
+
     if len(sys.argv) > 1 and sys.argv[1] == "--setup":
         print("🔧 Configurando demo...")
-        
+
         # Verifica se .env existe
         if not os.path.exists(".env"):
             print("📝 Criando arquivo .env de exemplo...")
@@ -286,17 +292,18 @@ def main():
                 f.write("# Configuração para CrewAI Demo\n")
                 f.write("GEMINI_API_KEY=your_gemini_key_here\n")
                 f.write("# Obtenha sua chave em: https://aistudio.google.com/app/apikey\n")
-            
+
             print("✅ Arquivo .env criado!")
             print("🔑 Configure sua GEMINI_API_KEY no arquivo .env")
             return 0
-        
+
         print("✅ Setup concluído!")
         return 0
-    
+
     # Executa demo
     success = run_demo_crew()
     return 0 if success else 1
+
 
 if __name__ == "__main__":
     exit(main())

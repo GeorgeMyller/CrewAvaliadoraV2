@@ -1,4 +1,4 @@
-""" 
+"""
 Serviço para publicação de imagens no Instagram, com gerenciamento de containers de mídia, tratamento de limites de taxa (rate limit), persistência de estado e estatísticas de publicação.
 
 Classes:
@@ -46,16 +46,17 @@ Principais métodos:
         Retorna lista de containers pendentes, com informações sobre próximas tentativas e erros.
 """
 
-import os
-import time
 import json
 import logging
+import os
 import random
+import time
 from datetime import datetime
+
 from src.agent_social_media.core.instagram.base_instagram_service import (
     BaseInstagramService,
-    RateLimitError,
     InstagramAPIError,
+    RateLimitError,
 )
 
 logger = logging.getLogger("InstagramPostService")
@@ -83,7 +84,7 @@ class InstagramPostService(BaseInstagramService):
         """Load persisted state from file"""
         try:
             if os.path.exists(self.state_file):
-                with open(self.state_file, "r") as f:
+                with open(self.state_file) as f:
                     state = json.load(f)
                     self.pending_containers = state.get("pending_containers", {})
                     self.stats = state.get(
@@ -116,9 +117,7 @@ class InstagramPostService(BaseInstagramService):
             }
             with open(self.state_file, "w") as f:
                 json.dump(state, f, indent=2)
-            logger.info(
-                f"Saved state with {len(self.pending_containers)} pending containers"
-            )
+            logger.info(f"Saved state with {len(self.pending_containers)} pending containers")
         except Exception as e:
             logger.error(f"Error saving state: {e}")
 
@@ -137,9 +136,7 @@ class InstagramPostService(BaseInstagramService):
         if not self.pending_containers:
             return
 
-        logger.info(
-            f"Found {len(self.pending_containers)} pending containers to process"
-        )
+        logger.info(f"Found {len(self.pending_containers)} pending containers to process")
         processed_containers = []
 
         for container_id, container_data in list(self.pending_containers.items()):
@@ -169,9 +166,7 @@ class InstagramPostService(BaseInstagramService):
                 post_id = self.publish_media(container_id)
 
                 if post_id:
-                    logger.info(
-                        f"Successfully published pending container! ID: {post_id}"
-                    )
+                    logger.info(f"Successfully published pending container! ID: {post_id}")
                     processed_containers.append(container_id)
 
                     # Get permalink
@@ -203,9 +198,7 @@ class InstagramPostService(BaseInstagramService):
 
                 # If we've retried too many times, give up
                 if retry_count >= 5:
-                    logger.error(
-                        f"Too many retry attempts for container {container_id}, giving up"
-                    )
+                    logger.error(f"Too many retry attempts for container {container_id}, giving up")
                     processed_containers.append(container_id)
 
             except Exception as e:
@@ -219,7 +212,9 @@ class InstagramPostService(BaseInstagramService):
         # Save updated state
         self._save_state()
 
-    def create_media_container(self, media_url=None, image_url=None, caption=None, media_type="IMAGE", **kwargs):
+    def create_media_container(
+        self, media_url=None, image_url=None, caption=None, media_type="IMAGE", **kwargs
+    ):
         """
         Creates a media container for the post. Supports both images and videos.
 
@@ -294,9 +289,7 @@ class InstagramPostService(BaseInstagramService):
             try:
                 status = self.check_container_status(container_id)
                 if status == "FINISHED":
-                    logger.info(
-                        f"Container pronto para publicação após {attempt+1} verificações"
-                    )
+                    logger.info(f"Container pronto para publicação após {attempt + 1} verificações")
                     return status
                 elif status in ["ERROR", "EXPIRED"]:
                     logger.error(f"Container falhou com status: {status}")
@@ -331,9 +324,7 @@ class InstagramPostService(BaseInstagramService):
         }
 
         try:
-            result = self._make_request(
-                "POST", f"{self.ig_user_id}/media_publish", data=params
-            )
+            result = self._make_request("POST", f"{self.ig_user_id}/media_publish", data=params)
 
             if result and "id" in result:
                 post_id = result["id"]

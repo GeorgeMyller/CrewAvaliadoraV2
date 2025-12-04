@@ -1,4 +1,4 @@
-""" 
+"""
 Módulo para validação e upload de vídeos para Instagram Reels via Imgur.
 Classes:
     VideoUploader:
@@ -20,12 +20,12 @@ Classes:
 
 """
 
-import os
 import logging
-from typing import Optional, Tuple
+import os
+
 import moviepy.editor as mp
-from imgurpython import ImgurClient
 from dotenv import load_dotenv
+from imgurpython import ImgurClient
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class VideoUploader:
             os.getenv("IMGUR_CLIENT_ID"), os.getenv("IMGUR_CLIENT_SECRET")
         )
 
-    def validate_video(self, video_path: str) -> Tuple[bool, str]:
+    def validate_video(self, video_path: str) -> tuple[bool, str]:
         """
         Validates video against Instagram Reels requirements.
 
@@ -97,7 +97,7 @@ class VideoUploader:
             is_portrait = aspect_ratio > 1.0  # Height > Width (portrait)
             is_landscape = aspect_ratio < 1.0  # Width > Height (landscape)
             is_square = abs(aspect_ratio - 1.0) < 0.1  # Approximately square
-            
+
             # Accept portrait (preferred), square, or not too wide landscape videos
             if not (is_portrait or is_square or (is_landscape and aspect_ratio > 0.5)):
                 return (
@@ -114,7 +114,7 @@ class VideoUploader:
             logger.error(f"Error validating video: {str(e)}")
             return False, f"Error validating video: {str(e)}"
 
-    def upload_video(self, video_path: str) -> Optional[dict]:
+    def upload_video(self, video_path: str) -> dict | None:
         """
         Uploads video to Imgur.
 

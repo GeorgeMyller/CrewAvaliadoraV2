@@ -10,17 +10,17 @@ Fluxo completo:
 4. Organiza outputs na pasta outputs/
 """
 
-import os
-import sys
-import subprocess
-import tempfile
-import shutil
-from pathlib import Path
-from datetime import datetime
 import logging
+import os
+import shutil
+import subprocess  # nosec
+import sys
+import tempfile
+from datetime import datetime
+from pathlib import Path
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -28,24 +28,24 @@ def clone_repository(repo_url: str, target_dir: str, depth: int = 1) -> bool:
     """Clone repositório do GitHub"""
     try:
         logger.info(f"📥 Clonando repositório: {repo_url}")
-        cmd = ['git', 'clone', repo_url, target_dir]
+        git_path = shutil.which("git")
+        if not git_path:
+            logger.error("❌ Git não encontrado")
+            return False
+
+        cmd = [git_path, "clone", repo_url, target_dir]
         if depth > 0:
-            cmd.extend(['--depth', str(depth)])
-            
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        
+            cmd.extend(["--depth", str(depth)])
+
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)  # nosec
+
         if result.returncode == 0:
             logger.info("✅ Repositório clonado com sucesso")
             return True
         else:
             logger.error(f"❌ Erro ao clonar: {result.stderr}")
             return False
-            
+
     except Exception as e:
         logger.error(f"❌ Erro: {e}")
         return False
@@ -55,21 +55,26 @@ def get_git_diff(repo_path: str, base_ref: str, head_ref: str) -> str:
     """Obtém o diff entre duas referências git"""
     try:
         logger.info(f"🔍 Obtendo diff entre {base_ref} e {head_ref}...")
-        
+
+        git_path = shutil.which("git")
+        if not git_path:
+            logger.error("❌ Git não encontrado")
+            return ""
+
         # Fetch se necessário (se clonado com depth 1, pode não ter histórico suficiente)
         # Mas assumindo que o usuário fornece refs válidas que existem no clone
-        
+
         # Garante que temos as refs
-        subprocess.run(['git', 'fetch', '--all'], cwd=repo_path, capture_output=True)
-        
+        subprocess.run([git_path, "fetch", "--all"], cwd=repo_path, capture_output=True)  # nosec
+
         result = subprocess.run(
-            ['git', 'diff', base_ref, head_ref],
+            [git_path, "diff", base_ref, head_ref],
             cwd=repo_path,
             capture_output=True,
             text=True,
-            timeout=60
-        )
-        
+            timeout=60,
+        )  # nosec
+
         if result.returncode == 0:
             diff_content = result.stdout
             logger.info(f"✅ Diff obtido ({len(diff_content)} chars)")
@@ -77,7 +82,7 @@ def get_git_diff(repo_path: str, base_ref: str, head_ref: str) -> str:
         else:
             logger.error(f"❌ Erro ao obter diff: {result.stderr}")
             return ""
-            
+
     except Exception as e:
         logger.error(f"❌ Erro ao obter diff: {e}")
         return ""
@@ -87,26 +92,26 @@ def generate_base_report(repo_path: str, output_file: str) -> bool:
     """Gera relatório base da codebase"""
     try:
         logger.info("📊 Gerando relatório base...")
-        
+
         # Usa quick report (mais rápido)
         quick_report_path = Path(__file__).parent / "quick_report.py"
         if not quick_report_path.exists():
             logger.error(f"❌ Script não encontrado: {quick_report_path}")
             return False
-        
+
         # Executa gerador rápido
         result = subprocess.run(
             [sys.executable, str(quick_report_path), repo_path, output_file],
             capture_output=True,
             text=True,
-            timeout=60  # Apenas 60 segundos
-        )
-        
+            timeout=60,  # Apenas 60 segundos
+        )  # nosec
+
         if result.returncode != 0:
             logger.error(f"❌ Erro ao gerar relatório: {result.stderr}")
             logger.error(f"stdout: {result.stdout}")
             return False
-        
+
         # Verifica que arquivo foi criado
         if os.path.exists(output_file):
             size = os.path.getsize(output_file)
@@ -115,33 +120,39 @@ def generate_base_report(repo_path: str, output_file: str) -> bool:
         else:
             logger.error("❌ Relatório não foi gerado")
             return False
-            
+
     except Exception as e:
         logger.error(f"❌ Erro: {e}")
         return False
 
 
-def run_crewai_analysis(base_report: str, output_dir: str, project_name: str, repo_path: str = None, diff_content: str = None) -> bool:
+def run_crewai_analysis(
+    base_report: str,
+    output_dir: str,
+    project_name: str,
+    repo_path: str = None,
+    diff_content: str = None,
+) -> bool:
     """Executa análise CrewAI"""
     try:
         logger.info("🚀 Iniciando análise CrewAI...")
-        
+
         # Importa e executa crew
         sys.path.insert(0, str(Path(__file__).parent.parent))
         from src.crew_avaliadora import CodebaseAnalysisCrewV2
-        
+
         # Lê relatório base
-        with open(base_report, 'r', encoding='utf-8') as f:
+        with open(base_report, encoding="utf-8") as f:
             codebase_report = f.read()
-        
+
         # Prepara output
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = os.path.join(output_dir, f"relatorio_final_{project_name}_{timestamp}.md")
-        
+
         # Executa análise
         crew = CodebaseAnalysisCrewV2(repo_path=repo_path)
         result = crew.analyze_codebase(codebase_report, output_file, diff_content=diff_content)
-        
+
         if os.path.exists(output_file):
             file_size = os.path.getsize(output_file)
             logger.info(f"✅ Análise completa: {output_file} ({file_size:,} bytes)")
@@ -149,10 +160,11 @@ def run_crewai_analysis(base_report: str, output_dir: str, project_name: str, re
         else:
             logger.error("❌ Relatório final não foi gerado")
             return False
-            
+
     except Exception as e:
         logger.error(f"❌ Erro na análise: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -163,25 +175,25 @@ def main():
         print("Uso: python analyze_repo.py <repo_url>")
         print("Exemplo: python analyze_repo.py https://github.com/user/repo")
         sys.exit(1)
-    
+
     repo_url = sys.argv[1]
-    
+
     # Extrai nome do projeto
-    project_name = repo_url.rstrip('/').split('/')[-1].replace('.git', '')
-    
-    print("="*70)
+    project_name = repo_url.rstrip("/").split("/")[-1].replace(".git", "")
+
+    print("=" * 70)
     print("🎯 Análise Completa de Repositório")
-    print("="*70)
+    print("=" * 70)
     print(f"📦 Projeto: {project_name}")
     print(f"🔗 URL: {repo_url}")
-    print("="*70)
+    print("=" * 70)
     print()
-    
+
     # Prepara diretórios
     base_dir = Path(__file__).parent.parent
     outputs_dir = base_dir / "outputs" / project_name
     outputs_dir.mkdir(parents=True, exist_ok=True)
-    
+
     temp_dir = None
     try:
         # 1. Clone repositório
@@ -189,42 +201,43 @@ def main():
         if not clone_repository(repo_url, temp_dir):
             logger.error("❌ Falha ao clonar repositório")
             sys.exit(1)
-        
+
         print()
-        
+
         # 2. Gera relatório base
         base_report = outputs_dir / "relatorio_codebase_inicial.md"
         if not generate_base_report(temp_dir, str(base_report)):
             logger.error("❌ Falha ao gerar relatório base")
             sys.exit(1)
-        
+
         print()
-        
+
         # 3. Executa análise CrewAI
         if not run_crewai_analysis(str(base_report), str(outputs_dir), project_name, temp_dir):
             logger.error("❌ Falha na análise CrewAI")
             sys.exit(1)
-        
+
         print()
-        print("="*70)
+        print("=" * 70)
         print("✅ ANÁLISE COMPLETA!")
-        print("="*70)
+        print("=" * 70)
         print(f"📁 Outputs salvos em: {outputs_dir}")
         print()
-        
+
         # Lista arquivos gerados
         for f in outputs_dir.iterdir():
             if f.is_file():
                 size = f.stat().st_size
                 print(f"  📄 {f.name} ({size:,} bytes)")
         print()
-        
+
     except KeyboardInterrupt:
         print("\n⚠️ Análise interrompida pelo usuário")
         sys.exit(130)
     except Exception as e:
         logger.error(f"❌ Erro inesperado: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
     finally:

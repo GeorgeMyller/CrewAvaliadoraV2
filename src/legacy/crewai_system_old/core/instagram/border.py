@@ -26,8 +26,9 @@ Uso:
 
 """
 
-from PIL import Image
 import logging
+
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +55,17 @@ class ImageWithBorder:
             str: Caminho da imagem resultante.
         """
         logger.info(f"🖼️ Criando imagem com moldura - Modo: {fit_mode}")
-        
+
         # Abrir a imagem e a borda
         image = Image.open(image_path)
         border = Image.open(border_path)
 
-        logger.info(f"📊 Imagem original - Size: {image.size}, Format: {image.format}, Mode: {image.mode}")
-        logger.info(f"📊 Moldura original - Size: {border.size}, Format: {border.format}, Mode: {border.mode}")
+        logger.info(
+            f"📊 Imagem original - Size: {image.size}, Format: {image.format}, Mode: {image.mode}"
+        )
+        logger.info(
+            f"📊 Moldura original - Size: {border.size}, Format: {border.format}, Mode: {border.mode}"
+        )
 
         # Convert image to RGB if it's RGBA
         if image.mode in ("RGBA", "LA"):
@@ -72,7 +77,7 @@ class ImageWithBorder:
         # NOVA LÓGICA: Ajustar moldura ao tamanho da imagem
         if fit_mode == "border_to_image":
             result = ImageWithBorder._fit_border_to_image(image, border)
-            
+
         # Modos antigos (mantidos para compatibilidade)
         else:
             # Se target_size não foi especificado, usar dimensões da borda
@@ -90,15 +95,17 @@ class ImageWithBorder:
             else:
                 processed_image = ImageWithBorder._resize_to_fill(image, target_size)
 
-            logger.info(f"📊 Imagem processada - Size: {processed_image.size}, Mode: {processed_image.mode}")
+            logger.info(
+                f"📊 Imagem processada - Size: {processed_image.size}, Mode: {processed_image.mode}"
+            )
 
             # Criar imagem resultado com as dimensões da borda
             result = Image.new("RGB", border.size, (255, 255, 255))
-            
+
             # Calcular posição para centralizar a imagem processada na moldura
             paste_x = (border.size[0] - processed_image.size[0]) // 2
             paste_y = (border.size[1] - processed_image.size[1]) // 2
-            
+
             # Colar a imagem processada
             result.paste(processed_image, (paste_x, paste_y))
 
@@ -116,7 +123,7 @@ class ImageWithBorder:
         # Salvar a imagem resultante
         result.save(output_path, format="JPEG", quality=95)
         logger.info(f"✅ Imagem com moldura salva: {output_path}")
-        
+
         return output_path
 
     @staticmethod
@@ -127,20 +134,22 @@ class ImageWithBorder:
         """
         img_width, img_height = image.size
         border_width, border_height = border.size
-        
-        logger.info(f"🔄 Ajustando moldura ({border_width}x{border_height}) para imagem ({img_width}x{img_height})")
-        
+
+        logger.info(
+            f"🔄 Ajustando moldura ({border_width}x{border_height}) para imagem ({img_width}x{img_height})"
+        )
+
         # Redimensionar a moldura para o tamanho exato da imagem
         resized_border = border.resize((img_width, img_height), Image.Resampling.LANCZOS)
         logger.info(f"📏 Moldura redimensionada para: {resized_border.size}")
-        
+
         # Criar resultado com o tamanho da imagem original
         result = Image.new("RGB", (img_width, img_height), (255, 255, 255))
-        
+
         # Colar a imagem original (sem alterações)
         result.paste(image, (0, 0))
         logger.info("📷 Imagem original colada (sem cortes)")
-        
+
         # Aplicar a moldura redimensionada
         if resized_border.mode == "RGBA":
             # Use o canal alpha da borda como máscara
@@ -151,7 +160,7 @@ class ImageWithBorder:
             # Borda sem transparência - aplicar diretamente
             result.paste(resized_border.convert("RGB"), (0, 0))
             logger.info("🎨 Moldura redimensionada opaca aplicada")
-        
+
         logger.info("✅ Moldura ajustada ao tamanho da imagem - IMAGEM PRESERVADA COMPLETAMENTE")
         return result
 
@@ -163,19 +172,19 @@ class ImageWithBorder:
         """
         target_width, target_height = target_size
         img_width, img_height = image.size
-        
+
         # Calcular escalas para largura e altura
         scale_w = target_width / img_width
         scale_h = target_height / img_height
-        
+
         # Usar a maior escala para garantir que preencha completamente
         scale = max(scale_w, scale_h)
-        
+
         # Redimensionar com a escala calculada
         new_width = int(img_width * scale)
         new_height = int(img_height * scale)
         resized_image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
-        
+
         # Se redimensionado for maior que target, fazer crop central
         if new_width > target_width or new_height > target_height:
             left = (new_width - target_width) // 2
@@ -183,7 +192,7 @@ class ImageWithBorder:
             right = left + target_width
             bottom = top + target_height
             resized_image = resized_image.crop((left, top, right, bottom))
-        
+
         return resized_image
 
     @staticmethod
@@ -194,17 +203,17 @@ class ImageWithBorder:
         """
         target_width, target_height = target_size
         img_width, img_height = image.size
-        
+
         # Calcular escalas para largura e altura
         scale_w = target_width / img_width
         scale_h = target_height / img_height
-        
+
         # Usar a menor escala para garantir que caiba completamente
         scale = min(scale_w, scale_h)
-        
+
         # Redimensionar com a escala calculada
         new_width = int(img_width * scale)
         new_height = int(img_height * scale)
         resized_image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
-        
+
         return resized_image

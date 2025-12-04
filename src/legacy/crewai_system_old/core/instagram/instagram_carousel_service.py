@@ -1,4 +1,4 @@
-""" 
+"""
 Serviço para gerenciamento de upload e publicação de carrosséis no Instagram.
 
 Este módulo fornece a classe `InstagramCarouselService`, que permite validar mídias,
@@ -30,19 +30,19 @@ Uso recomendado para automação de postagens de carrosséis em contas do Instag
 
 """
 
-import os
-import time
 import logging
+import os
 import random
-from typing import Optional, List
+import time
 from datetime import datetime
+
 from dotenv import load_dotenv
 from src.agent_social_media.core.instagram.base_instagram_service import (
-    BaseInstagramService,
     AuthenticationError,
+    BaseInstagramService,
+    InstagramAPIError,
     PermissionError,
     RateLimitError,
-    InstagramAPIError,
 )
 
 logger = logging.getLogger("InstagramCarouselService")
@@ -158,9 +158,7 @@ class InstagramCarouselService(BaseInstagramService):
                         missing_perms.append(perm)
 
                 if missing_perms:
-                    logger.error(
-                        f"Token is missing required permissions: {missing_perms}"
-                    )
+                    logger.error(f"Token is missing required permissions: {missing_perms}")
                     raise PermissionError(
                         f"Token is missing required permissions: {missing_perms}. "
                         f"Please request these permissions in your app and get a new token."
@@ -176,9 +174,7 @@ class InstagramCarouselService(BaseInstagramService):
                     if time.time() > self.token_expires_at - (
                         86400 * 3
                     ):  # 3 days before expiration
-                        logger.warning(
-                            "Token will expire soon. Consider refreshing it."
-                        )
+                        logger.warning("Token will expire soon. Consider refreshing it.")
             else:
                 logger.error("Access token is invalid or expired.")
                 raise AuthenticationError("Access token is invalid or expired.")
@@ -189,9 +185,7 @@ class InstagramCarouselService(BaseInstagramService):
     def _refresh_token(self):
         """Refreshes the access token."""
         if not os.getenv("INSTAGRAM_API_KEY"):
-            raise AuthenticationError(
-                "Cannot refresh token. No long-lived access token available."
-            )
+            raise AuthenticationError("Cannot refresh token. No long-lived access token available.")
 
         logger.info("Refreshing Instagram access token...")
         try:
@@ -219,7 +213,7 @@ class InstagramCarouselService(BaseInstagramService):
     def _update_env_file(self, key, new_value):
         """Updates the .env file with the new token (use with caution)."""
         try:
-            with open(".env", "r") as f:
+            with open(".env") as f:
                 lines = f.readlines()
             updated_lines = []
             found = False
@@ -233,22 +227,21 @@ class InstagramCarouselService(BaseInstagramService):
                 updated_lines.append(f"{key}={new_value}\n")
             with open(".env", "w") as f:
                 f.writelines(updated_lines)
-            logger.warning(
-                ".env file updated. THIS IS GENERALLY NOT RECOMMENDED FOR PRODUCTION."
-            )
+            logger.warning(".env file updated. THIS IS GENERALLY NOT RECOMMENDED FOR PRODUCTION.")
         except Exception as e:
             logger.error(f"Error updating .env file: {e}")
 
     def _validate_media(self, media_url: str) -> bool:
         """Validates media URL and type before uploading with retry mechanism."""
         import requests  # local import to ensure availability for except clauses
+
         max_retries = 5
         base_delay = 5  # seconds - increased from 2 to 5
 
         for attempt in range(max_retries):
             try:
                 logger.info(
-                    f"Validating media URL (attempt {attempt+1}/{max_retries}): {media_url}"
+                    f"Validating media URL (attempt {attempt + 1}/{max_retries}): {media_url}"
                 )
 
                 # Create a new session for each attempt to avoid connection pooling issues
@@ -260,9 +253,7 @@ class InstagramCarouselService(BaseInstagramService):
                     "Accept": "image/jpeg, image/png, */*",
                 }
 
-                response = session.head(
-                    media_url, timeout=20, headers=headers
-                )  # Increased timeout
+                response = session.head(media_url, timeout=20, headers=headers)  # Increased timeout
 
                 if response.status_code != 200:
                     logger.error(
@@ -273,9 +264,7 @@ class InstagramCarouselService(BaseInstagramService):
                     if response.status_code == 429:
                         # Use retry-after header if present, otherwise use exponential backoff
                         retry_after = int(
-                            response.headers.get(
-                                "retry-after", base_delay * (2**attempt)
-                            )
+                            response.headers.get("retry-after", base_delay * (2**attempt))
                         )
                         # Ensure we wait at least 10 seconds for Imgur rate limits
                         retry_after = max(retry_after, 10 + random.randint(1, 10))
@@ -305,7 +294,7 @@ class InstagramCarouselService(BaseInstagramService):
 
             except requests.exceptions.RequestException as e:
                 logger.error(
-                    f"Error validating media (attempt {attempt+1}/{max_retries}): {str(e)}"
+                    f"Error validating media (attempt {attempt + 1}/{max_retries}): {str(e)}"
                 )
 
                 if "too many 429 error responses" in str(e) or "429" in str(e):
@@ -329,12 +318,10 @@ class InstagramCarouselService(BaseInstagramService):
                     logger.warning(f"Will retry after {delay:.2f}s...")
                     time.sleep(delay)
 
-        logger.error(
-            f"Failed to validate media after {max_retries} attempts: {media_url}"
-        )
+        logger.error(f"Failed to validate media after {max_retries} attempts: {media_url}")
         return False
 
-    def _create_child_container(self, media_url: str) -> Optional[str]:
+    def _create_child_container(self, media_url: str) -> str | None:
         """Creates a child container for a carousel image."""
         if self.token_expires_at and time.time() > self.token_expires_at - 60:
             self._refresh_token()
@@ -356,9 +343,7 @@ class InstagramCarouselService(BaseInstagramService):
             logger.error(f"Failed to create child container: {e}")
             raise
 
-    def create_carousel_container(
-        self, media_urls: List[str], caption: str
-    ) -> Optional[str]:
+    def create_carousel_container(self, media_urls: list[str], caption: str) -> str | None:
         """Creates a container for a carousel post."""
         if self.token_expires_at and time.time() > self.token_expires_at - 60:
             self._refresh_token()
@@ -441,9 +426,7 @@ class InstagramCarouselService(BaseInstagramService):
                 publishing_to_ig = data.get("publishing_to_ig", False)
 
                 # Log detailed status information
-                logger.info(
-                    f"Container status check (attempt {attempt + 1}/{max_attempts}):"
-                )
+                logger.info(f"Container status check (attempt {attempt + 1}/{max_attempts}):")
                 logger.info(f"  - Status code: {status_code}")
                 logger.info(f"  - Status details: {status_details}")
                 logger.info(f"  - Publishing to IG: {publishing_to_ig}")
@@ -452,9 +435,7 @@ class InstagramCarouselService(BaseInstagramService):
                     return status_code
 
                 elif status_code == "FINISHED" and publishing_to_ig:
-                    logger.info(
-                        "Container is ready but still being processed by Instagram"
-                    )
+                    logger.info("Container is ready but still being processed by Instagram")
                     time.sleep(delay)
                     continue
 
@@ -512,7 +493,7 @@ class InstagramCarouselService(BaseInstagramService):
         logger.error(f"Container status check timed out after {max_attempts} attempts.")
         return "TIMEOUT"
 
-    def publish_carousel(self, container_id: str) -> Optional[str]:
+    def publish_carousel(self, container_id: str) -> str | None:
         """Publishes the carousel post."""
         if self.token_expires_at and time.time() > self.token_expires_at - 60:
             self._refresh_token()
@@ -521,24 +502,18 @@ class InstagramCarouselService(BaseInstagramService):
 
         if self._rate_limit_state.should_backoff():
             wait_time = self._rate_limit_state.get_backoff_time()
-            logger.warning(
-                f"Still in backoff period. Waiting {wait_time:.1f} seconds..."
-            )
+            logger.warning(f"Still in backoff period. Waiting {wait_time:.1f} seconds...")
             time.sleep(wait_time)
 
         try:
             # Add detailed logging to help diagnose issues
-            logger.info(
-                f"Attempting to publish carousel with container ID: {container_id}"
-            )
+            logger.info(f"Attempting to publish carousel with container ID: {container_id}")
 
             # Print detailed info about the request
             logger.info(f"Publishing to endpoint: {self.ig_user_id}/media_publish")
             logger.info(f"Publishing with params: {params}")
 
-            result = self._make_request(
-                "POST", f"{self.ig_user_id}/media_publish", data=params
-            )
+            result = self._make_request("POST", f"{self.ig_user_id}/media_publish", data=params)
 
             if result and "id" in result:
                 post_id = result["id"]
@@ -563,17 +538,17 @@ class InstagramCarouselService(BaseInstagramService):
 
             # Add additional error details
             if hasattr(e, "error_type"):
-                logger.error(f"Error type: {getattr(e, 'error_type')}")
+                logger.error(f"Error type: {e.error_type}")
             if hasattr(e, "error_message"):
-                logger.error(f"Error message: {getattr(e, 'error_message')}")
+                logger.error(f"Error message: {e.error_message}")
             if hasattr(e, "error_code"):
-                logger.error(f"Error code: {getattr(e, 'error_code')}")
+                logger.error(f"Error code: {e.error_code}")
             if hasattr(e, "fb_trace_id"):
-                logger.error(f"FB trace ID: {getattr(e, 'fb_trace_id')}")
+                logger.error(f"FB trace ID: {e.fb_trace_id}")
 
             raise
 
-    def post_carousel(self, media_urls: List[str], caption: str) -> Optional[str]:
+    def post_carousel(self, media_urls: list[str], caption: str) -> str | None:
         """Handles the full flow of creating and publishing a carousel post."""
         if len(media_urls) < 2 or len(media_urls) > 10:
             raise ValueError(
@@ -582,9 +557,7 @@ class InstagramCarouselService(BaseInstagramService):
 
         if self._rate_limit_state.should_backoff():
             wait_time = self._rate_limit_state.get_backoff_time()
-            logger.warning(
-                f"Still in backoff period. Waiting {wait_time:.1f} seconds..."
-            )
+            logger.warning(f"Still in backoff period. Waiting {wait_time:.1f} seconds...")
             time.sleep(wait_time)
 
         max_attempts = 3
@@ -618,9 +591,7 @@ class InstagramCarouselService(BaseInstagramService):
                 raise
 
             except Exception as e:
-                logger.error(
-                    f"Error posting carousel (attempt {attempt + 1}): {str(e)}"
-                )
+                logger.error(f"Error posting carousel (attempt {attempt + 1}): {str(e)}")
                 if attempt < max_attempts - 1:
                     delay = base_delay * (2**attempt)
                     logger.info(f"Retrying in {delay} seconds...")

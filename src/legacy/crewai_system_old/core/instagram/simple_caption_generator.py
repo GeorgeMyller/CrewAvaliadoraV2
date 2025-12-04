@@ -1,4 +1,4 @@
-""" 
+"""
 Módulo para geração simplificada de legendas para Instagram utilizando a API Gemini da Google Generative AI.
 Este módulo oferece uma classe principal, SimpleInstagramCaptionGenerator, que permite criar legendas cativantes, profissionais e irreverentes para postagens no Instagram, especialmente voltadas para o contexto corporativo e de transformação digital da empresa AcessoIA. O gerador utiliza parâmetros personalizáveis como gênero, estilo, sentimento, tamanho, uso de emojis e gírias, além de seguir diretrizes específicas para referência à empresa, tom de voz e inclusão de hashtags relevantes.
 Caso a API Gemini não esteja disponível ou configurada, o módulo fornece um mecanismo de fallback com templates pré-definidos para diferentes gêneros de legenda.
@@ -14,14 +14,17 @@ Uso:
 Inicialize a classe SimpleInstagramCaptionGenerator e utilize o método generate_caption passando um dicionário de parâmetros para obter uma legenda personalizada para Instagram.
 
 """
-import os
+
 import logging
+import os
+
 try:
     import google.generativeai as genai
+
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
-    
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,16 +42,16 @@ class SimpleInstagramCaptionGenerator:
             logger.warning("Google Generative AI não disponível, usando fallback")
             self.model = None
             return
-            
+
         api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         if not api_key:
             logger.warning("GEMINI_API_KEY não encontrado, usando fallback")
             self.model = None
             return
-        
+
         try:
             genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-2.0-flash')
+            self.model = genai.GenerativeModel("gemini-2.0-flash")
         except Exception as e:
             logger.error(f"Erro ao configurar Gemini: {e}, usando fallback")
             self.model = None
@@ -56,14 +59,14 @@ class SimpleInstagramCaptionGenerator:
     def generate_caption(self, inputs):
         """
         Gera uma legenda para Instagram baseada nos inputs fornecidos
-        
+
         Args:
             inputs (dict): Dicionário com parâmetros para geração
-        
+
         Returns:
             str: Legenda gerada
         """
-        
+
         # Extrair parâmetros dos inputs
         genero = inputs.get("genero", "Corporativo")
         caption = inputs.get("caption", "Nova postagem")
@@ -133,16 +136,14 @@ Gere uma legenda seguindo essas diretrizes:
 
     def _generate_fallback_caption(self, caption, describe, genero):
         """Gera uma legenda básica quando o Gemini não está disponível"""
-        
+
         # Templates básicos baseados no gênero
         templates = {
             "Corporativo": "🚀 A AcessoIA está revolucionando a transformação digital corporativa! {caption}\n\n💡 Quando falamos de {describe}, pensamos em como a IA pode otimizar processos e gerar resultados excepcionais.\n\n✨ Capacitação • Inovação • Produtividade\n\n#AcessoIA #TransformacaoDigital #InteligenciaArtificial",
-            
             "Tecnológico": "💻 Olha só o que a AcessoIA está aprontando agora! {caption}\n\n🔧 {describe} é só mais um exemplo de como a tecnologia pode acelerar a inovação corporativa.\n\n🎯 Porque treinar equipes em IA não é luxo, é necessidade!\n\n#TechInnovation #AcessoIA #AITraining",
-            
-            "Educacional": "📚 A AcessoIA não para de surpreender! {caption}\n\n🎓 {describe} mostra como o conhecimento em IA pode transformar carreiras e abrir portas no mercado.\n\n💪 Inclusão digital que gera resultados reais!\n\n#EducacaoDigital #AcessoIA #FuturoDoTrabalho"
+            "Educacional": "📚 A AcessoIA não para de surpreender! {caption}\n\n🎓 {describe} mostra como o conhecimento em IA pode transformar carreiras e abrir portas no mercado.\n\n💪 Inclusão digital que gera resultados reais!\n\n#EducacaoDigital #AcessoIA #FuturoDoTrabalho",
         }
-        
+
         template = templates.get(genero, templates["Corporativo"])
         return template.format(caption=caption, describe=describe)
 
@@ -150,10 +151,10 @@ Gere uma legenda seguindo essas diretrizes:
 # Compatibilidade com o código existente
 class InstagramPostCrew:
     """Wrapper para compatibilidade com código existente"""
-    
+
     def __init__(self):
         self.generator = SimpleInstagramCaptionGenerator()
-    
+
     def kickoff(self, inputs):
         """Método para compatibilidade com CrewAI"""
         return self.generator.generate_caption(inputs)

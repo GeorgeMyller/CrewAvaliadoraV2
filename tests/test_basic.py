@@ -1,7 +1,8 @@
 """Basic tests to verify project setup."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 def test_project_structure():
@@ -20,9 +21,9 @@ def test_config_files():
 
 def test_main_scripts():
     """Test that main scripts exist."""
-    assert Path("crew_avaliacao_completa.py").exists()
-    assert Path("avaliacao_gemini.py").exists()
-    assert Path("gerar_relatorio.py").exists()
+    assert Path("src/crew_avaliadora.py").exists()
+    assert Path("src/analyze_repo.py").exists()
+    assert Path("src/legacy/gerar_relatorio.py").exists()
 
 
 def test_imports():
@@ -31,6 +32,7 @@ def test_imports():
         import crewai
         import google.generativeai as genai
         from dotenv import load_dotenv
+
         assert True
     except ImportError as e:
         pytest.fail(f"Failed to import required module: {e}")

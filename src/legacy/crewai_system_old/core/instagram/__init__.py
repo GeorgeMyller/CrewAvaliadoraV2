@@ -10,7 +10,7 @@ Este pacote contém todos os módulos necessários para:
 
 # Imports principais serão configurados após refatoração
 # from .image_uploader import ImageUploader
-# from .video_uploader import VideoUploader  
+# from .video_uploader import VideoUploader
 # from .instagram_post_service import InstagramPostService
 # from .filter import FilterImage, FilterVideo
 

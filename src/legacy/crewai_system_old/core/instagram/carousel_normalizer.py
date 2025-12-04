@@ -24,10 +24,11 @@ Todos os métodos são estáticos e podem ser utilizados independentemente.
 
 """
 
-import os
 import logging
+import os
 import tempfile
-from typing import List, Tuple, Optional, Dict
+from typing import Optional
+
 from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger("CarouselNormalizer")
@@ -78,7 +79,7 @@ class CarouselNormalizer:
             return 0
 
     @staticmethod
-    def get_image_info(image_path: str) -> Dict:
+    def get_image_info(image_path: str) -> dict:
         """Get detailed information about an image"""
         if not os.path.exists(image_path):
             logger.error(f"Image file not found: {image_path}")
@@ -109,7 +110,7 @@ class CarouselNormalizer:
             return {}
 
     @staticmethod
-    def validate_for_instagram(image_path: str) -> Tuple[bool, List[str]]:
+    def validate_for_instagram(image_path: str) -> tuple[bool, list[str]]:
         """
         Validate if an image meets Instagram's requirements
         Returns (is_valid, issues)
@@ -156,7 +157,7 @@ class CarouselNormalizer:
             # Check file size
             if info["file_size"] > CarouselNormalizer.MAX_FILE_SIZE:
                 issues.append(
-                    f"File size too large: {info['file_size_mb']}MB (max: {CarouselNormalizer.MAX_FILE_SIZE / (1024*1024)}MB)"
+                    f"File size too large: {info['file_size_mb']}MB (max: {CarouselNormalizer.MAX_FILE_SIZE / (1024 * 1024)}MB)"
                 )
 
             return len(issues) == 0, issues
@@ -166,7 +167,7 @@ class CarouselNormalizer:
             return False, [f"Validation error: {str(e)}"]
 
     @staticmethod
-    def get_most_common_ratio(image_paths: List[str]) -> float:
+    def get_most_common_ratio(image_paths: list[str]) -> float:
         """Find the most common aspect ratio in a list of images"""
         if not image_paths:
             return CarouselNormalizer.RECOMMENDED_RATIOS["square"]
@@ -234,10 +235,7 @@ class CarouselNormalizer:
         width, height = img.size
 
         # Check if resizing is needed
-        if (
-            width <= CarouselNormalizer.MAX_WIDTH
-            and height <= CarouselNormalizer.MAX_HEIGHT
-        ):
+        if width <= CarouselNormalizer.MAX_WIDTH and height <= CarouselNormalizer.MAX_HEIGHT:
             return img
 
         # Calculate new dimensions while preserving aspect ratio
@@ -263,7 +261,7 @@ class CarouselNormalizer:
         return resized
 
     @staticmethod
-    def normalize_image(image_path: str, target_ratio: float) -> Optional[str]:
+    def normalize_image(image_path: str, target_ratio: float) -> str | None:
         """
         Resize the image to match the target aspect ratio
         Returns path to the normalized image or None if failed
@@ -354,7 +352,7 @@ class CarouselNormalizer:
             return Optional[str](image_path) if image_path else None
 
     @staticmethod
-    def find_best_target_ratio(image_paths: List[str]) -> float:
+    def find_best_target_ratio(image_paths: list[str]) -> float:
         """Find the best target ratio that will work with Instagram's requirements"""
         if not image_paths:
             return CarouselNormalizer.RECOMMENDED_RATIOS["square"]
@@ -374,7 +372,7 @@ class CarouselNormalizer:
         return CarouselNormalizer.get_best_instagram_ratio(most_common)
 
     @staticmethod
-    def normalize_carousel_images(image_paths: List[str]) -> List[str]:
+    def normalize_carousel_images(image_paths: list[str]) -> list[str]:
         """
         Normalize all images to the most common aspect ratio
         Returns a list of paths to normalized images
@@ -430,9 +428,7 @@ class CarouselNormalizer:
             is_valid, issues = CarouselNormalizer.validate_for_instagram(path)
             if not is_valid:
                 all_valid = False
-                logger.warning(
-                    f"Normalized image {path} still has issues: {', '.join(issues)}"
-                )
+                logger.warning(f"Normalized image {path} still has issues: {', '.join(issues)}")
 
         if not all_valid:
             logger.warning("Some normalized images may not meet Instagram requirements")

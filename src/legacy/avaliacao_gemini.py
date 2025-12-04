@@ -7,35 +7,39 @@ Versão simplificada que funciona com Google Gemini 2.5 Flash
 """
 
 import os
-import google.generativeai as genai
 from datetime import datetime
+
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
+
 
 def setup_gemini():
     """🔧 Configura Gemini API"""
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY não encontrada no .env")
-    
+
     # Remove espaços em branco da chave
     api_key = api_key.strip()
     genai.configure(api_key=api_key)
-    
-    return genai.GenerativeModel('gemini-2.5-flash')
+
+    return genai.GenerativeModel("gemini-2.5-flash")
+
 
 def load_report(file_path="relatorio_codebase_turbinado.md"):
     """📄 Carrega relatório base"""
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Relatório não encontrado: {file_path}")
-    
-    with open(file_path, 'r', encoding='utf-8') as f:
+
+    with open(file_path, encoding="utf-8") as f:
         return f.read()
+
 
 def analyze_architecture(model, report_content):
     """🏗️ Análise Arquitetural"""
-    
+
     prompt = f"""Como um Arquiteto de Software Sênior experiente, analise o seguinte relatório de codebase e forneça uma análise arquitetural profunda:
 
 RELATÓRIO DA CODEBASE:
@@ -58,9 +62,10 @@ Seja específico e técnico nas recomendações."""
     except Exception as e:
         return f"❌ Erro na análise arquitetural: {str(e)}"
 
+
 def analyze_quality(model, report_content):
     """🧪 Análise de Qualidade"""
-    
+
     prompt = f"""Como um Engenheiro de Qualidade sênior, analise o seguinte relatório e forneça uma avaliação de qualidade:
 
 RELATÓRIO DA CODEBASE:
@@ -83,9 +88,10 @@ Dê um score de 0-100 para qualidade geral."""
     except Exception as e:
         return f"❌ Erro na análise de qualidade: {str(e)}"
 
+
 def analyze_documentation(model, report_content):
     """📄 Análise de Documentação"""
-    
+
     prompt = f"""Como um Documentador Técnico especialista, analise este relatório:
 
 RELATÓRIO DA CODEBASE:
@@ -108,9 +114,10 @@ Score de completude: 0-100"""
     except Exception as e:
         return f"❌ Erro na análise de documentação: {str(e)}"
 
+
 def analyze_business(model, report_content):
     """🚀 Análise de Negócio"""
-    
+
     prompt = f"""Como um Product Manager estratégico, analise a viabilidade comercial:
 
 RELATÓRIO DA CODEBASE:
@@ -133,9 +140,10 @@ Score de market readiness: 0-100"""
     except Exception as e:
         return f"❌ Erro na análise comercial: {str(e)}"
 
+
 def analyze_legal(model, report_content):
     """⚖️ Análise Legal"""
-    
+
     prompt = f"""Como um Consultor Jurídico de Tecnologia, analise os aspectos legais:
 
 RELATÓRIO DA CODEBASE:
@@ -158,9 +166,10 @@ Score de compliance: 0-100"""
     except Exception as e:
         return f"❌ Erro na análise legal: {str(e)}"
 
+
 def analyze_ai(model, report_content):
     """🤖 Análise de IA"""
-    
+
     prompt = f"""Como um Engenheiro de IA especialista, analise os componentes de inteligência artificial:
 
 RELATÓRIO DA CODEBASE:
@@ -183,11 +192,12 @@ Score de otimização IA: 0-100"""
     except Exception as e:
         return f"❌ Erro na análise de IA: {str(e)}"
 
+
 def generate_final_report(model, analyses):
     """📑 Gera relatório final consolidado"""
-    
+
     combined_analysis = "\n\n".join(analyses)
-    
+
     prompt = f"""Como um Arquiteto de Software Sênior, consolide as seguintes análises em um relatório final ultra-profissional:
 
 ANÁLISES ESPECIALIZADAS:
@@ -230,61 +240,62 @@ Use markdown profissional com emojis e formatação clara."""
     except Exception as e:
         return f"❌ Erro na consolidação final: {str(e)}"
 
+
 def main():
     """🎯 Função principal"""
-    
+
     print("🚀 CrewAI Simplificado - Análise com Gemini")
     print("=" * 50)
-    
+
     try:
         # Setup
         print("🔧 Configurando Gemini...")
         model = setup_gemini()
-        
+
         print("📄 Carregando relatório...")
         report_content = load_report()
-        
+
         # Análises especializadas
         print("🏗️ Executando análise arquitetural...")
         arch_analysis = analyze_architecture(model, report_content)
-        
+
         print("🧪 Executando análise de qualidade...")
         quality_analysis = analyze_quality(model, report_content)
-        
+
         print("📄 Executando análise de documentação...")
         doc_analysis = analyze_documentation(model, report_content)
-        
+
         print("🚀 Executando análise de negócio...")
         business_analysis = analyze_business(model, report_content)
-        
+
         print("⚖️ Executando análise legal...")
         legal_analysis = analyze_legal(model, report_content)
-        
+
         print("🤖 Executando análise de IA...")
         ai_analysis = analyze_ai(model, report_content)
-        
+
         # Consolidação final
         print("📑 Gerando relatório final...")
         analyses = [
             arch_analysis,
-            quality_analysis, 
+            quality_analysis,
             doc_analysis,
             business_analysis,
             legal_analysis,
-            ai_analysis
+            ai_analysis,
         ]
-        
+
         final_report = generate_final_report(model, analyses)
-        
+
         # Salva resultado
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = f"relatorio_final_gemini_{timestamp}.md"
-        
+
         with open(output_file, "w", encoding="utf-8") as f:
             header = f"""# 🚀 RELATÓRIO ULTRA-PROFISSIONAL - ANÁLISE DE CODEBASE
 ## Agent Social Media - Automação WhatsApp→Instagram
 
-**Data**: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}  
+**Data**: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}  
 **Modelo**: Google Gemini 2.5 Flash  
 **Versão**: CrewAI Simplificado v1.0
 
@@ -292,25 +303,26 @@ def main():
 
 """
             f.write(header + final_report)
-        
+
         print("\n✅ Análise concluída com sucesso!")
         print(f"📄 Relatório salvo: {output_file}")
-        
+
         # Preview
         print("\n👀 Preview do relatório:")
         print("-" * 40)
-        with open(output_file, 'r', encoding='utf-8') as f:
+        with open(output_file, encoding="utf-8") as f:
             content = f.read()
-            lines = content.split('\n')[:30]
+            lines = content.split("\n")[:30]
             for line in lines:
                 print(line)
             print("...")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Erro: {str(e)}")
         return False
+
 
 if __name__ == "__main__":
     exit(0 if main() else 1)

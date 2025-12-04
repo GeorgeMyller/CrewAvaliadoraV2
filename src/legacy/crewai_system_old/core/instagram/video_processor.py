@@ -1,4 +1,4 @@
-""" 
+"""
 Módulo para processamento e validação de vídeos para Instagram Reels.
 
 Este módulo fornece a classe VideoProcessor, responsável por analisar, validar e processar vídeos para garantir que estejam compatíveis com os requisitos do Instagram Reels. Utiliza a biblioteca moviepy para manipulação dos arquivos de vídeo.
@@ -21,11 +21,12 @@ Exceções são registradas via logging para facilitar o diagnóstico de problem
 
 """
 
-import os
 import logging
-import time
+import os
 import shutil
-from typing import Tuple, Dict, Any, Optional
+import time
+from typing import Any
+
 from moviepy.editor import VideoFileClip
 
 # Configure logging
@@ -50,7 +51,7 @@ class VideoProcessor:
     SUPPORTED_FORMATS = ["mp4", "mov"]
 
     @staticmethod
-    def get_video_info(video_path: str) -> Dict[str, Any]:
+    def get_video_info(video_path: str) -> dict[str, Any]:
         """
         Get video information using moviepy instead of ffprobe.
 
@@ -91,7 +92,7 @@ class VideoProcessor:
             raise
 
     @classmethod
-    def validate_video(cls, video_path: str) -> Tuple[bool, str]:
+    def validate_video(cls, video_path: str) -> tuple[bool, str]:
         """
         Validate if a video meets Instagram Reels requirements.
 
@@ -144,9 +145,7 @@ class VideoProcessor:
             return False, f"Erro ao validar vídeo: {str(e)}"
 
     @classmethod
-    def process_video_for_reels(
-        cls, input_path: str, output_path: Optional[str] = None
-    ) -> str:
+    def process_video_for_reels(cls, input_path: str, output_path: str | None = None) -> str:
         """
         Process video to make it compatible with Instagram Reels using moviepy.
 
@@ -186,21 +185,15 @@ class VideoProcessor:
                     # Video too wide, crop sides
                     new_width = int(clip.size[1] * target_aspect_ratio)
                     x_center = clip.size[0] / 2
-                    clip = clip.crop(
-                        x1=x_center - new_width / 2, x2=x_center + new_width / 2
-                    )
+                    clip = clip.crop(x1=x_center - new_width / 2, x2=x_center + new_width / 2)
                 elif current_aspect_ratio < target_aspect_ratio:
                     # Video too tall, crop top and bottom
                     new_height = int(clip.size[0] / target_aspect_ratio)
                     y_center = clip.size[1] / 2
-                    clip = clip.crop(
-                        y1=y_center - new_height / 2, y2=y_center + new_height / 2
-                    )
+                    clip = clip.crop(y1=y_center - new_height / 2, y2=y_center + new_height / 2)
 
                 # Resize to recommended dimensions
-                clip = clip.resize(
-                    width=cls.RECOMMENDED_WIDTH, height=cls.RECOMMENDED_HEIGHT
-                )
+                clip = clip.resize(width=cls.RECOMMENDED_WIDTH, height=cls.RECOMMENDED_HEIGHT)
 
                 # Write to file with recommended codecs
                 clip.write_videofile(

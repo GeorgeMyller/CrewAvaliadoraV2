@@ -1,4 +1,4 @@
-""""
+""" "
 Módulo para gerar descrições detalhadas de imagens utilizando o modelo Gemini da Google.
 
 Classes:
@@ -25,16 +25,19 @@ Uso:
 
 """
 
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
-import requests  # Added for fetching image data
 import base64  # Added for base64 encoding
 import logging
+import os
+
+import google.generativeai as genai
+import requests  # Added for fetching image data
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
 load_dotenv()  # Carregar variáveis de ambiente do arquivo .env
+
+
 class ImageDescriber:
     @staticmethod
     def describe(image_url: str, api_key: str) -> str:

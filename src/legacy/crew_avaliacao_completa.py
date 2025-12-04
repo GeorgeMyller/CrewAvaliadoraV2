@@ -9,21 +9,22 @@ Gera relatórios ultra-profissionais para devs juniores e seniores.
 Fluxo: Codebase → Script Python → Relatório → CrewAI → Relatório Ultra-Profissional
 """
 
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Crew, Process, Task
+
 try:
     import crewai_tools
+
     HAVE_CREWAI_TOOLS = True
 except Exception:
     crewai_tools = None
     HAVE_CREWAI_TOOLS = False
-from dotenv import load_dotenv
-import os
 import json
-from datetime import datetime
-from typing import Dict, List, Optional
 import logging
+import os
 import re
-from urllib.parse import urlparse
+from datetime import datetime
+
+from dotenv import load_dotenv
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -32,44 +33,47 @@ logger = logging.getLogger(__name__)
 # Carrega variáveis de ambiente
 load_dotenv()
 
+
 class CodebaseAnalysisCrew:
     """
     🤝 CrewAI para Avaliação Completa de Codebase
-    
+
     Roles especializados:
     📐 Arquiteto de Software
-    🧪 Engenheiro de Qualidade  
+    🧪 Engenheiro de Qualidade
     📄 Documentador Técnico
     🚀 Product Manager
     ⚖️ Especialista Legal
     🤖 Engenheiro de IA
     """
-    
-    def __init__(self, gemini_api_key: Optional[str] = None, project_name: Optional[str] = None):
+
+    def __init__(self, gemini_api_key: str | None = None, project_name: str | None = None):
         """Inicializa a crew com configuração Gemini 2.5 Flash"""
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         if not self.gemini_api_key:
-            raise ValueError("❌ GEMINI_API_KEY não encontrada! Configure no .env ou passe como parâmetro")
-        
+            raise ValueError(
+                "❌ GEMINI_API_KEY não encontrada! Configure no .env ou passe como parâmetro"
+            )
+
         # Remove espaços em branco da API key se houver
         self.gemini_api_key = self.gemini_api_key.strip()
-        
+
         logger.info(f"✅ GEMINI_API_KEY carregada: {self.gemini_api_key[:10]}...")
-        
+
         # Set environment variables for CrewAI's built-in LLM handling
         # Following the pattern from latest_ai_development example
         os.environ["GEMINI_API_KEY"] = self.gemini_api_key
         if "MODEL" not in os.environ:
             os.environ["MODEL"] = "gemini/gemini-2.5-flash"
-        
+
         # CrewAI will automatically handle LLM instantiation from env vars
         # No need for manual LLM() instantiation
         self.llm = None
-        
+
         # Setup output directory structure
         self.project_name = project_name or "unknown_project"
         self.output_base_dir = self._setup_output_directory()
-        
+
         # Tools para leitura de arquivos (só instanciaremos ferramentas reais se disponíveis)
         if HAVE_CREWAI_TOOLS and crewai_tools is not None:
             try:
@@ -82,158 +86,181 @@ class CodebaseAnalysisCrew:
         else:
             self.file_tool = None
             self.dir_tool = None
-        
+
         # Cria agentes especializados
         self.agents = self._create_agents()
         self.tasks = self._create_tasks()
-    
+
     def _setup_output_directory(self) -> str:
         """Cria estrutura de diretórios para outputs organizados por projeto"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         # Sanitiza o nome do projeto
-        safe_project_name = re.sub(r'[^\w\-]', '_', self.project_name.lower())
-        safe_project_name = re.sub(r'_+', '_', safe_project_name).strip('_')
-        
+        safe_project_name = re.sub(r"[^\w\-]", "_", self.project_name.lower())
+        safe_project_name = re.sub(r"_+", "_", safe_project_name).strip("_")
+
         # Estrutura: outputs/{project_name}_{timestamp}/
         project_dir = f"{safe_project_name}_{timestamp}"
         output_dir = os.path.join(os.getcwd(), "outputs", project_dir)
-        
+
         # Cria subdiretórios
         os.makedirs(os.path.join(output_dir, "reports"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "metadata"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "per_file_reports"), exist_ok=True)
-        
+
         logger.info(f"📁 Diretório de saída criado: {output_dir}")
         return output_dir
-    
+
     @staticmethod
     def extract_project_name_from_path(path: str) -> str:
         """Extrai nome do projeto a partir de URL do GitHub ou caminho local"""
         # Tenta extrair de URL do GitHub
-        github_match = re.search(r'github\.com/[^/]+/([^/\.]+)', path)
+        github_match = re.search(r"github\.com/[^/]+/([^/\.]+)", path)
         if github_match:
             return github_match.group(1)
-        
+
         # Tenta extrair do caminho local
         if os.path.isdir(path):
             return os.path.basename(os.path.abspath(path))
-        
+
         # Fallback: usa o próprio path sanitizado
         return os.path.basename(path) or "unknown_project"
-        
-    def _create_agents(self) -> Dict[str, Agent]:
+
+    def _create_agents(self) -> dict[str, Agent]:
         """🎭 Cria todos os agentes especializados"""
-        tools_list = [self.file_tool, self.dir_tool] if (self.file_tool is not None and self.dir_tool is not None) else None
+        tools_list = (
+            [self.file_tool, self.dir_tool]
+            if (self.file_tool is not None and self.dir_tool is not None)
+            else None
+        )
 
         agents = {
             # 📐 Arquiteto de Software
             "arquiteto": Agent(
                 role="🏗️ Arquiteto de Software Sênior",
-                goal=("Analisar profundamente a arquitetura da aplicação, identificando:\n"
-                      "- Padrões arquiteturais usados (MVC, Clean Architecture, etc.)\n"
-                      "- Qualidade das integrações com APIs externas\n"
-                      "- Escalabilidade e manutenibilidade do código\n"
-                      "- Pontos de falha e gargalos potenciais\n"
-                      "- Sugestões concretas de refatoração"),
-                backstory=("Arquiteto de software com 10+ anos de experiência em sistemas distribuídos,\n"
-                          "APIs de redes sociais e automação. Especialista em Instagram Graph API v23, WhatsApp Business API\n"
-                          "e arquiteturas para SaaS. Conhece profundamente padrões como Repository, Factory, Observer e\n"
-                          "estratégias de rate limiting para APIs."),
+                goal=(
+                    "Analisar profundamente a arquitetura da aplicação, identificando:\n"
+                    "- Padrões arquiteturais usados (MVC, Clean Architecture, etc.)\n"
+                    "- Qualidade das integrações com APIs externas\n"
+                    "- Escalabilidade e manutenibilidade do código\n"
+                    "- Pontos de falha e gargalos potenciais\n"
+                    "- Sugestões concretas de refatoração"
+                ),
+                backstory=(
+                    "Arquiteto de software com 10+ anos de experiência em sistemas distribuídos,\n"
+                    "APIs de redes sociais e automação. Especialista em Instagram Graph API v23, WhatsApp Business API\n"
+                    "e arquiteturas para SaaS. Conhece profundamente padrões como Repository, Factory, Observer e\n"
+                    "estratégias de rate limiting para APIs."
+                ),
                 tools=tools_list,
                 verbose=True,
                 max_iter=3,
                 allow_delegation=False,
             ),
-
             # 🧪 Engenheiro de Qualidade
             "qa_engineer": Agent(
                 role="🔬 Engenheiro de Qualidade e Testes",
-                goal=("Avaliar rigorosamente a qualidade do código:\n"
-                      "- Cobertura de testes (unitários, integração, E2E)\n"
-                      "- Análise estática de código (complexity, duplication)\n"
-                      "- Práticas de CI/CD e deployment\n"
-                      "- Identificação de bugs e vulnerabilidades\n"
-                      "- Estratégias de monitoramento e observabilidade"),
-                backstory=("Engenheiro de QA com expertise em automação de testes, análise estática\n"
-                          "e pipelines CI/CD. Experiência com pytest, bandit, ruff e ferramentas de segurança.\n"
-                          "Especialista em testes de APIs, mock de serviços externos e estratégias de teste para\n"
-                          "sistemas que integram redes sociais."),
+                goal=(
+                    "Avaliar rigorosamente a qualidade do código:\n"
+                    "- Cobertura de testes (unitários, integração, E2E)\n"
+                    "- Análise estática de código (complexity, duplication)\n"
+                    "- Práticas de CI/CD e deployment\n"
+                    "- Identificação de bugs e vulnerabilidades\n"
+                    "- Estratégias de monitoramento e observabilidade"
+                ),
+                backstory=(
+                    "Engenheiro de QA com expertise em automação de testes, análise estática\n"
+                    "e pipelines CI/CD. Experiência com pytest, bandit, ruff e ferramentas de segurança.\n"
+                    "Especialista em testes de APIs, mock de serviços externos e estratégias de teste para\n"
+                    "sistemas que integram redes sociais."
+                ),
                 tools=tools_list,
                 verbose=True,
                 max_iter=3,
                 allow_delegation=False,
             ),
-
             # 📄 Documentador Técnico
             "documentador": Agent(
                 role="📚 Documentador Técnico Sênior",
-                goal=("Garantir documentação de classe mundial:\n"
-                      "- Clareza para onboarding de desenvolvedores\n"
-                      "- Completude da documentação de APIs\n"
-                      "- Guias de instalação e configuração\n"
-                      "- Exemplos práticos e troubleshooting\n"
-                      "- Documentação de arquitetura e decisões técnicas"),
-                backstory=("Documentador técnico especializado em projetos open-source e SaaS.\n"
-                          "Expert em criar documentação que funciona para diferentes níveis técnicos,\n"
-                          "desde devs juniores até arquitetos seniores. Conhece ferramentas como Sphinx,\n"
-                          "MkDocs e padrões de documentação de APIs REST."),
+                goal=(
+                    "Garantir documentação de classe mundial:\n"
+                    "- Clareza para onboarding de desenvolvedores\n"
+                    "- Completude da documentação de APIs\n"
+                    "- Guias de instalação e configuração\n"
+                    "- Exemplos práticos e troubleshooting\n"
+                    "- Documentação de arquitetura e decisões técnicas"
+                ),
+                backstory=(
+                    "Documentador técnico especializado em projetos open-source e SaaS.\n"
+                    "Expert em criar documentação que funciona para diferentes níveis técnicos,\n"
+                    "desde devs juniores até arquitetos seniores. Conhece ferramentas como Sphinx,\n"
+                    "MkDocs e padrões de documentação de APIs REST."
+                ),
                 tools=tools_list,
                 verbose=True,
                 max_iter=3,
                 allow_delegation=False,
             ),
-
             # 🚀 Product Manager
             "product_manager": Agent(
                 role="🎯 Product Manager Estratégico",
-                goal=("Avaliar viabilidade comercial e estratégica:\n"
-                      "- Prontidão para lançamento como SaaS\n"
-                      "- Análise competitiva e diferenciação\n"
-                      "- Roadmap de features e priorização\n"
-                      "- Estratégia de monetização\n"
-                      "- Riscos de adoção e go-to-market"),
-                backstory=("Product Manager com 8+ anos em produtos de automação e marketing digital.\n"
-                          "Experiência em lançar SaaS para redes sociais, conhece profundamente o mercado de\n"
-                          "automação Instagram/WhatsApp. Expert em definir MVP, pricing strategy e user journey\n"
-                          "para produtos B2B."),
+                goal=(
+                    "Avaliar viabilidade comercial e estratégica:\n"
+                    "- Prontidão para lançamento como SaaS\n"
+                    "- Análise competitiva e diferenciação\n"
+                    "- Roadmap de features e priorização\n"
+                    "- Estratégia de monetização\n"
+                    "- Riscos de adoção e go-to-market"
+                ),
+                backstory=(
+                    "Product Manager com 8+ anos em produtos de automação e marketing digital.\n"
+                    "Experiência em lançar SaaS para redes sociais, conhece profundamente o mercado de\n"
+                    "automação Instagram/WhatsApp. Expert em definir MVP, pricing strategy e user journey\n"
+                    "para produtos B2B."
+                ),
                 tools=tools_list,
                 verbose=True,
                 max_iter=3,
                 allow_delegation=False,
             ),
-
             # ⚖️ Especialista Legal
             "especialista_legal": Agent(
                 role="⚖️ Consultor Jurídico de Tecnologia",
-                goal=("Assegurar conformidade legal total:\n"
-                      "- Compliance com termos das APIs (Instagram, WhatsApp)\n"
-                      "- Conformidade LGPD/GDPR para dados pessoais\n"
-                      "- Riscos legais de automação em redes sociais\n"
-                      "- Políticas de uso e termos de serviço\n"
-                      "- Estratégias de mitigação de riscos legais"),
-                backstory=("Advogado especializado em direito digital com foco em APIs de redes sociais.\n"
-                          "Expert em LGPD, GDPR e regulamentações de automação. Experiência em revisar contratos\n"
-                          "de APIs, políticas de uso de dados e compliance para startups de tecnologia."),
+                goal=(
+                    "Assegurar conformidade legal total:\n"
+                    "- Compliance com termos das APIs (Instagram, WhatsApp)\n"
+                    "- Conformidade LGPD/GDPR para dados pessoais\n"
+                    "- Riscos legais de automação em redes sociais\n"
+                    "- Políticas de uso e termos de serviço\n"
+                    "- Estratégias de mitigação de riscos legais"
+                ),
+                backstory=(
+                    "Advogado especializado em direito digital com foco em APIs de redes sociais.\n"
+                    "Expert em LGPD, GDPR e regulamentações de automação. Experiência em revisar contratos\n"
+                    "de APIs, políticas de uso de dados e compliance para startups de tecnologia."
+                ),
                 tools=tools_list,
                 verbose=True,
                 max_iter=3,
                 allow_delegation=False,
             ),
-
             # 🤖 Engenheiro de IA
             "engenheiro_ia": Agent(
                 role="🧠 Engenheiro de IA Especialista",
-                goal=("Otimizar componentes de inteligência artificial:\n"
-                      "- Análise do pipeline de geração de legendas\n"
-                      "- Otimização de prompts e modelos LLM\n"
-                      "- Estratégias de personalização por usuário\n"
-                      "- Performance e custos de APIs de IA\n"
-                      "- Implementação de RAG e fine-tuning"),
-                backstory=("Engenheiro de IA com especialização em NLP, visão computacional e LLMs.\n"
-                          "Experiência com Google Gemini, OpenAI GPT, e modelos de visão para análise de imagens.\n"
-                          "Expert em otimização de prompts, RAG systems e estratégias de personalização de conteúdo\n"
-                          "para redes sociais."),
+                goal=(
+                    "Otimizar componentes de inteligência artificial:\n"
+                    "- Análise do pipeline de geração de legendas\n"
+                    "- Otimização de prompts e modelos LLM\n"
+                    "- Estratégias de personalização por usuário\n"
+                    "- Performance e custos de APIs de IA\n"
+                    "- Implementação de RAG e fine-tuning"
+                ),
+                backstory=(
+                    "Engenheiro de IA com especialização em NLP, visão computacional e LLMs.\n"
+                    "Experiência com Google Gemini, OpenAI GPT, e modelos de visão para análise de imagens.\n"
+                    "Expert em otimização de prompts, RAG systems e estratégias de personalização de conteúdo\n"
+                    "para redes sociais."
+                ),
                 tools=tools_list,
                 verbose=True,
                 max_iter=3,
@@ -243,10 +270,9 @@ class CodebaseAnalysisCrew:
 
         return agents
 
-    
-    def _create_tasks(self) -> List[Task]:
+    def _create_tasks(self) -> list[Task]:
         """📋 Cria tasks específicas para cada agente"""
-        
+
         tasks = [
             # Task do Arquiteto
             Task(
@@ -269,9 +295,8 @@ class CodebaseAnalysisCrew:
                 - Recomendações priorizadas (Alta/Média/Baixa)
                 - Diagrama conceitual em texto
                 """,
-                agent=self.agents["arquiteto"]
+                agent=self.agents["arquiteto"],
             ),
-            
             # Task do QA Engineer
             Task(
                 description="""🧪 AVALIAÇÃO DE QUALIDADE E TESTES
@@ -294,9 +319,8 @@ class CodebaseAnalysisCrew:
                 - Ferramentas e métricas sugeridas
                 - Roadmap de melhorias em qualidade
                 """,
-                agent=self.agents["qa_engineer"]
+                agent=self.agents["qa_engineer"],
             ),
-            
             # Task do Documentador
             Task(
                 description="""📄 AUDITORIA DE DOCUMENTAÇÃO
@@ -319,9 +343,8 @@ class CodebaseAnalysisCrew:
                 - Estratégia de manutenção
                 - Roadmap de melhorias documentais
                 """,
-                agent=self.agents["documentador"]
+                agent=self.agents["documentador"],
             ),
-            
             # Task do Product Manager
             Task(
                 description="""🚀 ANÁLISE DE VIABILIDADE COMERCIAL
@@ -344,9 +367,8 @@ class CodebaseAnalysisCrew:
                 - Modelo de monetização sugerido
                 - Riscos comerciais e mitigações
                 """,
-                agent=self.agents["product_manager"]
+                agent=self.agents["product_manager"],
             ),
-            
             # Task do Especialista Legal
             Task(
                 description="""⚖️ ANÁLISE DE CONFORMIDADE LEGAL
@@ -369,9 +391,8 @@ class CodebaseAnalysisCrew:
                 - Políticas necessárias
                 - Roadmap de compliance
                 """,
-                agent=self.agents["especialista_legal"]
+                agent=self.agents["especialista_legal"],
             ),
-            
             # Task do Engenheiro de IA
             Task(
                 description="""🤖 OTIMIZAÇÃO DO PIPELINE DE IA
@@ -394,15 +415,15 @@ class CodebaseAnalysisCrew:
                 - Otimizações de custo sugeridas
                 - Roadmap de evolução IA
                 """,
-                agent=self.agents["engenheiro_ia"]
-            )
+                agent=self.agents["engenheiro_ia"],
+            ),
         ]
-        
+
         return tasks
-    
+
     def create_final_report_task(self) -> Task:
         """📑 Cria task final para consolidação do relatório"""
-        
+
         return Task(
             description="""🎯 CONSOLIDAÇÃO DO RELATÓRIO FINAL
             
@@ -453,10 +474,13 @@ class CodebaseAnalysisCrew:
             # NOTE: não passamos `context=self.tasks` aqui porque o modelo Task pode não aceitar objetos complexos.
             # O contexto completo será anexado textualmente à `description` antes da execução final.
         )
-    
-    def  run_analysis(self, report_path: str = "relatorio_codebase_turbinado.md",
-                     max_files: int = 300,
-                     max_size_bytes: int = 2 * 1024 * 1024) -> str:
+
+    def run_analysis(
+        self,
+        report_path: str = "relatorio_codebase_turbinado.md",
+        max_files: int = 300,
+        max_size_bytes: int = 2 * 1024 * 1024,
+    ) -> str:
         """🚀 Percorre a codebase lendo arquivos e gerando relatório por arquivo, depois consolida.
 
         Comportamento:
@@ -469,7 +493,9 @@ class CodebaseAnalysisCrew:
 
         # Se for arquivo existente, mantemos o comportamento original (usa o relatório como insumo)
         if os.path.exists(report_path) and os.path.isfile(report_path):
-            logger.info(f"📄 Relatório de entrada encontrado: {report_path} — executando fluxo padrão.")
+            logger.info(
+                f"📄 Relatório de entrada encontrado: {report_path} — executando fluxo padrão."
+            )
             # Reutiliza o fluxo original: verifica e executa crew com as tasks definidas mais a task final
             all_tasks = self.tasks + [self.create_final_report_task()]
 
@@ -489,7 +515,9 @@ class CodebaseAnalysisCrew:
                 result = crew.kickoff()
 
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_file = os.path.join(self.output_base_dir, "reports", f"relatorio_final_{timestamp}.md")
+                output_file = os.path.join(
+                    self.output_base_dir, "reports", f"relatorio_final_{timestamp}.md"
+                )
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(str(result))
 
@@ -499,9 +527,11 @@ class CodebaseAnalysisCrew:
                     "output_file": output_file,
                     "agents_used": list(self.agents.keys()),
                     "total_tasks": len(all_tasks),
-                    "llm_model": "gemini-2.5-flash"
+                    "llm_model": "gemini-2.5-flash",
                 }
-                metadata_file = os.path.join(self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json")
+                metadata_file = os.path.join(
+                    self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json"
+                )
                 with open(metadata_file, "w", encoding="utf-8") as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
@@ -521,11 +551,34 @@ class CodebaseAnalysisCrew:
         else:
             # report_path não existe como arquivo nem diretório -> usamos cwd como fallback
             root_dir = os.getcwd()
-            logger.warning(f"⚠️ '{report_path}' não encontrado como arquivo; usando root: {root_dir}")
+            logger.warning(
+                f"⚠️ '{report_path}' não encontrado como arquivo; usando root: {root_dir}"
+            )
 
         # filtros e extensões de interesse
-        skip_dirs = {".git", "__pycache__", "node_modules", "venv", ".venv", ".idea", ".env", ".venv"}
-        allowed_exts = {".py", ".md", ".txt", ".json", ".yaml", ".yml", ".ini", ".cfg", ".sh", ".tsx", ".ts", ".js"}
+        skip_dirs = {
+            ".git",
+            "__pycache__",
+            "node_modules",
+            "venv",
+            ".venv",
+            ".idea",
+            ".env",
+        }
+        allowed_exts = {
+            ".py",
+            ".md",
+            ".txt",
+            ".json",
+            ".yaml",
+            ".yml",
+            ".ini",
+            ".cfg",
+            ".sh",
+            ".tsx",
+            ".ts",
+            ".js",
+        }
 
         per_file_reports = []
         reports_dir = os.path.join(self.output_base_dir, "per_file_reports")
@@ -539,7 +592,9 @@ class CodebaseAnalysisCrew:
 
             for fname in filenames:
                 if files_analyzed >= max_files:
-                    logger.info(f"ℹ️ Limite de arquivos alcançado ({max_files}). Parando análise por arquivo.")
+                    logger.info(
+                        f"ℹ️ Limite de arquivos alcançado ({max_files}). Parando análise por arquivo."
+                    )
                     break
 
                 _, ext = os.path.splitext(fname)
@@ -552,14 +607,18 @@ class CodebaseAnalysisCrew:
                 try:
                     size = os.path.getsize(file_path)
                     if size > max_size_bytes:
-                        logger.info(f"⏭️ Pulando arquivo grande (>{max_size_bytes} bytes): {file_path}")
+                        logger.info(
+                            f"⏭️ Pulando arquivo grande (>{max_size_bytes} bytes): {file_path}"
+                        )
                         continue
                 except Exception:
-                    logger.warning(f"⚠️ Não foi possível ler tamanho do arquivo, pulando: {file_path}")
+                    logger.warning(
+                        f"⚠️ Não foi possível ler tamanho do arquivo, pulando: {file_path}"
+                    )
                     continue
 
                 try:
-                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    with open(file_path, encoding="utf-8", errors="ignore") as f:
                         content = f.read()
                 except Exception as e:
                     logger.warning(f"⚠️ Falha ao ler {file_path}: {e}")
@@ -567,7 +626,11 @@ class CodebaseAnalysisCrew:
 
                 # Trunca conteúdo muito grande para colocar no prompt
                 max_chars = 50000
-                snippet = content if len(content) <= max_chars else content[:max_chars] + "\n\n... (truncated)"
+                snippet = (
+                    content
+                    if len(content) <= max_chars
+                    else content[:max_chars] + "\n\n... (truncated)"
+                )
 
                 logger.info(f"🔎 Gerando análise para: {file_path}")
 
@@ -592,7 +655,7 @@ Conteúdo do arquivo (até {max_chars} chars):
 - Sugestões de testes
 - Linha de ação rápida (quick win)
 """,
-                    agent=self.agents["arquiteto"]
+                    agent=self.agents["arquiteto"],
                 )
 
                 # Executa uma execução rápida da crew apenas para este arquivo
@@ -612,7 +675,9 @@ Conteúdo do arquivo (até {max_chars} chars):
                     result = f"❌ Erro ao analisar {file_path}: {e}"
 
                 # Salva relatório por arquivo (sempre tentamos salvar, mesmo que a análise falhe)
-                safe_name = os.path.relpath(file_path, root_dir).replace(os.sep, "_").replace("..", "")
+                safe_name = (
+                    os.path.relpath(file_path, root_dir).replace(os.sep, "_").replace("..", "")
+                )
                 if not safe_name:
                     safe_name = fname
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -622,7 +687,9 @@ Conteúdo do arquivo (até {max_chars} chars):
                     with open(out_path, "w", encoding="utf-8") as f:
                         f.write(f"# Análise do arquivo: {os.path.relpath(file_path, root_dir)}\n\n")
                         f.write(str(result) if result is not None else "(sem resultado)")
-                    per_file_reports.append({"file": os.path.relpath(file_path, root_dir), "report_path": out_path})
+                    per_file_reports.append(
+                        {"file": os.path.relpath(file_path, root_dir), "report_path": out_path}
+                    )
                     files_analyzed += 1
                     logger.info(f"✅ Relatório salvo: {out_path} ({files_analyzed}/{max_files})")
                 except Exception as e:
@@ -642,7 +709,9 @@ Conteúdo do arquivo (até {max_chars} chars):
         # Anexa sumário dos relatórios por arquivo na descrição para fornecer contexto
         reports_summary_lines = [f"- {r['file']}: {r['report_path']}" for r in per_file_reports]
         reports_summary = "\n".join(reports_summary_lines)
-        final_task.description += f"\n\n\n\n**Relatórios por arquivo (resumo):**\n{reports_summary}\n"
+        final_task.description += (
+            f"\n\n\n\n**Relatórios por arquivo (resumo):**\n{reports_summary}\n"
+        )
 
         # Executa a consolidação final usando toda a crew
         try:
@@ -660,7 +729,9 @@ Conteúdo do arquivo (até {max_chars} chars):
 
             # Salva resultado final consolidado
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = os.path.join(self.output_base_dir, "reports", f"relatorio_final_{timestamp}.md")
+            output_file = os.path.join(
+                self.output_base_dir, "reports", f"relatorio_final_{timestamp}.md"
+            )
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(str(final_result))
 
@@ -675,7 +746,9 @@ Conteúdo do arquivo (até {max_chars} chars):
                 "total_files_analyzed": len(per_file_reports),
                 "llm_model": "gemini-2.5-flash",
             }
-            metadata_file = os.path.join(self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json")
+            metadata_file = os.path.join(
+                self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json"
+            )
             with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
 
@@ -692,15 +765,21 @@ Conteúdo do arquivo (até {max_chars} chars):
             logger.error(f"❌ Erro durante consolidação com Crew (usando fallback): {e}")
             try:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                fallback_output = os.path.join(self.output_base_dir, "reports", f"relatorio_final_fallback_{timestamp}.md")
+                fallback_output = os.path.join(
+                    self.output_base_dir, "reports", f"relatorio_final_fallback_{timestamp}.md"
+                )
                 with open(fallback_output, "w", encoding="utf-8") as out_f:
                     out_f.write("# Relatório Consolidado (fallback)\n\n")
-                    out_f.write("_A consolidação automática com a Crew falhou; este é um fallback que concatena os relatórios por arquivo gerados previamente._\n\n")
+                    out_f.write(
+                        "_A consolidação automática com a Crew falhou; este é um fallback que concatena os relatórios por arquivo gerados previamente._\n\n"
+                    )
 
                     for r in per_file_reports:
                         try:
                             out_f.write(f"\n---\n\n## Arquivo: {r['file']}\n\n")
-                            with open(r["report_path"], "r", encoding="utf-8", errors="ignore") as in_f:
+                            with open(
+                                r["report_path"], encoding="utf-8", errors="ignore"
+                            ) as in_f:
                                 out_f.write(in_f.read())
                                 out_f.write("\n\n")
                         except Exception as inner_e:
@@ -718,7 +797,9 @@ Conteúdo do arquivo (até {max_chars} chars):
                     "fallback": True,
                     "error": str(e),
                 }
-                metadata_file = os.path.join(self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json")
+                metadata_file = os.path.join(
+                    self.output_base_dir, "metadata", f"metadata_analise_{timestamp}.json"
+                )
                 with open(metadata_file, "w", encoding="utf-8") as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
@@ -736,20 +817,22 @@ Conteúdo do arquivo (até {max_chars} chars):
 
 def main():
     """🎯 Função principal para execução direta"""
-    
+
     print("🚀 CrewAI - Análise Completa de Codebase")
     print("=" * 50)
-    
+
     try:
         # Pede caminho ou URL do projeto
-        project_path = input("📂 Digite o caminho/URL do repositório (ou Enter para usar diretório atual): ").strip()
+        project_path = input(
+            "📂 Digite o caminho/URL do repositório (ou Enter para usar diretório atual): "
+        ).strip()
         if not project_path:
             project_path = os.getcwd()
-        
+
         # Extrai nome do projeto
         project_name = CodebaseAnalysisCrew.extract_project_name_from_path(project_path)
         print(f"📦 Projeto identificado: {project_name}")
-        
+
         # Inicializa a crew com o nome do projeto
         crew_analyzer = CodebaseAnalysisCrew(project_name=project_name)
 

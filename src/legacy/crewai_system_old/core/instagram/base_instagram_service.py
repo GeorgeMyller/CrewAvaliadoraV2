@@ -1,4 +1,4 @@
-""" 
+"""
 
     BaseInstagramService fornece uma base robusta para interação com a Instagram Graph API, incluindo tratamento avançado de erros, controle de limite de requisições (rate limiting) e verificação de permissões.
 Classes:
@@ -26,15 +26,14 @@ Uso:
 
 """
 
-
-
-import time
 import json
 import logging
-import requests
-from urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 import random
+import time
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -190,9 +189,7 @@ class BaseInstagramService:
             if data:
                 logger.info(f"With data: {data}")
 
-            response = self.session.request(
-                method, url, params=params, data=data, headers=headers
-            )
+            response = self.session.request(method, url, params=params, data=data, headers=headers)
             self.last_request_time = time.time()
 
             # Process rate limit headers if present
@@ -212,9 +209,7 @@ class BaseInstagramService:
                         error_message = error.get("message", "")
                         fb_trace_id = error.get("fbtrace_id")
 
-                        logger.error(
-                            f"{error_code} {error_message} (Subcode: {error_subcode})"
-                        )
+                        logger.error(f"{error_code} {error_message} (Subcode: {error_subcode})")
 
                         # Handle application request limit specifically
                         if error_subcode == 2207051:
@@ -224,7 +219,7 @@ class BaseInstagramService:
                                     retry_attempt, retry_seconds
                                 )
                                 logger.warning(
-                                    f"Application request limit reached. Backing off for {backoff_time:.2f} seconds. Attempt {retry_attempt+1}/{RateLimitHandler.MAX_ATTEMPTS}"
+                                    f"Application request limit reached. Backing off for {backoff_time:.2f} seconds. Attempt {retry_attempt + 1}/{RateLimitHandler.MAX_ATTEMPTS}"
                                 )
                                 time.sleep(backoff_time)
                                 return self._make_request(
@@ -236,9 +231,7 @@ class BaseInstagramService:
                                     retry_attempt + 1,
                                 )
                         else:
-                            retry_seconds = (
-                                300  # Default retry_seconds if not set above
-                            )
+                            retry_seconds = 300  # Default retry_seconds if not set above
 
                         raise RateLimitError(
                             error_message,
@@ -262,13 +255,9 @@ class BaseInstagramService:
                 fb_trace_id = error.get("fbtrace_id")
 
                 if error_code in [190, 104]:  # Token errors
-                    raise AuthenticationError(
-                        error_message, error_code, error_subcode, fb_trace_id
-                    )
+                    raise AuthenticationError(error_message, error_code, error_subcode, fb_trace_id)
                 elif error_code in [200, 10, 803]:  # Permission errors
-                    raise PermissionError(
-                        error_message, error_code, error_subcode, fb_trace_id
-                    )
+                    raise PermissionError(error_message, error_code, error_subcode, fb_trace_id)
                 elif RateLimitHandler.is_rate_limit_error(error_code, error_subcode):
                     retry_seconds = self._get_retry_after(error)
                     if retry_attempt < RateLimitHandler.MAX_ATTEMPTS:
@@ -276,7 +265,7 @@ class BaseInstagramService:
                             retry_attempt, retry_seconds
                         )
                         logger.warning(
-                            f"Rate limit hit. Backing off for {backoff_time:.2f} seconds. Attempt {retry_attempt+1}/{RateLimitHandler.MAX_ATTEMPTS}"
+                            f"Rate limit hit. Backing off for {backoff_time:.2f} seconds. Attempt {retry_attempt + 1}/{RateLimitHandler.MAX_ATTEMPTS}"
                         )
                         time.sleep(backoff_time)
                         return self._make_request(
@@ -294,28 +283,28 @@ class BaseInstagramService:
                         error_message, error_code, error_subcode, fb_trace_id
                     )
                 else:
-                    raise InstagramAPIError(
-                        error_message, error_code, error_subcode, fb_trace_id
-                    )
+                    raise InstagramAPIError(error_message, error_code, error_subcode, fb_trace_id)
 
             return result
 
         except requests.exceptions.RequestException as e:
             # Tentar obter mais detalhes do erro da resposta
             error_details = f"Request failed: {str(e)}"
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, "response") and e.response is not None:
                 try:
                     error_response = e.response.json()
-                    if 'error' in error_response:
-                        error_info = error_response['error']
-                        error_message = error_info.get('message', 'Unknown error')
-                        error_code = error_info.get('code', 'Unknown code')
-                        error_subcode = error_info.get('error_subcode', 'No subcode')
+                    if "error" in error_response:
+                        error_info = error_response["error"]
+                        error_message = error_info.get("message", "Unknown error")
+                        error_code = error_info.get("code", "Unknown code")
+                        error_subcode = error_info.get("error_subcode", "No subcode")
                         error_details = f"Instagram API Error - Code: {error_code}, Subcode: {error_subcode}, Message: {error_message}"
                         logger.error(f"Detailed API error: {error_details}")
                 except Exception as parse_error:
-                    logger.error(f"Could not parse error response: {e.response.text} - Parse error: {parse_error}")
-            
+                    logger.error(
+                        f"Could not parse error response: {e.response.text} - Parse error: {parse_error}"
+                    )
+
             logger.error(error_details)
             raise InstagramAPIError(error_details)
 
@@ -330,8 +319,7 @@ class BaseInstagramService:
                         rate_data = metrics[0]
                         if "estimated_time_to_regain_access" in rate_data:
                             self.rate_limit_window[app_id] = (
-                                time.time()
-                                + rate_data["estimated_time_to_regain_access"]
+                                time.time() + rate_data["estimated_time_to_regain_access"]
                             )
             except json.JSONDecodeError:
                 logger.warning("Failed to parse rate limit headers")
@@ -411,7 +399,7 @@ class BaseInstagramService:
                     "debug": "all",
                     "fields": "id,name",
                 },
-                timeout=30
+                timeout=30,
             )
 
             headers = result.headers
@@ -423,9 +411,7 @@ class BaseInstagramService:
                 "headers": {
                     "x-app-usage": headers.get("x-app-usage"),
                     "x-ad-account-usage": headers.get("x-ad-account-usage"),
-                    "x-business-use-case-usage": headers.get(
-                        "x-business-use-case-usage"
-                    ),
+                    "x-business-use-case-usage": headers.get("x-business-use-case-usage"),
                     "x-fb-api-version": headers.get("facebook-api-version"),
                 },
             }
@@ -493,7 +479,9 @@ class BaseInstagramService:
             logger.error(f"Erro ao publicar o Story: {e}")
             raise
 
-    def _check_container_status(self, container_id: str, timeout: int = 300, check_interval: int = 5) -> bool:
+    def _check_container_status(
+        self, container_id: str, timeout: int = 300, check_interval: int = 5
+    ) -> bool:
         """
         Verifica o status de um contêiner de mídia até que esteja pronto ou o tempo limite seja atingido.
 
@@ -508,23 +496,27 @@ class BaseInstagramService:
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
-                status_response = self._make_request("GET", container_id, params={"fields": "status_code"})
+                status_response = self._make_request(
+                    "GET", container_id, params={"fields": "status_code"}
+                )
                 status_code = status_response.get("status_code")
                 logger.info(f"Status do contêiner {container_id}: {status_code}")
 
                 if status_code == "FINISHED":
                     return True
                 elif status_code in ["ERROR", "EXPIRED"]:
-                    logger.error(f"Falha no processamento do contêiner {container_id} com status: {status_code}")
+                    logger.error(
+                        f"Falha no processamento do contêiner {container_id} com status: {status_code}"
+                    )
                     return False
-                
+
                 time.sleep(check_interval)
 
             except InstagramAPIError as e:
                 logger.error(f"Erro ao verificar o status do contêiner {container_id}: {e}")
                 # Se o erro for grave, pode ser melhor interromper
                 return False
-        
+
         logger.warning(f"Tempo limite de {timeout}s atingido para o contêiner {container_id}.")
         return False
 

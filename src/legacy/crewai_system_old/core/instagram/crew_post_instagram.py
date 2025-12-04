@@ -22,11 +22,11 @@ Uso:
 
 """
 
-
-from crewai import Agent, Task, Crew, Process, LLM
-from dotenv import load_dotenv
-import os
 import logging
+import os
+
+from crewai import LLM, Agent, Crew, Process, Task
+from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -41,15 +41,12 @@ class InstagramPostCrew:
         """
         Inicializa os serviços, ferramentas, e configura os agentes e tarefas.
         """
-        
+
         # Configurar LLM Gemini para CrewAI
-        gemini_api_key = os.getenv('GEMINI_API_KEY')
+        gemini_api_key = os.getenv("GEMINI_API_KEY")
         if gemini_api_key:
             # Configurar LLM do Gemini para CrewAI
-            self.llm_captioner = LLM(
-                model="gemini/gemini-2.0-flash",
-                api_key=gemini_api_key
-            )
+            self.llm_captioner = LLM(model="gemini/gemini-2.0-flash", api_key=gemini_api_key)
         else:
             logger.warning("⚠️  GEMINI_API_KEY não encontrada - usando LLM padrão")
             self.llm_captioner = None

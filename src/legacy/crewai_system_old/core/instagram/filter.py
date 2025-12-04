@@ -22,31 +22,31 @@ Uso recomendado para automação de postagens e preparação de imagens para red
 
 """
 
-import sys
-import os
-import time
-import shutil
 import logging
+import os
+import shutil
+import sys
+import time
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import os
-from PIL import Image, UnidentifiedImageError
+
 import pilgram
+from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
 
 
 class FilterImage:
-
     @staticmethod
     def validate_image(image_path):
         """
         Valida se o arquivo é uma imagem válida e pode ser processada.
-        
+
         Args:
             image_path (str): Caminho para o arquivo de imagem
-            
+
         Returns:
             bool: True se a imagem é válida, False caso contrário
         """
@@ -55,31 +55,31 @@ class FilterImage:
             if not os.path.exists(image_path):
                 logger.error(f"Erro: Arquivo não encontrado: {image_path}")
                 return False
-            
+
             # Verificar se o arquivo não está vazio
             if os.path.getsize(image_path) == 0:
                 logger.error(f"Erro: Arquivo vazio: {image_path}")
                 return False
-            
+
             # Tentar abrir a imagem
             with Image.open(image_path) as img:
                 # Verificar se é uma imagem válida tentando acessar suas propriedades
                 img.verify()
-                
+
             # Reabrir para uso (verify() fecha o arquivo)
             with Image.open(image_path) as img:
                 # Verificar formato suportado
-                if img.format not in ['JPEG', 'PNG', 'WEBP', 'BMP']:
+                if img.format not in ["JPEG", "PNG", "WEBP", "BMP"]:
                     logger.error(f"Erro: Formato não suportado: {img.format}")
                     return False
-                
+
                 # Verificar dimensões mínimas
                 if img.size[0] < 10 or img.size[1] < 10:
                     logger.error(f"Erro: Imagem muito pequena: {img.size}")
                     return False
-                    
+
             return True
-            
+
         except UnidentifiedImageError:
             logger.error(f"Erro: Não é possível identificar a imagem: {image_path}")
             return False
@@ -91,47 +91,47 @@ class FilterImage:
     def repair_image(image_path):
         """
         Tenta reparar uma imagem corrompida.
-        
+
         Args:
             image_path (str): Caminho para o arquivo de imagem
-            
+
         Returns:
             str: Caminho para a imagem reparada ou None se não foi possível reparar
         """
         try:
             logger.info(f"Tentando reparar imagem: {image_path}")
-            
+
             # Criar backup do arquivo original
             backup_path = f"{image_path}.backup"
             shutil.copy2(image_path, backup_path)
-            
+
             # Tentar diferentes métodos de reparo
-            with open(image_path, 'rb') as f:
+            with open(image_path, "rb") as f:
                 data = f.read()
-            
+
             # Verificar se há dados suficientes
             if len(data) < 100:
                 logger.warning("Arquivo muito pequeno para ser uma imagem válida")
                 return None
-            
+
             # Tentar forçar abertura com PIL em modo resiliente
             try:
                 with Image.open(image_path) as img:
                     # Converter para RGB se necessário
-                    if img.mode not in ('RGB', 'RGBA'):
-                        img = img.convert('RGB')
-                    
+                    if img.mode not in ("RGB", "RGBA"):
+                        img = img.convert("RGB")
+
                     # Salvar a imagem reparada
                     repaired_path = f"{os.path.splitext(image_path)[0]}_repaired.jpg"
-                    img.save(repaired_path, 'JPEG', quality=95)
-                    
+                    img.save(repaired_path, "JPEG", quality=95)
+
                     logger.info(f"Imagem reparada salva em: {repaired_path}")
                     return repaired_path
-                    
+
             except Exception as repair_error:
                 logger.error(f"Falha ao reparar com PIL: {repair_error}")
                 return None
-                
+
         except Exception as e:
             logger.error(f"Erro durante reparo da imagem: {e}")
             return None
@@ -141,7 +141,7 @@ class FilterImage:
         """
         Processa a imagem aplicando validação, reparo se necessário, filtro opcional,
         e otimizações para Instagram.
-        
+
         Args:
             image_path (str): Caminho da imagem
             apply_filter (bool): Se deve aplicar filtro (padrão: True)
@@ -149,12 +149,14 @@ class FilterImage:
         """
         try:
             logger.info(f"🔄 Iniciando processamento da imagem: {image_path}")
-            logger.info(f"🎨 Configurações: aplicar_filtro={apply_filter}, tipo_filtro={filter_type}")
-            
+            logger.info(
+                f"🎨 Configurações: aplicar_filtro={apply_filter}, tipo_filtro={filter_type}"
+            )
+
             # Validar a imagem primeiro
             if not FilterImage.validate_image(image_path):
                 logger.warning(f"⚠️ Imagem inválida detectada: {image_path}")
-                
+
                 # Tentar reparar a imagem
                 repaired_path = FilterImage.repair_image(image_path)
                 if repaired_path:
@@ -162,37 +164,37 @@ class FilterImage:
                     logger.info(f"✅ Usando imagem reparada: {image_path}")
                 else:
                     raise ValueError(f"Não foi possível processar a imagem: {image_path}")
-            
+
             # Abrir a imagem
             with Image.open(image_path) as im:
                 logger.info(f"📊 Original - Size: {im.size}, Format: {im.format}, Mode: {im.mode}")
-                
+
                 # Converter para RGB se necessário
-                if im.mode not in ('RGB', 'RGBA'):
+                if im.mode not in ("RGB", "RGBA"):
                     logger.info(f"🔄 Convertendo de {im.mode} para RGB")
-                    im = im.convert('RGB')
-                
+                    im = im.convert("RGB")
+
                 # Verificar e ajustar dimensões para Instagram (mínimo 320x320, máximo 1080x1350)
                 width, height = im.size
-                
+
                 # Se a imagem for muito pequena, redimensionar mantendo proporção
                 if width < 320 or height < 320:
                     logger.info(f"📏 Imagem muito pequena ({width}x{height}), redimensionando...")
-                    scale = max(320/width, 320/height)
+                    scale = max(320 / width, 320 / height)
                     new_width = int(width * scale)
                     new_height = int(height * scale)
                     im = im.resize((new_width, new_height), Image.Resampling.LANCZOS)
                     logger.info(f"📏 Nova dimensão: {im.size}")
-                
+
                 # Se a imagem for muito grande, redimensionar
                 elif width > 1080 or height > 1350:
                     logger.info(f"📏 Imagem muito grande ({width}x{height}), redimensionando...")
-                    scale = min(1080/width, 1350/height)
+                    scale = min(1080 / width, 1350 / height)
                     new_width = int(width * scale)
                     new_height = int(height * scale)
                     im = im.resize((new_width, new_height), Image.Resampling.LANCZOS)
                     logger.info(f"📏 Nova dimensão: {im.size}")
-                
+
                 # Aplicar filtro se solicitado
                 if apply_filter:
                     logger.info(f"🎨 Aplicando filtro {filter_type}...")
@@ -246,20 +248,16 @@ class FilterImage:
                 else:
                     logger.info("📷 Pulando aplicação de filtro")
                     filtered_image = im
-                
+
                 # Otimizar qualidade e tamanho
                 logger.info("💾 Salvando imagem otimizada...")
-                filtered_image.save(
-                    image_path, 
-                    'JPEG', 
-                    quality=95, 
-                    optimize=True, 
-                    progressive=True
-                )
+                filtered_image.save(image_path, "JPEG", quality=95, optimize=True, progressive=True)
 
-                logger.info(f"✅ Processamento concluído - Size: {filtered_image.size}, Mode: {filtered_image.mode}")
+                logger.info(
+                    f"✅ Processamento concluído - Size: {filtered_image.size}, Mode: {filtered_image.mode}"
+                )
                 return image_path
-            
+
         except UnidentifiedImageError as e:
             logger.error(f"❌ Erro: Não é possível identificar a imagem {image_path}: {e}")
             raise ValueError(f"Imagem corrompida ou formato inválido: {image_path}")
@@ -275,48 +273,48 @@ class FilterImage:
         """
         if not os.path.exists(temp_dir):
             return
-            
+
         now = time.time()
         cleaned_count = 0
         total_size_cleaned = 0
-        
+
         logger.info(f"🧹 Iniciando limpeza do diretório: {temp_dir}")
-        
+
         for filename in os.listdir(temp_dir):
             file_path = os.path.join(temp_dir, filename)
-            
+
             if not os.path.isfile(file_path):
                 continue
-                
+
             try:
                 file_age = now - os.path.getmtime(file_path)
                 file_size = os.path.getsize(file_path)
-                
+
                 should_remove = False
                 reason = ""
-                
+
                 # Verificar idade do arquivo
                 if file_age > max_age_seconds:
                     should_remove = True
-                    reason = f"arquivo antigo ({file_age/3600:.1f}h)"
-                
+                    reason = f"arquivo antigo ({file_age / 3600:.1f}h)"
+
                 # Verificar se é uma imagem válida (apenas para arquivos de imagem)
-                elif filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.bmp')):
+                elif filename.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".bmp")):
                     if not FilterImage.validate_image(file_path):
                         should_remove = True
                         reason = "imagem corrompida/inválida"
-                
+
                 # Verificar arquivos muito pequenos (provavelmente corrompidos)
                 elif file_size < 100:
                     should_remove = True
                     reason = "arquivo muito pequeno"
-                
+
                 if should_remove:
                     os.remove(file_path)
                     cleaned_count += 1
                     total_size_cleaned += file_size
                     logger.info(f"🗑️ Removido: {filename} ({reason})")
-                    
+
             except Exception as e:
                 logger.warning(f"⚠️ Erro ao processar {filename}: {e}")
                 try:
@@ -324,11 +322,15 @@ class FilterImage:
                     cleaned_count += 1
                     logger.info(f"🗑️ Removido arquivo problemático: {filename}")
                 except Exception as remove_error:
-                    logger.warning(f"⚠️ Erro ao remover arquivo problemático {filename}: {remove_error}")
+                    logger.warning(
+                        f"⚠️ Erro ao remover arquivo problemático {filename}: {remove_error}"
+                    )
                     pass
-        
+
         if cleaned_count > 0:
-            logger.info(f"✅ Limpeza concluída: {cleaned_count} arquivos removidos ({total_size_cleaned/1024:.1f} KB liberados)")
+            logger.info(
+                f"✅ Limpeza concluída: {cleaned_count} arquivos removidos ({total_size_cleaned / 1024:.1f} KB liberados)"
+            )
         else:
             logger.info("✅ Nenhum arquivo para limpar")
 
@@ -346,12 +348,14 @@ class FilterImage:
         """
         try:
             logger.info(f"🖼️ Aplicando borda: {border_path} na imagem: {image_path}")
-            
+
             # Abrir a imagem original e a borda
             original_image = Image.open(image_path)
             border_image = Image.open(border_path)
-            
-            logger.info(f"📊 Imagem original - Size: {original_image.size}, Mode: {original_image.mode}")
+
+            logger.info(
+                f"📊 Imagem original - Size: {original_image.size}, Mode: {original_image.mode}"
+            )
             logger.info(f"📊 Borda original - Size: {border_image.size}, Mode: {border_image.mode}")
 
             # Convert original image to RGB if it's RGBA to avoid transparency issues
@@ -364,21 +368,21 @@ class FilterImage:
             # Calcular as dimensões da borda para manter proporção
             border_width, border_height = border_image.size
             original_width, original_height = original_image.size
-            
+
             # Calcular corte central da imagem original para se adequar à borda
             # mantendo a proporção da borda
             border_ratio = border_width / border_height
             original_ratio = original_width / original_height
-            
+
             if border_ratio > original_ratio:
                 # Borda é mais larga proporcionalmente - ajustar pela altura
                 new_height = original_height
                 new_width = int(original_height * border_ratio)
             else:
-                # Borda é mais alta proporcionalmente - ajustar pela largura  
+                # Borda é mais alta proporcionalmente - ajustar pela largura
                 new_width = original_width
                 new_height = int(original_width / border_ratio)
-            
+
             # Redimensionar a imagem original para se adequar à borda
             if new_width != original_width or new_height != original_height:
                 # Calcular corte central
@@ -386,7 +390,7 @@ class FilterImage:
                 top = (original_height - new_height) // 2 if new_height < original_height else 0
                 right = left + min(new_width, original_width)
                 bottom = top + min(new_height, original_height)
-                
+
                 # Se precisar expandir, criar nova imagem com fundo branco
                 if new_width > original_width or new_height > original_height:
                     expanded_image = Image.new("RGB", (new_width, new_height), (255, 255, 255))
@@ -397,14 +401,16 @@ class FilterImage:
                 else:
                     # Cortar a imagem
                     resized_image = original_image.crop((left, top, right, bottom))
-                
+
                 logger.info(f"📏 Imagem ajustada - Size: {resized_image.size}")
             else:
                 resized_image = original_image
-            
+
             # Redimensionar a imagem para o tamanho exato da borda
-            final_image = resized_image.resize((border_width, border_height), Image.Resampling.LANCZOS)
-            
+            final_image = resized_image.resize(
+                (border_width, border_height), Image.Resampling.LANCZOS
+            )
+
             # Criar imagem resultado com fundo da imagem
             result = Image.new("RGB", (border_width, border_height))
             result.paste(final_image, (0, 0))
@@ -425,12 +431,12 @@ class FilterImage:
                 os.path.dirname(image_path), f"bordered_{os.path.basename(image_path)}"
             )
             result.save(bordered_image_path, format="JPEG", quality=95)
-            
+
             logger.info(f"✅ Borda aplicada com sucesso: {bordered_image_path}")
             logger.info(f"📊 Resultado final - Size: {result.size}, Mode: {result.mode}")
 
             return bordered_image_path
-            
+
         except Exception as e:
             logger.error(f"❌ Erro ao aplicar borda à imagem: {e}")
             raise

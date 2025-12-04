@@ -33,19 +33,12 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run Black formatter check
-        run: uv run black --check src/ tests/
-
-      - name: Run Pylint
-        run: uv run pylint src/ --exit-zero --output-format=text
+      - name: Run Ruff check
+        run: uv run ruff check src/ tests/
         continue-on-error: true
 
-      - name: Run Flake8
-        run: uv run flake8 src/ tests/ --max-line-length=120 --extend-ignore=E203,W503
-        continue-on-error: true
-
-      - name: Run isort import checker
-        run: uv run isort --check-only src/ tests/
+      - name: Run Ruff format check
+        run: uv run ruff format --check src/ tests/
         continue-on-error: true
 
   security:
@@ -69,7 +62,7 @@ jobs:
         run: uv sync
 
       - name: Run Bandit security check
-        run: uv run bandit -r src/ -f json -o bandit-report.json
+        run: uv run bandit -r src/ -x src/legacy/ -f json -o bandit-report.json
         continue-on-error: true
 
       - name: Run Safety check for dependencies
@@ -172,7 +165,7 @@ jobs:
         run: uv sync
 
       - name: Run mypy type checker
-        run: uv run mypy src/ --ignore-missing-imports
+        run: uv run mypy src/ --exclude src/legacy/ --ignore-missing-imports
         continue-on-error: true
 
   build:

@@ -1,7 +1,7 @@
 """
 Módulo especializado para publicação de Reels no Instagram.
 
-Este módulo implementa uma classe `ReelsPublisher` que encapsula o fluxo completo para publicação de vídeos no formato Reels, 
+Este módulo implementa uma classe `ReelsPublisher` que encapsula o fluxo completo para publicação de vídeos no formato Reels,
 seguindo as melhores práticas e requisitos oficiais da Meta. Inclui validação de vídeo, upload via Imgur, criação de containers,
 monitoramento de status e publicação final no Instagram.
 
@@ -22,18 +22,19 @@ Fonte: https://github.com/fbsamples/reels_publishing_apis
 
 """
 
-import os
-import time
 import json
 import logging
+import os
 import random
+import time
+
 from dotenv import load_dotenv
 from imgurpython import ImgurClient
 from moviepy.editor import VideoFileClip
 from src.agent_social_media.core.instagram.base_instagram_service import (
     BaseInstagramService,
-    RateLimitError,
     InstagramAPIError,
+    RateLimitError,
 )
 
 logger = logging.getLogger("ReelsPublisher")
@@ -145,9 +146,7 @@ class ReelsPublisher(BaseInstagramService):
         params = {"creation_id": container_id}
 
         try:
-            result = self._make_request(
-                "POST", f"{self.ig_user_id}/media_publish", data=params
-            )
+            result = self._make_request("POST", f"{self.ig_user_id}/media_publish", data=params)
             if result and "id" in result:
                 post_id = result["id"]
                 logger.info(f"Reels publicado com sucesso: {post_id}")
@@ -213,9 +212,7 @@ class ReelsPublisher(BaseInstagramService):
         if not container_id:
             return None
 
-        logger.info(
-            f"Aguardando processamento do Reels... (máx. {max_retries} tentativas)"
-        )
+        logger.info(f"Aguardando processamento do Reels... (máx. {max_retries} tentativas)")
         status = self.wait_for_container_status(
             container_id, max_attempts=max_retries, delay=retry_interval
         )
@@ -308,6 +305,8 @@ class ReelsPublisher(BaseInstagramService):
             return f"{caption}\n\n{hashtag_text}"
         else:
             return hashtag_text
+
+
 class ReelsValidator:
     """Validates videos for Reels requirements"""
 

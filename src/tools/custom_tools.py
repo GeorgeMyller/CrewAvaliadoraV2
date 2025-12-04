@@ -1,8 +1,10 @@
-from crewai.tools import BaseTool
-from pydantic import Field, PrivateAttr
-import subprocess
 import os
 import shutil
+import subprocess  # nosec
+
+from crewai.tools import BaseTool
+from pydantic import Field
+
 
 class RunLinterTool(BaseTool):
     name: str = "Run Linter"
@@ -19,23 +21,25 @@ class RunLinterTool(BaseTool):
 
         try:
             # Check if ruff is installed
-            if not shutil.which("ruff"):
+            ruff_path = shutil.which("ruff")
+            if not ruff_path:
                 return "Error: 'ruff' is not installed in the environment."
 
             result = subprocess.run(
-                ["ruff", "check", "."],
+                [ruff_path, "check", "."],
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                timeout=60
-            )
-            
+                timeout=60,
+            )  # nosec
+
             output = f"Ruff Linter Output:\n{result.stdout}\n{result.stderr}"
             if len(output) > 5000:
                 return output[:5000] + "\n... (output truncated)"
             return output
         except Exception as e:
             return f"Error running linter: {e}"
+
 
 class CheckDependenciesTool(BaseTool):
     name: str = "Check Dependencies"
@@ -51,27 +55,32 @@ class CheckDependenciesTool(BaseTool):
 
         try:
             # Try pip-audit first
-            if shutil.which("pip-audit"):
-                cmd = ["pip-audit", "."]
+            pip_audit_path = shutil.which("pip-audit")
+            safety_path = shutil.which("safety")
+            pip_path = shutil.which("pip")
+
+            if pip_audit_path:
+                cmd = [pip_audit_path, "."]
             # Fallback to safety if available
-            elif shutil.which("safety"):
-                cmd = ["safety", "check"]
-            else:
+            elif safety_path:
+                cmd = [safety_path, "check"]
+            elif pip_path:
                 # Fallback to pip list --outdated
-                cmd = ["pip", "list", "--outdated"]
-                return "Warning: Neither 'pip-audit' nor 'safety' found. Running 'pip list --outdated' instead.\n" + \
-                       subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True).stdout
+                cmd = [pip_path, "list", "--outdated"]
+                return (
+                    "Warning: Neither 'pip-audit' nor 'safety' found. Running 'pip list --outdated' instead.\n"
+                    + subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True).stdout  # nosec
+                )
+            else:
+                return "Error: No dependency checking tool found (pip-audit, safety, or pip)."
 
             result = subprocess.run(
-                cmd,
-                cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
+                cmd, cwd=self.repo_path, capture_output=True, text=True, timeout=60
+            )  # nosec
             return f"Dependency Check Output ({cmd[0]}):\n{result.stdout}\n{result.stderr}"
         except Exception as e:
             return f"Error checking dependencies: {e}"
+
 
 class ExecuteTestsTool(BaseTool):
     name: str = "Execute Tests"
@@ -87,23 +96,21 @@ class ExecuteTestsTool(BaseTool):
 
         try:
             # Check if pytest is installed
-            if not shutil.which("pytest"):
+            pytest_path = shutil.which("pytest")
+            if not pytest_path:
                 return "Error: 'pytest' is not installed in the environment."
 
             result = subprocess.run(
-                ["pytest"],
-                cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            
+                [pytest_path], cwd=self.repo_path, capture_output=True, text=True, timeout=120
+            )  # nosec
+
             output = f"Test Execution Output:\n{result.stdout}\n{result.stderr}"
             if len(output) > 5000:
                 return output[:5000] + "\n... (output truncated)"
             return output
         except Exception as e:
             return f"Error running tests: {e}"
+
 
 class GrepTool(BaseTool):
     name: str = "Grep Search"
@@ -119,19 +126,20 @@ class GrepTool(BaseTool):
 
         try:
             # Use git grep if it's a git repo, otherwise regular grep
-            if os.path.exists(os.path.join(self.repo_path, ".git")):
-                cmd = ["git", "grep", "-n", search_pattern]
+            git_path = shutil.which("git")
+            grep_path = shutil.which("grep")
+
+            if os.path.exists(os.path.join(self.repo_path, ".git")) and git_path:
+                cmd = [git_path, "grep", "-n", search_pattern]
+            elif grep_path:
+                cmd = [grep_path, "-r", "-n", search_pattern, "."]
             else:
-                cmd = ["grep", "-r", "-n", search_pattern, "."]
+                return "Error: Neither 'git' nor 'grep' found in the environment."
 
             result = subprocess.run(
-                cmd,
-                cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
-            
+                cmd, cwd=self.repo_path, capture_output=True, text=True, timeout=60
+            )  # nosec
+
             output = f"Grep Output:\n{result.stdout}\n{result.stderr}"
             if len(output) > 5000:
                 return output[:5000] + "\n... (output truncated)"

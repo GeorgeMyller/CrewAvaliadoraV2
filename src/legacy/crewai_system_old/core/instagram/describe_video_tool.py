@@ -18,13 +18,12 @@ Exceções e Tratamento de Erros:
 
 """
 
-
-
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
 import base64
 import logging
+import os
+
+import google.generativeai as genai
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -43,20 +42,18 @@ class VideoDescriber:
         """
         # Log de debug para rastrear entrada
         logger.info(f"🎬 VideoDescriber: Analisando arquivo: {video_path}")
-        
+
         # Verificar se é uma URL (não deveria ser!)
-        if video_path.startswith('http'):
+        if video_path.startswith("http"):
             error_msg = f"❌ VideoDescriber: Recebeu URL em vez de arquivo local: {video_path}"
             logger.error(error_msg)
             return f"Erro: O arquivo de vídeo não existe no caminho: {video_path}"
-        
+
         load_dotenv()  # Carregar variáveis de ambiente do arquivo .env
 
         # Configurar o cliente Gemini
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel(
-            "gemini-2.0-flash"
-        )  # Usando o modelo que suporta vídeos
+        model = genai.GenerativeModel("gemini-2.0-flash")  # Usando o modelo que suporta vídeos
 
         # Verificar se o arquivo existe
         if not os.path.exists(video_path):
@@ -72,13 +69,13 @@ class VideoDescriber:
             return "Vídeo muito pequeno ou formato inválido. Não foi possível analisar o conteúdo."
 
         logger.info(f"✅ VideoDescriber: Arquivo encontrado, tamanho: {file_size} bytes")
-        
+
         try:
             # Ler o arquivo de vídeo diretamente do caminho local
             with open(video_path, "rb") as video_file:
                 video_bytes = video_file.read()
                 encoded_video = base64.b64encode(video_bytes).decode("utf-8")
-                
+
             logger.info(f"✅ VideoDescriber: Vídeo codificado, tamanho: {len(encoded_video)} chars")
         except Exception as e:
             return f"Erro ao ler o arquivo de vídeo: {e}"
@@ -123,9 +120,9 @@ class VideoDescriber:
             # Truncar mensagens de erro muito longas da API
             if len(error_msg) > 500:
                 error_msg = error_msg[:500] + "... [erro truncado]"
-            
+
             logger.error(f"❌ VideoDescriber: Erro na API Gemini: {error_msg}")
-            
+
             # Retornar uma mensagem mais amigável baseada no tipo de erro
             if "400" in error_msg:
                 return "Erro: Formato de vídeo não suportado ou arquivo corrompido."
