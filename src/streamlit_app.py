@@ -220,7 +220,7 @@ def app():
             status_container.update(
                 label="✅ Análise concluída com sucesso!", state="complete", expanded=False
             )
-            st.balloons()
+
 
             # Results Section
             st.divider()
