@@ -35,15 +35,14 @@ class InputGuard:
     ]
 
     def __init__(self):
-        self.prompt_patterns = [re.compile(p, re.IGNORECASE) for p in self.PROMPT_INJECTION_PATTERNS]
+        self.prompt_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.PROMPT_INJECTION_PATTERNS
+        ]
         self.code_patterns = [re.compile(p, re.IGNORECASE) for p in self.DANGEROUS_CODE_PATTERNS]
         logger.info("🛡️ InputGuard initialized with separated patterns")
 
     def validate_prompt(
-        self,
-        prompt: str,
-        max_length: int = 100000,
-        check_code_patterns: bool = True
+        self, prompt: str, max_length: int = 100000, check_code_patterns: bool = True
     ) -> tuple[bool, str | None]:
         """
         Validates a user prompt against known injection patterns.

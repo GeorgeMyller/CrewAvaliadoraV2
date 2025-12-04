@@ -48,7 +48,7 @@ class TestInputGuard:
 
     def test_long_input(self, guard):
         """Test extremely long input"""
-        long_input = "a" * 10001
+        long_input = "a" * 100001
         is_valid, error = guard.validate_prompt(long_input)
         assert not is_valid
         assert "Input too long" in error

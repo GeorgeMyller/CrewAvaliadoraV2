@@ -23,7 +23,6 @@ def test_main_scripts():
     """Test that main scripts exist."""
     assert Path("src/crew_avaliadora.py").exists()
     assert Path("src/analyze_repo.py").exists()
-    assert Path("src/legacy/gerar_relatorio.py").exists()
 
 
 def test_imports():

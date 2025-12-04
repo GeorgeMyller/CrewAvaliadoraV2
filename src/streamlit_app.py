@@ -221,7 +221,6 @@ def app():
                 label="✅ Análise concluída com sucesso!", state="complete", expanded=False
             )
 
-
             # Results Section
             st.divider()
             st.subheader(f"📊 Resultados: {project_name}")
