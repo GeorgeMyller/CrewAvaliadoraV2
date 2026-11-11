@@ -46,8 +46,8 @@ CrewAvaliadora is a comprehensive codebase analysis tool that uses artificial in
 
 ```bash
 # Clone o repositório | Clone the repository
-git clone <repository-url>
-cd CrewAvaliadora
+git clone https://github.com/GeorgeMyller/CrewAvaliadoraV2.git
+cd CrewAvaliadoraV2
 
 # Instale as dependências | Install dependencies
 uv sync
